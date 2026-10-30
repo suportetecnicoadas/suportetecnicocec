@@ -1,0 +1,10 @@
+[
+  {
+    "arquivo": "NOME-DO-ARQUIVO-NOVO.pdf",
+    "titulo": "Título que vai aparecer no portal",
+    "categoria": "calibracao",
+    "montadora": "Toyota",
+    "modelos": ["Corolla"],
+    "descricao": "Descrição curta do conteúdo do PDF."
+  }
+]
