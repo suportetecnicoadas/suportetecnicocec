@@ -1170,6 +1170,10 @@ footer{background:var(--c-cinza);border-top:1px solid var(--line);box-shadow:non
 @media (max-width:600px){.contato .result-foot .btn{width:100%}}
 @media (hover:hover) and (pointer:fine){.contato .btn.btn-wa:not(.primary):not(.ghost):hover{background:#075E54;border-color:#075E54;color:#FFFFFF}}
 
+/* Contato do suporte na página inicial */
+.sec-contato{padding-top:36px;padding-bottom:40px}
+.sec-contato .contatos{max-width:900px}
+
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
@@ -1415,8 +1419,8 @@ footer{background:var(--c-cinza);border-top:1px solid var(--line);box-shadow:non
     // ---------------- GWM ----------------
     V("GWM", "Haval H6", { anos: ">=2016", sistema: CF, tipo: "dinamica", caminho: "DIAGNOSTICO INTELIGENTE > ECU DIAGNOSTIC FUCTION > HAVAL > HAVAL H6 > CHINA > OTHERS (THIS CAN BE USED WHILE THE VEHICLE MODEL IS NOT IN THE LIST ABOVE) > THE THIRD GENERATION OF HAVAL H6 > HEV/PHEV > INTELIGENT FORWARD CAMERA > FUNÇÃO ESPECIAL > IFC CALIBRAÇÃO >" }),
     V("GWM", "Haval H9", { anos: ">=2016", tipo: "dinamica" }),
-    V("GWM", "Tank 300", { anos: "<=2023", sistema: CF, tipo: "dinamica",
-      alertas: [atencao("ATÉ ANO 2023 ACEITA CALIBRAÇÃO, 2024 EM DIANTE NÃO ACEITA CALIBRAÇÃO."), atencao("VEÍCULO TANK 300 ACIMA DE 2024 NÃO CALIBRA EM NOSSO SCANNER.")] }),
+    V("GWM", "Tank 300", { anos: ">=2020", sistema: CF, tipo: "dinamica" /* atualizado pela equipe Autoglass: calibra acima do ano 2020 */,
+      caminho: "DIAGNOSTICO INTELIGENTE > ECU DIAGNOSTIC FUNCTION > TANK > TANK 300 > CHINA > ANO DO CARRO > PHEV > IFC" }),
     V("GWM", "Poer P30", { anos: "<=2024", sistema: CF, tipo: "dinamica",
       caminho: "Caminho: Função de Diagnóstico da ECU > GREAT WALL > GWM POER (GWM UTE) > ANO DO CARRO > IFC (Câmera Frontal Inteligente) > Informações da Versão",
       alertas: [atencao("VEÍCULO POER P30 ACIMA DE 2024 NÃO CALIBRA EM NOSSO SCANNER.")] }),
@@ -1668,17 +1672,17 @@ footer{background:var(--c-cinza);border-top:1px solid var(--line);box-shadow:non
      preencha "link" com o endereço do arquivo na pasta compartilhada da Autoglass. */
   const materiais = [
     { id: "manual-toyota-yaris", titulo: "Manual de instrução para calibração Toyota Yaris", veiculos: ["toyota-yaris"],
-      arquivo: "TOYOTA_YARIS.pdf", formato: "PDF", tamanho: "2,6 MB", paginas: 16, origem: "Grupo Autoglass", link: null,
+      arquivo: "TOYOTA_YARIS.pdf", formato: "PDF", tamanho: "2,6 MB", paginas: 16, origem: "Grupo Autoglass", link: "https://github.com/suportetecnicoadas/PDF-s-F12/blob/main/TOYOTA%20YARIS.pdf",
       descricao: "Este manual foi elaborado para instruir exclusivamente sobre a forma de calibração do veículo Toyota Yaris. Siga os passos orientados abaixo para realizar a calibração com sucesso." },
     { id: "orientacao-calibracao-toyota", titulo: "Orientação para calibração Toyota", veiculos: ["toyota-corolla", "toyota-corolla-cross", "toyota-hilux", "toyota-rav4"],
-      arquivo: "Calibração_Toyota.pdf", formato: "PDF", tamanho: "2,9 MB", paginas: 17, origem: "Grupo Autoglass", link: null,
+      arquivo: "Calibração_Toyota.pdf", formato: "PDF", tamanho: "2,9 MB", paginas: 17, origem: "Grupo Autoglass", link: "https://github.com/suportetecnicoadas/PDF-s-F12/blob/main/Calibra%C3%A7%C3%A3o%20Toyota.pdf",
       descricao: "Este manual foi elaborado para instruir sobre a calibração da câmera dos veículos da Toyota." },
     { id: "liberacao-sfd", titulo: "Liberação SFD automático", veiculos: [], marcas: ["Volkswagen", "Audi", "Porsche"],
       restricao: "Uso somente para os modelos de veículos acima de ano 2024.",
-      arquivo: "LIBERACAO_SFD.pdf", formato: "PDF", tamanho: "1,9 MB", paginas: 10, origem: "Grupo Autoglass", link: null,
+      arquivo: "LIBERACAO_SFD.pdf", formato: "PDF", tamanho: "1,9 MB", paginas: 10, origem: "Grupo Autoglass", link: "https://github.com/suportetecnicoadas/PDF-s-F12/blob/main/LIBERACAO%20SFD.pdf",
       descricao: "Veículos da Volkswagen, Audi e Porsche necessitam de liberação da licença SFD para prosseguir com a calibração de câmera ou radar." },
     { id: "calibracao-chevrolet", titulo: "Manual de instrução para calibração de veículos Chevrolet/GM", veiculos: [], marcas: ["Chevrolet"],
-      arquivo: "CALIBRAÇÃO_CHEVROLET.pdf", formato: "PDF", tamanho: "2,5 MB", paginas: 13, origem: "Grupo Autoglass", link: null,
+      arquivo: "CALIBRAÇÃO_CHEVROLET.pdf", formato: "PDF", tamanho: "2,5 MB", paginas: 13, origem: "Grupo Autoglass", link: "https://github.com/suportetecnicoadas/PDF-s-F12/blob/main/CALIBRA%C3%87%C3%83O%20CHEVROLET.pdf",
       descricao: "Este manual foi elaborado para instruir exclusivamente sobre a forma de calibração dos veículos Chevrolet/GM. Siga os passos orientados abaixo para realizar a calibração com sucesso." }
   ];
 
@@ -1867,7 +1871,10 @@ footer{background:var(--c-cinza);border-top:1px solid var(--line);box-shadow:non
       {"id": "aud-a3-09-12-espelho-retrovisor", "capa": "a3_1", "tipo": "tutorial", "titulo": "Aud A3 09-12 espelho retrovisor", "aplicacao": "Audi A3 2009 a 2012", "veiculo": "audi-a3", "resumo": "Peça de média complexidade para substituição. O detalhe fica por conta da passagem do chicote por dentro da porta.", "pdf": "arquivo-aud-a3-retrovisor", "pdfNome": "Aud_A3_09_Esp_Retrov.pdf", "pdfPaginas": 8, "etapas": [{"n": "1", "img": "a3_1"}, {"n": "2", "texto": "Para ter acesso ao chicote de comando do retrovisor é necessário 0remover o forro de porta. Inicie a desmontagem, retirando um acabamento no puxador da porta para dar acesso a um parafuso.", "img": "a3_2"}, {"n": "3", "img": "a3_3"}, {"n": "4", "img": "a3_4"}, {"n": "5", "texto": "Remova um segundo parafuso na parte inferior do apoia-braço.", "img": "a3_5"}, {"n": "6", "texto": "Retire dois parafusos na parte inferior do forro.", "img": "a3_6"}, {"n": "7", "texto": "Desloque o forro puxando na parte inferior.", "img": "a3_7"}, {"n": "8", "texto": "Em seguida erga para cima desencaixando a pestana por completo.", "img": "a3_8"}, {"n": "9", "texto": "Desencaixe a haste da maçaneta interna.", "img": "a3_9"}, {"n": "10", "texto": "Para desencaixar o conector do conjunto de comandos do vidro elétrico, solte a trava de cor rosa.", "img": "a3_10"}, {"n": "11", "texto": "Desencaixe o acabamento do espelho retrovisor para ter acesso a um único parafuso de fixação.", "img": "a3_11"}, {"n": "12", "img": "a3_12"}, {"n": "13", "img": "a3_13"}, {"n": "14", "texto": "Desloque o conetor do chicote elétrico e o retire com cuidado, passando por dentro da porta.", "img": "a3_14"}, {"n": "15", "texto": "Monte a nova peça seguindo uma sequência inversa a desmontagem, lembrando de executar os testes antes de fechar o forro de porta.", "img": "a3_15"}]}
     ] },
     { id: "portas", nome: "Portas", icone: "🚪", descricao: "Instalação e substituição de peças e componentes de portas.", itens: [] },
-    { id: "calibracao", nome: "Dicas e PDF de calibração", icone: "🎯", descricao: "Manuais em PDF e dicas práticas para a calibração ADAS.", itens: [], incluiMateriaisPdf: true, incluiDicasGerais: true }
+    { id: "calibracao", nome: "Dicas e PDF de calibração", icone: "🎯", descricao: "Manuais em PDF e dicas práticas para a calibração ADAS.", itens: [
+      { id: "exclusao-instalacao-software-vw", tipo: "pdf", titulo: "Exclusão e Instalação Software Volkswagen", aplicacao: "Volkswagen", resumo: "PDF no repositório de materiais do Suporte Técnico - CEC.", link: "https://github.com/suportetecnicoadas/PDF-s-F12/blob/main/Exclus%C3%A3o%20e%20Instala%C3%A7%C3%A3o%20Software%20Volkswagen.pdf" },
+      { id: "laudo-tecnico-scanner-checklist", tipo: "pdf", titulo: "Laudo Técnico Scanner – Checklist", resumo: "PDF no repositório de materiais do Suporte Técnico - CEC.", link: "https://github.com/suportetecnicoadas/PDF-s-F12/blob/main/Laudo_Tecnico_Scanner_Checklist_1.pdf" }
+    ], incluiMateriaisPdf: true, incluiDicasGerais: true }
   ];
 
   /* ==========================================================
@@ -2746,6 +2753,13 @@ function Inicio() {
         ${m}<small>${nModelos(m) ? `${nModelos(m)} ${nModelos(m) === 1 ? "modelo" : "modelos"}` : "todos os modelos"}</small>
       </a>`)}</div>
     </div></section>
+
+    <section className="section sec-contato" aria-labelledby="h-contato-home"><div className="wrap">
+      <h2 className="home-h2" id="h-contato-home">Contato do Suporte Técnico ADAS</h2>
+      <p className="lead">Acione o suporte em caso de divergência, situação não contemplada no portal ou dúvida que a consulta não resolveu.</p>
+      <${ContatoCards} />
+      <p className="hint" style=${{ marginTop: "14px" }}>Antes de acionar o suporte, tenha em mãos a marca, o modelo, o ano do veículo e o que já foi verificado no portal.</p>
+    </div></section>
   </div>`;
 }
 
@@ -3556,14 +3570,13 @@ const CONTATOS = [
   { publico: "Lojas Autoglass", titulo: "Suporte Técnico ADAS para loja Autoglass", numero: "+55 27 3202-4646", whatsapp: "552732024646" }
 ];
 // Mensagem automática enviada ao abrir a conversa no WhatsApp
-const MSG_WHATSAPP = "Olá! Preciso de ajuda a calibração do sistema ADAS.";
+const MSG_WHATSAPP = "Olá! Preciso de ajuda na calibração do sistema ADAS.";
 const linkWhatsApp = n => `https://wa.me/${n}?text=${encodeURIComponent(MSG_WHATSAPP)}`;
 const ICONE_WHATSAPP = html`<svg className="wa-ic" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><path fill="#25D366" d="M16 3C8.8 3 3 8.7 3 15.8c0 2.5.7 4.9 2 6.9L3.2 29l6.6-1.7c1.9 1 4 1.6 6.2 1.6 7.2 0 13-5.7 13-12.8S23.2 3 16 3z"/><path fill="#FFFFFF" d="M23.3 19.6c-.4-.2-2.3-1.1-2.6-1.2-.4-.1-.6-.2-.9.2-.3.4-1 1.2-1.2 1.4-.2.2-.4.3-.8.1-.4-.2-1.6-.6-3.1-1.9-1.1-1-1.9-2.3-2.1-2.7-.2-.4 0-.6.2-.8l.6-.7c.2-.2.3-.4.4-.6.1-.3.1-.5 0-.7-.1-.2-.9-2.1-1.2-2.9-.3-.8-.6-.6-.9-.7h-.7c-.3 0-.7.1-1 .5-.4.4-1.3 1.3-1.3 3.1s1.4 3.6 1.5 3.9c.2.2 2.7 4.1 6.5 5.7.9.4 1.6.6 2.2.8.9.3 1.8.2 2.4.1.7-.1 2.3-.9 2.6-1.8.3-.9.3-1.7.2-1.8-.1-.1-.3-.2-.7-.4z"/></svg>`;
 
-function ContatoPagina() {
-  return html`<section className="section"><div className="wrap narrow">
-    <${TituloPagina} t="Contato / Suporte ADAS" sub="Acione o suporte técnico ADAS em caso de divergência, situação não contemplada no portal ou dúvida que a consulta não resolveu." />
-    <div className="contatos">${CONTATOS.map(c => html`<div className="panel contato" key=${c.numero}>
+// Cartões de contato do suporte (usados na página Contato e na página inicial)
+function ContatoCards() {
+  return html`<div className="contatos">${CONTATOS.map(c => html`<div className="panel contato" key=${c.numero}>
       <span className="tag">${c.publico}</span>
       <h2>${c.titulo}</h2>
       <p className="fone ic-txt">${ic("💬")}${c.numero}</p>
@@ -3572,7 +3585,13 @@ function ContatoPagina() {
         <a className="btn btn-wa" href=${linkWhatsApp(c.whatsapp)} target="_blank" rel="noopener noreferrer" aria-label=${"Falar com o Suporte pelo WhatsApp: " + c.titulo}>${ICONE_WHATSAPP}<span>Falar com o Suporte pelo WhatsApp</span></a>
         <${CopyButton} texto=${c.numero} rotulo="Copiar número" sucesso="Número copiado" />
       </div>
-    </div>`)}</div>
+    </div>`)}</div>`;
+}
+
+function ContatoPagina() {
+  return html`<section className="section"><div className="wrap narrow">
+    <${TituloPagina} t="Contato / Suporte ADAS" sub="Acione o suporte técnico ADAS em caso de divergência, situação não contemplada no portal ou dúvida que a consulta não resolveu." />
+    <${ContatoCards} />
     <p className="hint" style=${{ marginTop: "14px" }}>Antes de acionar o suporte, tenha em mãos a marca, o modelo, o ano do veículo e o que já foi verificado no portal.</p>
   </div></section>`;
 }
@@ -3678,16 +3697,63 @@ function MaterialItem({ it }) {
       ${imgs.length > 1 && html`<div className="mi-galeria">${imgs.slice(1).map((im, i) => html`<${ImagemAlvo} key=${i} a=${{ codigo: it.titulo, legenda: im.legenda || "", imagem: im.src }} />`)}</div>`}
       <div className="mi-acoes">
         ${it.pdf && html`<button type="button" className="btn primary" onClick=${() => baixarPdfEmbutido(it.pdf, it.pdfNome)}>${ic("📄")} Baixar PDF${it.pdfPaginas ? ` (${it.pdfPaginas} páginas)` : ""}</button>`}
-        ${it.link && html`<a className="btn" href=${it.link} target="_blank" rel="noopener noreferrer">Abrir material</a>`}
+        ${it.link && html`<a className=${"btn" + (it.tipo === "pdf" ? " primary" : "")} href=${it.link} target="_blank" rel="noopener noreferrer">${it.tipo === "pdf" ? html`${ic("📄")} Abrir PDF` : "Abrir material"}</a>`}
         ${veic && html`<a className="btn" href=${"#/veiculo/" + veic.id}>Ficha do ${veic.modelo}</a>`}
       </div>
     </div>
   </article>`;
 }
 
+/* ---------- PDFs do repositório GitHub (atualização automática) ----------
+   Na versão hospedada no GitHub Pages, o portal lista os PDFs do repositório sozinho.
+   Se existir um arquivo materiais.json no repositório, ele define título, categoria,
+   montadora, modelos e descrição de cada PDF. Sem acesso à internet (ou na versão
+   publicada no Claude), o portal usa apenas os PDFs já cadastrados. */
+const REPO_PDFS = { api: "https://api.github.com/repos/suportetecnicoadas/PDF-s-F12/contents/", cache: "cec_repo_pdfs", horas: 3 };
+const REPO_STATE = { lista: [], pronto: false };
+const repoSubs = new Set();
+let repoIniciado = false;
+const limparNome = n => decodeURIComponent(n).replace(/\.pdf$/i, "").replace(/[_]+/g, " ").replace(/\s+/g, " ").trim();
+const chaveArq = u => { try { return decodeURIComponent(String(u || "").split("/").pop()).toLowerCase(); } catch (e) { return String(u || "").toLowerCase(); } };
+function montarRepo(arquivos, meta) {
+  const conhecidos = new Set([...MATERIAIS.map(m => chaveArq(m.link)), ...CENTRAL.flatMap(c => (c.itens || []).map(it => chaveArq(it.link)))].filter(Boolean));
+  const porArq = {}; (meta || []).forEach(m => { if (m && m.arquivo) porArq[String(m.arquivo).toLowerCase()] = m; });
+  return arquivos.filter(a => a.type === "file" && /\.pdf$/i.test(a.name) && !conhecidos.has(a.name.toLowerCase())).map(a => {
+    const m = porArq[a.name.toLowerCase()] || {};
+    const cat = CENTRAL.some(c => c.id === m.categoria) ? m.categoria : "calibracao";
+    const veic = m.montadora && (m.modelos || []).length ? VEICULOS.find(v => v.marca === m.montadora && v.modelo === m.modelos[0]) : null;
+    return { id: "repo-" + a.sha, tipo: "pdf", categoria: cat, titulo: m.titulo || limparNome(a.name), resumo: m.descricao || "PDF no repositório de materiais do Suporte Técnico - CEC.",
+      aplicacao: [m.montadora, (m.modelos || []).join(", ")].filter(Boolean).join(" ") || "", veiculo: veic ? veic.id : null, link: a.html_url };
+  });
+}
+function iniciarRepo() {
+  if (repoIniciado) return;
+  repoIniciado = true;
+  const fim = lista => { REPO_STATE.lista = lista; REPO_STATE.pronto = true; repoSubs.forEach(f => f({ ...REPO_STATE })); };
+  try { const c = JSON.parse(localStorage.getItem(REPO_PDFS.cache) || "null"); if (c && c.t > Date.now() - REPO_PDFS.horas * 3600e3) return fim(montarRepo(c.arquivos, c.meta)); } catch (e) {}
+  (async () => {
+    const r = await fetch(REPO_PDFS.api, { headers: { Accept: "application/vnd.github+json" } });
+    if (!r.ok) throw new Error("github " + r.status);
+    const arquivos = await r.json();
+    let meta = [];
+    const mj = arquivos.find(a => a.name.toLowerCase() === "materiais.json");
+    if (mj && mj.download_url) { try { const rm = await fetch(mj.download_url); if (rm.ok) meta = await rm.json(); } catch (e) {} }
+    const enxuto = arquivos.map(a => ({ name: a.name, type: a.type, sha: a.sha, html_url: a.html_url }));
+    try { localStorage.setItem(REPO_PDFS.cache, JSON.stringify({ t: Date.now(), arquivos: enxuto, meta })); } catch (e) {}
+    fim(montarRepo(enxuto, meta));
+  })().catch(() => fim([]));
+}
+function useRepoPdfs() {
+  const [st, setSt] = useState({ ...REPO_STATE });
+  useEffect(() => { repoSubs.add(setSt); iniciarRepo(); setSt({ ...REPO_STATE }); return () => { repoSubs.delete(setSt); }; }, []);
+  return st.lista;
+}
+
 function MateriaisPagina({ params }) {
   const cat = params.get("cat") || "";
   const [q, setQ] = useState("");
+  const repo = useRepoPdfs();
+  const nRepo = c => repo.filter(x => x.categoria === c.id).length;
   const ts = tokens(q);
   const casaBusca = txt => !ts.length || ts.every(t => norm(txt).includes(t));
   const sel = CENTRAL.find(c => c.id === cat);
@@ -3695,16 +3761,16 @@ function MateriaisPagina({ params }) {
   return html`<section className="section"><div className="wrap">
     <${TituloPagina} t="Materiais Instrutivos" sub="Central de conhecimento técnico com imagens, tutoriais, orientações e dicas para instalação e substituição de peças automotivas." />
     <nav className="mi-cats" aria-label="Categorias">
-      <a className=${"mi-cat" + (!sel ? " on" : "")} href="#/materiais" aria-current=${!sel ? "page" : undefined}><span className="mi-ic" aria-hidden="true">${ic("🧰")}</span><span><strong>Todos</strong><small>${CENTRAL.reduce((n, c) => n + itensDe(c), 0)} materiais</small></span></a>
+      <a className=${"mi-cat" + (!sel ? " on" : "")} href="#/materiais" aria-current=${!sel ? "page" : undefined}><span className="mi-ic" aria-hidden="true">${ic("🧰")}</span><span><strong>Todos</strong><small>${CENTRAL.reduce((n, c) => n + itensDe(c) + nRepo(c), 0)} materiais</small></span></a>
       ${CENTRAL.map(c => html`<a key=${c.id} className=${"mi-cat" + (sel && sel.id === c.id ? " on" : "")} href=${"#/materiais?cat=" + c.id} aria-current=${sel && sel.id === c.id ? "page" : undefined}>
-        <span className="mi-ic" aria-hidden="true">${ic(c.icone)}</span><span><strong>${c.nome}</strong><small>${itensDe(c)} ${itensDe(c) === 1 ? "material" : "materiais"}</small></span></a>`)}
+        <span className="mi-ic" aria-hidden="true">${ic(c.icone)}</span><span><strong>${c.nome}</strong><small>${itensDe(c) + nRepo(c)} ${itensDe(c) + nRepo(c) === 1 ? "material" : "materiais"}</small></span></a>`)}
     </nav>
     <div className="field mi-busca">
       <label htmlFor="mi-q">Pesquisar nos materiais</label>
       <input id="mi-q" type="search" inputMode="search" enterKeyHint="search" autoComplete="off" autoCapitalize="off" spellCheck=${false} placeholder="Ex.: para-brisa, farol, retrovisor, calibração" value=${q} onInput=${e => setQ(e.target.value)} />
     </div>
     ${lista.map(c => {
-      const itens = (c.itens || []).filter(it => casaBusca([it.titulo, it.resumo, it.aplicacao, (it.passos || []).join(" "), (it.dicas || []).join(" "), (it.etapas || []).map(e => [e.texto, e.seguranca].join(" ")).join(" ")].join(" ")));
+      const itens = [...(c.itens || []), ...repo.filter(x => x.categoria === c.id)].filter(it => casaBusca([it.titulo, it.resumo, it.aplicacao, (it.passos || []).join(" "), (it.dicas || []).join(" "), (it.etapas || []).map(e => [e.texto, e.seguranca].join(" ")).join(" ")].join(" ")));
       const pdfs = c.incluiMateriaisPdf ? MATERIAIS.filter(m => casaBusca([m.titulo, m.descricao, (m.marcas || []).join(" "), m.veiculos.join(" ")].join(" "))) : [];
       const dicas = c.incluiDicasGerais ? DICAS_CALIBRACAO.filter(r => casaBusca(textoRegra.get(r.id))) : [];
       const vazio = !itens.length && !pdfs.length && !dicas.length;
@@ -4016,7 +4082,7 @@ function App({ sessao, onSair }) {
     <footer><div className="wrap">
       <img className="footlogo" src=${LOGO_GRUPO} alt="Grupo Autoglass" width="609" height="68" />
       <p><strong>Importante:</strong> As informações deste portal são destinadas à consulta técnica e devem ser utilizadas conforme os procedimentos e orientações vigentes da Autoglass. Em caso de divergência ou situação não contemplada, acione o suporte técnico ADAS.</p>
-      <p className="footcontato"><a href="#/contato"><strong>Suporte Técnico ADAS</strong></a>, acionamento via WhatsApp: credenciados <span>+55 0800 025 6301</span> | loja Autoglass <span>+55 27 3202-4646</span></p>
+      ${secao !== "" && html`<p className="footcontato"><a href="#/contato"><strong>Suporte Técnico ADAS</strong></a>, acionamento via WhatsApp: credenciados <span>+55 0800 025 6301</span> | loja Autoglass <span>+55 27 3202-4646</span></p>`}
       <p>Suporte Técnico - CEC, Grupo Autoglass, versão MVP. <a href="#/sobre">Sobre o projeto</a> | <a href="#/fontes">Fonte das informações</a></p>
     </div></footer>
     <nav className="bottomnav" aria-label="Acesso rápido">
