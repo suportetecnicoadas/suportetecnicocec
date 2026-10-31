@@ -1174,6 +1174,8 @@ footer{background:var(--c-cinza);border-top:1px solid var(--line);box-shadow:non
 .sec-contato{padding-top:36px;padding-bottom:40px}
 .sec-contato .contatos{max-width:900px}
 
+.repo-status{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin:0 0 6px}
+.repo-status .repo-recarregar{min-height:32px;padding:4px 12px;font-size:13.5px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
@@ -3709,19 +3711,23 @@ function MaterialItem({ it }) {
    Se existir um arquivo materiais.json no repositório, ele define título, categoria,
    montadora, modelos e descrição de cada PDF. Sem acesso à internet (ou na versão
    publicada no Claude), o portal usa apenas os PDFs já cadastrados. */
-const REPO_PDFS = { apis: ["https://api.github.com/repos/suportetecnicoadas/PDF-s-F12/contents/", "https://api.github.com/repos/suportetecnicoadas/suportetecnicocec/contents/"], cache: "cec_repo_pdfs_v2", horas: 3 };
-const REPO_STATE = { lista: [], pronto: false };
+const REPO_PDFS = {
+  repos: [{ dono: "suportetecnicoadas", nome: "PDF-s-F12" }, { dono: "suportetecnicoadas", nome: "suportetecnicocec" }],
+  cache: "cec_repo_pdfs_v3", horas: 3
+};
+const REPO_STATE = { lista: [], pronto: false, status: null };
 const repoSubs = new Set();
 let repoIniciado = false;
-const limparNome = n => decodeURIComponent(n).replace(/\.pdf$/i, "").replace(/[_]+/g, " ").replace(/\s+/g, " ").trim();
-const chaveArq = u => { try { return decodeURIComponent(String(u || "").split("/").pop()).toLowerCase(); } catch (e) { return String(u || "").toLowerCase(); } };
+const limparNome = n => decodeURIComponent(String(n).split("/").pop()).replace(/\.pdf$/i, "").replace(/[_]+/g, " ").replace(/\s+/g, " ").trim();
+const chaveArq = u => { try { return decodeURIComponent(String(u || "").split("/").pop()).toLowerCase(); } catch (e) { return String(u || "").split("/").pop().toLowerCase(); } };
+const caminhoUrl = p => String(p).split("/").map(encodeURIComponent).join("/");
 function montarRepo(arquivos, meta) {
   const conhecidos = new Set([...MATERIAIS.map(m => chaveArq(m.link)), ...CENTRAL.flatMap(c => (c.itens || []).map(it => chaveArq(it.link)))].filter(Boolean));
-  const porArq = {}; (meta || []).forEach(m => { if (m && m.arquivo) porArq[String(m.arquivo).toLowerCase()] = m; });
-  return arquivos.filter(a => a.type === "file" && /\.pdf$/i.test(a.name) && !conhecidos.has(a.name.toLowerCase())).map(a => {
+  const porArq = {}; (meta || []).forEach(m => { if (m && m.arquivo) porArq[String(m.arquivo).split("/").pop().toLowerCase()] = m; });
+  return arquivos.filter(a => /\.pdf$/i.test(a.name) && !conhecidos.has(a.name.toLowerCase())).map(a => {
     const m = porArq[a.name.toLowerCase()] || {};
     const cat = CENTRAL.some(c => c.id === m.categoria) ? m.categoria : "calibracao";
-    const veic = m.montadora && (m.modelos || []).length ? VEICULOS.find(v => v.marca === m.montadora && v.modelo === m.modelos[0]) : null;
+    const veic = m.montadora && (m.modelos || []).length ? VEICULOS.find(v => norm(v.marca) === norm(m.montadora) && norm(v.modelo) === norm(m.modelos[0])) : null;
     return { id: "repo-" + a.sha, tipo: "pdf", categoria: cat, titulo: m.titulo || limparNome(a.name), resumo: m.descricao || "PDF no repositório de materiais do Suporte Técnico - CEC.",
       aplicacao: [m.montadora, (m.modelos || []).join(", ")].filter(Boolean).join(" ") || "", veiculo: veic ? veic.id : null, link: a.html_url };
   });
@@ -3729,40 +3735,65 @@ function montarRepo(arquivos, meta) {
 function iniciarRepo() {
   if (repoIniciado) return;
   repoIniciado = true;
-  const fim = lista => { REPO_STATE.lista = lista; REPO_STATE.pronto = true; repoSubs.forEach(f => f({ ...REPO_STATE })); };
-  try { const c = JSON.parse(localStorage.getItem(REPO_PDFS.cache) || "null"); if (c && c.t > Date.now() - REPO_PDFS.horas * 3600e3) return fim(montarRepo(c.arquivos, c.meta)); } catch (e) {}
+  const fim = (lista, status) => { REPO_STATE.lista = lista; REPO_STATE.pronto = true; REPO_STATE.status = status; repoSubs.forEach(f => f({ ...REPO_STATE })); };
+  try { const c = JSON.parse(localStorage.getItem(REPO_PDFS.cache) || "null"); if (c && c.t > Date.now() - REPO_PDFS.horas * 3600e3) { const l = montarRepo(c.arquivos, c.meta); return fim(l, { ok: true, n: c.arquivos.filter(a => /\.pdf$/i.test(a.name)).length, novos: l.length, quando: c.t }); } } catch (e) {}
   (async () => {
-    // Lê os PDFs dos dois repositórios (PDF-s-F12 e o do próprio site) e junta, sem repetir nomes
-    const arquivos = [], meta = [], vistos = new Set();
+    // Lê todos os PDFs dos repositórios, inclusive dentro de pastas, e junta sem repetir nomes
+    const arquivos = [], meta = [], vistos = new Set(), falhas = [];
     let algum = false;
-    for (const api of REPO_PDFS.apis) {
+    for (const { dono, nome } of REPO_PDFS.repos) {
       try {
-        const r = await fetch(api, { headers: { Accept: "application/vnd.github+json" } });
-        if (!r.ok) continue;
-        const lista = await r.json();
-        if (!Array.isArray(lista)) continue;
+        const r = await fetch(`https://api.github.com/repos/${dono}/${nome}/git/trees/HEAD?recursive=1`, { headers: { Accept: "application/vnd.github+json" } });
+        if (!r.ok) { falhas.push(`${nome}: ${r.status === 404 ? "repositório não encontrado ou privado" : r.status === 403 ? "limite de consultas do GitHub atingido" : "erro " + r.status}`); continue; }
+        const j = await r.json();
         algum = true;
-        lista.forEach(a => { const k = String(a.name).toLowerCase(); if (!vistos.has(k)) { vistos.add(k); arquivos.push(a); } });
-        const mj = lista.find(a => String(a.name).toLowerCase() === "materiais.json");
-        if (mj && mj.download_url) { try { const rm = await fetch(mj.download_url); if (rm.ok) { const m = await rm.json(); if (Array.isArray(m)) meta.push(...m); } } catch (e) {} }
-      } catch (e) {}
+        for (const it of j.tree || []) {
+          if (it.type !== "blob") continue;
+          const arq = String(it.path).split("/").pop();
+          const k = arq.toLowerCase();
+          if (k === "materiais.json") {
+            try { const rm = await fetch(`https://raw.githubusercontent.com/${dono}/${nome}/HEAD/${caminhoUrl(it.path)}`); if (rm.ok) { const m = await rm.json(); if (Array.isArray(m)) meta.push(...m); } } catch (e) { falhas.push(`${nome}: materiais.json com formato inválido`); }
+            continue;
+          }
+          if (!/\.pdf$/i.test(arq) || vistos.has(k)) continue;
+          vistos.add(k);
+          arquivos.push({ name: arq, sha: it.sha, html_url: `https://github.com/${dono}/${nome}/blob/HEAD/${caminhoUrl(it.path)}` });
+        }
+      } catch (e) { falhas.push(`${nome}: sem acesso ao GitHub`); }
     }
-    if (!algum) throw new Error("github indisponível");
-    const enxuto = arquivos.map(a => ({ name: a.name, type: a.type, sha: a.sha, html_url: a.html_url }));
-    try { localStorage.setItem(REPO_PDFS.cache, JSON.stringify({ t: Date.now(), arquivos: enxuto, meta })); } catch (e) {}
-    fim(montarRepo(enxuto, meta));
-  })().catch(() => fim([]));
+    if (!algum) throw new Error(falhas.join(" · ") || "sem acesso ao GitHub");
+    try { localStorage.setItem(REPO_PDFS.cache, JSON.stringify({ t: Date.now(), arquivos, meta })); } catch (e) {}
+    const l = montarRepo(arquivos, meta);
+    fim(l, { ok: true, n: arquivos.length, novos: l.length, quando: Date.now(), avisos: falhas });
+  })().catch(e => fim([], { ok: false, erro: String(e && e.message || e) }));
+}
+function recarregarRepo() {
+  try { localStorage.removeItem(REPO_PDFS.cache); } catch (e) {}
+  repoIniciado = false; REPO_STATE.pronto = false; REPO_STATE.status = null;
+  repoSubs.forEach(f => f({ ...REPO_STATE }));
+  iniciarRepo();
 }
 function useRepoPdfs() {
   const [st, setSt] = useState({ ...REPO_STATE });
   useEffect(() => { repoSubs.add(setSt); iniciarRepo(); setSt({ ...REPO_STATE }); return () => { repoSubs.delete(setSt); }; }, []);
-  return st.lista;
+  return st;
+}
+function StatusRepo({ st }) {
+  const s = st.status;
+  const hora = t => new Date(t).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+  return html`<p className="hint repo-status" role="status">
+    ${!st.pronto ? "Procurando PDFs no GitHub…"
+      : s && s.ok ? `PDFs no GitHub: ${s.n} encontrados, ${s.novos} ${s.novos === 1 ? "novo" : "novos"} na lista · atualizado às ${hora(s.quando)}${(s.avisos || []).length ? " · " + s.avisos.join(" · ") : ""}`
+      : `Não foi possível consultar os PDFs do GitHub (${s ? s.erro : "sem resposta"}). A consulta automática funciona no site do GitHub Pages; aqui aparecem os materiais já cadastrados.`}
+    ${st.pronto && html` <button type="button" className="btn ghost repo-recarregar" onClick=${recarregarRepo}>Atualizar lista</button>`}
+  </p>`;
 }
 
 function MateriaisPagina({ params }) {
   const cat = params.get("cat") || "";
   const [q, setQ] = useState("");
-  const repo = useRepoPdfs();
+  const repoSt = useRepoPdfs();
+  const repo = repoSt.lista;
   const nRepo = c => repo.filter(x => x.categoria === c.id).length;
   const ts = tokens(q);
   const casaBusca = txt => !ts.length || ts.every(t => norm(txt).includes(t));
@@ -3779,6 +3810,7 @@ function MateriaisPagina({ params }) {
       <label htmlFor="mi-q">Pesquisar nos materiais</label>
       <input id="mi-q" type="search" inputMode="search" enterKeyHint="search" autoComplete="off" autoCapitalize="off" spellCheck=${false} placeholder="Ex.: para-brisa, farol, retrovisor, calibração" value=${q} onInput=${e => setQ(e.target.value)} />
     </div>
+    <${StatusRepo} st=${repoSt} />
     ${lista.map(c => {
       const itens = [...(c.itens || []), ...repo.filter(x => x.categoria === c.id)].filter(it => casaBusca([it.titulo, it.resumo, it.aplicacao, (it.passos || []).join(" "), (it.dicas || []).join(" "), (it.etapas || []).map(e => [e.texto, e.seguranca].join(" ")).join(" ")].join(" ")));
       const pdfs = c.incluiMateriaisPdf ? MATERIAIS.filter(m => casaBusca([m.titulo, m.descricao, (m.marcas || []).join(" "), m.veiculos.join(" ")].join(" "))) : [];
