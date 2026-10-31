@@ -1176,6 +1176,7 @@ footer{background:var(--c-cinza);border-top:1px solid var(--line);box-shadow:non
 
 .repo-status{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin:0 0 6px}
 .repo-status .repo-recarregar{min-height:32px;padding:4px 12px;font-size:13.5px}
+.mi-aviso-pdf{margin:0 0 10px;max-width:80ch}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
@@ -2892,6 +2893,7 @@ function Veiculo({ id, params }) {
   const v = porId(id);
   const cat = params.get("cat");
   const { todos: todosVideos } = useVideos();
+  const repoVeic = useRepoPdfs().lista.filter(x => v && (x.veiculo === v.id || (!x.veiculo && x.marca === v.marca)));
   useEffect(() => {
     if (!cat) { window.scrollTo(0, 0); return; }
     const t = setTimeout(() => {
@@ -2931,6 +2933,7 @@ function Veiculo({ id, params }) {
     lista.length && { id: "checklist", t: "✅ Checklist" },
     (v.orientacoes.length || regras.length) && { id: "orientacoes", t: "🧭 Orientações" },
     { id: "fonte", t: "📚 Fonte" },
+    repoVeic.length && { id: "pdfs", t: "📄 PDFs" },
     videosDoVeiculo(todosVideos, v).length && { id: "videos", t: "🎬 Vídeos" }
   ].filter(Boolean);
 
@@ -3036,6 +3039,10 @@ function Veiculo({ id, params }) {
         ${!q.length && QCAR.url && html`<p className="hint"><a href="#/qcar">Como consultar no QCar</a></p>`}
       </section>
 
+      ${repoVeic.length > 0 && html`<section className="panel" id="sec-pdfs" aria-labelledby="h-pdfs">
+        <div className="panel-head"><h2 id="h-pdfs"><span aria-hidden="true">${ic("📄")}</span>PDFs de instalação e instrução</h2><a className="btn ghost" href="#/materiais">Todos os materiais</a></div>
+        <div className="mi-grid">${repoVeic.map(it => html`<${MaterialItem} key=${it.id} it=${it} />`)}</div>
+      </section>`}
       <${VideosVeiculo} v=${v} />
 
       <p className="hint">Dúvidas gerais (equipamento, internet, vidro, estepe) estão em <a href="#/faq">Perguntas frequentes</a>.</p>
@@ -3634,7 +3641,7 @@ function MaterialCard({ m, compacto }) {
       ${!compacto && html`<p>${m.descricao}</p>`}
       <div className="result-foot">
         ${m.link
-          ? html`<a className="btn primary" href=${m.link} target="_blank" rel="noopener noreferrer">${ic("📄")} Abrir PDF</a>`
+          ? html`<a className="btn primary" href=${RAW_DE(m.link)} target="_blank" rel="noopener noreferrer">⬇ Baixar PDF</a><a className="btn" href=${m.link} target="_blank" rel="noopener noreferrer">${ic("📄")} Abrir no GitHub</a>`
           : html`<span className="mat-indisp">Download temporariamente indisponível. Para receber este material, acione o <a href="#/contato">suporte técnico ADAS</a>.</span>`}
         ${compacto ? "" : veics.map(v => html`<a key=${v.id} className="btn" href=${"#/veiculo/" + v.id}>Ficha do ${v.modelo}</a>`)}
         ${compacto ? "" : (m.marcas || []).map(mc => html`<a key=${mc} className="btn" href=${"#/consulta?marca=" + encodeURIComponent(mc)}>Veículos ${mc}</a>`)}
@@ -3699,7 +3706,9 @@ function MaterialItem({ it }) {
       ${imgs.length > 1 && html`<div className="mi-galeria">${imgs.slice(1).map((im, i) => html`<${ImagemAlvo} key=${i} a=${{ codigo: it.titulo, legenda: im.legenda || "", imagem: im.src }} />`)}</div>`}
       <div className="mi-acoes">
         ${it.pdf && html`<button type="button" className="btn primary" onClick=${() => baixarPdfEmbutido(it.pdf, it.pdfNome)}>${ic("📄")} Baixar PDF${it.pdfPaginas ? ` (${it.pdfPaginas} páginas)` : ""}</button>`}
-        ${it.link && html`<a className=${"btn" + (it.tipo === "pdf" ? " primary" : "")} href=${it.link} target="_blank" rel="noopener noreferrer">${it.tipo === "pdf" ? html`${ic("📄")} Abrir PDF` : "Abrir material"}</a>`}
+        ${it.link && it.tipo === "pdf" && html`<a className="btn primary" href=${RAW_DE(it.link)} target="_blank" rel="noopener noreferrer">⬇ Baixar PDF</a>
+          <a className="btn" href=${it.link} target="_blank" rel="noopener noreferrer">${ic("📄")} Abrir no GitHub</a>`}
+        ${it.link && it.tipo !== "pdf" && html`<a className="btn" href=${it.link} target="_blank" rel="noopener noreferrer">Abrir material</a>`}
         ${veic && html`<a className="btn" href=${"#/veiculo/" + veic.id}>Ficha do ${veic.modelo}</a>`}
       </div>
     </div>
@@ -3721,15 +3730,50 @@ let repoIniciado = false;
 const limparNome = n => decodeURIComponent(String(n).split("/").pop()).replace(/\.pdf$/i, "").replace(/[_]+/g, " ").replace(/\s+/g, " ").trim();
 const chaveArq = u => { try { return decodeURIComponent(String(u || "").split("/").pop()).toLowerCase(); } catch (e) { return String(u || "").split("/").pop().toLowerCase(); } };
 const caminhoUrl = p => String(p).split("/").map(encodeURIComponent).join("/");
+/* Organização automática pelo nome do arquivo: categoria (vidros, faróis…) e veículo (marca/modelo) */
+const RAW_DE = u => String(u || "").replace(/^https:\/\/github\.com\/([^/]+)\/([^/]+)\/blob\//, "https://raw.githubusercontent.com/$1/$2/");
+const CAT_PALAVRAS = [
+  ["retrovisores", /retrovisor|retrov|espelho/],
+  ["farois", /farol|farois|milha/],
+  ["lanternas", /lanterna|break ?light|brake ?light/],
+  ["vidros", /para ?-?brisa|parabrisa|\bvidro|vigia|janela|teto solar|quebra ?vento/],
+  ["portas", /\bporta\b|\bportas\b|forro|macaneta|fechadura/],
+  ["calibracao", /calibra|\badas\b|\bsfd\b|camera|scanner|laudo|software|\balvo\b|radar/]
+];
+const MARCA_APELIDOS = { aud: "Audi", vw: "Volkswagen", volks: "Volkswagen", gm: "Chevrolet", chev: "Chevrolet", chevy: "Chevrolet", mercedes: "Mercedes Benz", mb: "Mercedes Benz", benz: "Mercedes Benz", landrover: "Land Rover", lr: "Land Rover", mitsu: "Mitsubishi", hyundai: "Hyundai", hyunday: "Hyundai", toyta: "Toyota" };
+function classificarArquivo(nome) {
+  const base = norm(decodeURIComponent(String(nome)).replace(/\.pdf$/i, "").replace(/[_\-.]+/g, " "));
+  const toks = base.split(/\s+/).filter(Boolean);
+  const tem = t => toks.includes(t);
+  const categoria = (CAT_PALAVRAS.find(([, re]) => re.test(base)) || [null])[0];
+  let marca = MARCAS.find(m => { const mt = norm(m).split(/\s+/); return mt.every(tem) || tem(norm(m).replace(/\s+/g, "")); }) || null;
+  if (!marca) { const k = toks.find(t => MARCA_APELIDOS[t]); if (k) marca = MARCA_APELIDOS[k]; }
+  const candidatos = VEICULOS.filter(v => !v.generico && (!marca || v.marca === marca)).filter(v => {
+    const mt = norm(v.modelo).replace(/[\/()]/g, " ").split(/\s+/).filter(Boolean);
+    return mt.length && mt.every(tem);
+  }).sort((a, b) => norm(b.modelo).length - norm(a.modelo).length);
+  let veiculo = candidatos[0] || null;
+  if (veiculo && !marca && candidatos.filter(c => norm(c.modelo) === norm(veiculo.modelo)).length > 1) veiculo = null;
+  if (veiculo) marca = veiculo.marca;
+  const anos = (base.match(/\b(19|20)\d{2}\b/g) || []);
+  const faixa = base.match(/\b(\d{2})\s+(\d{2})\b/);
+  const ano = anos.length ? anos.join(" a ") : faixa && +faixa[1] < +faixa[2] ? `20${faixa[1]} a 20${faixa[2]}` : "";
+  return { categoria, marca, veiculo, ano };
+}
 function montarRepo(arquivos, meta) {
   const conhecidos = new Set([...MATERIAIS.map(m => chaveArq(m.link)), ...CENTRAL.flatMap(c => (c.itens || []).map(it => chaveArq(it.link)))].filter(Boolean));
   const porArq = {}; (meta || []).forEach(m => { if (m && m.arquivo) porArq[String(m.arquivo).split("/").pop().toLowerCase()] = m; });
   return arquivos.filter(a => /\.pdf$/i.test(a.name) && !conhecidos.has(a.name.toLowerCase())).map(a => {
     const m = porArq[a.name.toLowerCase()] || {};
-    const cat = CENTRAL.some(c => c.id === m.categoria) ? m.categoria : "calibracao";
-    const veic = m.montadora && (m.modelos || []).length ? VEICULOS.find(v => norm(v.marca) === norm(m.montadora) && norm(v.modelo) === norm(m.modelos[0])) : null;
-    return { id: "repo-" + a.sha, tipo: "pdf", categoria: cat, titulo: m.titulo || limparNome(a.name), resumo: m.descricao || "PDF no repositório de materiais do Suporte Técnico - CEC.",
-      aplicacao: [m.montadora, (m.modelos || []).join(", ")].filter(Boolean).join(" ") || "", veiculo: veic ? veic.id : null, link: a.html_url };
+    const auto = classificarArquivo(a.name);
+    // O materiais.json tem prioridade; sem ele, a organização vem do nome do arquivo
+    const cat = CENTRAL.some(c => c.id === m.categoria) ? m.categoria : auto.categoria && CENTRAL.some(c => c.id === auto.categoria) ? auto.categoria : "calibracao";
+    const veicJson = m.montadora && (m.modelos || []).length ? VEICULOS.find(v => norm(v.marca) === norm(m.montadora) && norm(v.modelo) === norm(m.modelos[0])) : null;
+    const veic = veicJson || (m.montadora ? null : auto.veiculo);
+    const marca = m.montadora || (veic ? veic.marca : auto.marca);
+    const aplicacao = m.montadora ? [m.montadora, (m.modelos || []).join(", ")].filter(Boolean).join(" ") : [veic ? nomeVeiculo(veic) : auto.marca, auto.ano].filter(Boolean).join(" ");
+    return { id: "repo-" + a.sha, tipo: "pdf", categoria: cat, titulo: m.titulo || limparNome(a.name), resumo: m.descricao || "",
+      aplicacao, marca: marca || null, veiculo: veic ? veic.id : null, link: a.html_url };
   });
 }
 function iniciarRepo() {
@@ -3811,6 +3855,7 @@ function MateriaisPagina({ params }) {
       <input id="mi-q" type="search" inputMode="search" enterKeyHint="search" autoComplete="off" autoCapitalize="off" spellCheck=${false} placeholder="Ex.: para-brisa, farol, retrovisor, calibração" value=${q} onInput=${e => setQ(e.target.value)} />
     </div>
     <${StatusRepo} st=${repoSt} />
+    <p className="hint mi-aviso-pdf">${ic("📄")} <strong>Baixar PDF</strong> faz o download do arquivo direto. <strong>Abrir no GitHub</strong> mostra o PDF no site do GitHub; para baixar por lá, use o botão de download (⬇) no canto superior direito do visualizador.</p>
     ${lista.map(c => {
       const itens = [...(c.itens || []), ...repo.filter(x => x.categoria === c.id)].filter(it => casaBusca([it.titulo, it.resumo, it.aplicacao, (it.passos || []).join(" "), (it.dicas || []).join(" "), (it.etapas || []).map(e => [e.texto, e.seguranca].join(" ")).join(" ")].join(" ")));
       const pdfs = c.incluiMateriaisPdf ? MATERIAIS.filter(m => casaBusca([m.titulo, m.descricao, (m.marcas || []).join(" "), m.veiculos.join(" ")].join(" "))) : [];
