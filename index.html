@@ -1177,6 +1177,14 @@ footer{background:var(--c-cinza);border-top:1px solid var(--line);box-shadow:non
 .repo-status{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin:0 0 6px}
 .repo-status .repo-recarregar{min-height:32px;padding:4px 12px;font-size:13.5px}
 .mi-aviso-pdf{margin:0 0 10px;max-width:80ch}
+/* Miniaturas dos PDFs */
+.pdf-thumb{position:relative;aspect-ratio:4/3;overflow:hidden;background:#10082F;border-bottom:1px solid var(--line)}
+.pdf-thumb img{display:block;width:100%;height:100%;object-fit:cover;object-position:top center;background:#FFFFFF}
+.pdf-capa{display:block;width:100%;height:100%}
+.material{align-items:flex-start}
+.material > .pdf-thumb{flex:none;width:96px;aspect-ratio:3/4;border:1px solid var(--line);border-radius:8px}
+@media (min-width:601px){.material > .pdf-thumb{width:120px}}
+
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
@@ -3626,10 +3634,128 @@ function arquivoBlob(m) {
   return new Blob([u8], { type: "application/pdf" });
 }
 
+/* ---------- Miniatura dos PDFs ----------
+   Gerada no navegador com o pdf.js: usa a maior foto das primeiras páginas do PDF
+   (ou a primeira página, se não houver foto). Fica guardada no navegador
+   para não ser gerada de novo. Sem acesso ao arquivo, aparece uma capa desenhada. */
+const PDFJS_BASE = "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/";
+let pdfjsPromise = null;
+function carregarPdfjs() {
+  if (!pdfjsPromise) pdfjsPromise = import(PDFJS_BASE + "pdf.min.mjs").then(lib => { lib.GlobalWorkerOptions.workerSrc = PDFJS_BASE + "pdf.worker.min.mjs"; return lib; });
+  return pdfjsPromise;
+}
+const THUMB_PREFIXO = "cec_thumb_";
+const thumbCache = url => { try { return localStorage.getItem(THUMB_PREFIXO + url) || null; } catch (e) { return null; } };
+let thumbsAtivos = 0;
+const filaThumbs = [];
+function enfileirarThumb(tarefa) {
+  return new Promise((ok, erro) => {
+    filaThumbs.push({ tarefa, ok, erro });
+    const proximo = () => {
+      if (thumbsAtivos >= 2 || !filaThumbs.length) return;
+      const t = filaThumbs.shift(); thumbsAtivos++;
+      t.tarefa().then(t.ok, t.erro).finally(() => { thumbsAtivos--; proximo(); });
+    };
+    proximo();
+  });
+}
+// Pega um objeto de imagem já carregado pelo pdf.js
+const objetoPdf = (pag, nome) => new Promise(ok => { const fonte = String(nome).startsWith("g_") ? pag.commonObjs : pag.objs; try { fonte.get(nome, ok); } catch (e) { ok(null); } });
+// Desenha a imagem do PDF num canvas reduzido (largura máxima 520 px)
+function imagemParaCanvas(img) {
+  const w = img.width || (img.bitmap && img.bitmap.width), h = img.height || (img.bitmap && img.bitmap.height);
+  if (!w || !h) return null;
+  const esc = Math.min(1, 520 / w);
+  const cv = document.createElement("canvas"); cv.width = Math.round(w * esc); cv.height = Math.round(h * esc);
+  const ctx = cv.getContext("2d");
+  if (img.bitmap) { ctx.drawImage(img.bitmap, 0, 0, cv.width, cv.height); return cv; }
+  if (!img.data) return null;
+  const tmp = document.createElement("canvas"); tmp.width = w; tmp.height = h;
+  const id = tmp.getContext("2d").createImageData(w, h), d = img.data;
+  if (d.length === w * h * 4) id.data.set(d);
+  else if (d.length === w * h * 3) { for (let i = 0, j = 0; i < d.length; i += 3, j += 4) { id.data[j] = d[i]; id.data[j + 1] = d[i + 1]; id.data[j + 2] = d[i + 2]; id.data[j + 3] = 255; } }
+  else return null;
+  tmp.getContext("2d").putImageData(id, 0, 0);
+  ctx.drawImage(tmp, 0, 0, cv.width, cv.height);
+  return cv;
+}
+async function gerarThumb(url) {
+  const c = thumbCache(url); if (c) return c;
+  const lib = await carregarPdfjs();
+  const pdf = await lib.getDocument({ url, disableAutoFetch: true }).promise;
+  try {
+    // 1) Procura a maior foto nas primeiras páginas do PDF
+    let melhor = null;
+    for (let n = 1; n <= Math.min(3, pdf.numPages) && !melhor; n++) {
+      const pag = await pdf.getPage(n);
+      const ops = await pag.getOperatorList();
+      const nomes = [];
+      ops.fnArray.forEach((fn, i) => { if (fn === lib.OPS.paintImageXObject) nomes.push(ops.argsArray[i][0]); });
+      for (const nome of nomes) {
+        const img = await objetoPdf(pag, nome);
+        const w = img && (img.width || (img.bitmap && img.bitmap.width)), h = img && (img.height || (img.bitmap && img.bitmap.height));
+        if (!w || !h || w < 200 || h < 150 || w / h > 3 || h / w > 3) continue; // ignora logotipos, ícones e faixas
+        if (!melhor || w * h > melhor.w * melhor.h) melhor = { img, w, h };
+      }
+    }
+    let cv = melhor ? imagemParaCanvas(melhor.img) : null;
+    // 2) Sem foto: usa a primeira página
+    if (!cv) {
+      const pag = await pdf.getPage(1);
+      const v1 = pag.getViewport({ scale: 1 });
+      const vp = pag.getViewport({ scale: 520 / v1.width });
+      cv = document.createElement("canvas"); cv.width = Math.round(vp.width); cv.height = Math.round(vp.height);
+      const ctx = cv.getContext("2d"); ctx.fillStyle = "#FFFFFF"; ctx.fillRect(0, 0, cv.width, cv.height);
+      await pag.render({ canvasContext: ctx, viewport: vp }).promise;
+    }
+    const dados = cv.toDataURL("image/jpeg", 0.72);
+    try { localStorage.setItem(THUMB_PREFIXO + url, dados); } catch (e) {}
+    return dados;
+  } finally { pdf.destroy(); }
+}
+function CapaPdf({ titulo, categoria }) {
+  const cat = CENTRAL.find(c => c.id === categoria) || {};
+  const ls = linhasTitulo(titulo, 24, 3);
+  const f = "Poppins, system-ui, sans-serif";
+  return html`<svg className="pdf-capa" viewBox="0 0 320 240" aria-hidden="true" focusable="false">
+    <rect width="320" height="240" fill="#10082F" />
+    <rect y="210" width="320" height="30" fill="#4562B5" opacity="0.45" />
+    <line x1="0" y1="225" x2="320" y2="225" stroke="#FFFFFF" strokeOpacity="0.4" strokeWidth="2" strokeDasharray="12 9" />
+    <rect x="232" y="30" width="62" height="80" rx="6" fill="#FFFFFF" />
+    <path d="M276 30 v16 h18" fill="none" stroke="#10082F" strokeOpacity="0.3" strokeWidth="2" />
+    <rect x="240" y="88" width="46" height="16" rx="3" fill="#3510B5" />
+    <text x="263" y="100" textAnchor="middle" fill="#FFFFFF" fontSize="11" fontFamily=${f} fontWeight="700">PDF</text>
+    <circle cx="38" cy="40" r="19" fill="#FFFFFF" opacity="0.12" />
+    <g transform="translate(26 28)" style=${{ color: "#FFFFFF" }} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"
+      dangerouslySetInnerHTML=${{ __html: ICONES[ICON_DE[cat.icone]] || ICONES.doc }}></g>
+    <text x="66" y="44" fill="#FFFFFF" opacity="0.78" fontSize="10.5" fontFamily=${f} fontWeight="600">${(cat.nome || "MATERIAL").toUpperCase()}</text>
+    ${ls.map((l, i) => html`<text key=${i} x="20" y=${140 + i * 22} fill="#FFFFFF" fontSize="17" fontFamily=${f} fontWeight="600">${l}</text>`)}
+  </svg>`;
+}
+function PdfThumb({ link, titulo, categoria }) {
+  const url = RAW_DE(link);
+  const [src, setSrc] = useState(() => thumbCache(url));
+  const ref = useRef(null);
+  useEffect(() => {
+    if (src || !ref.current || !("IntersectionObserver" in window)) return;
+    let vivo = true;
+    const io = new IntersectionObserver(es => {
+      if (!es.some(e => e.isIntersecting)) return;
+      io.disconnect();
+      enfileirarThumb(() => gerarThumb(url)).then(d => { if (vivo) setSrc(d); }).catch(e => { console.warn("Miniatura do PDF indisponível:", url, e && e.message); });
+    }, { rootMargin: "300px" });
+    io.observe(ref.current);
+    return () => { vivo = false; io.disconnect(); };
+  }, [url]);
+  return html`<div className="pdf-thumb" ref=${ref}>
+    ${src ? html`<img src=${src} alt=${"Imagem do PDF: " + titulo} loading="lazy" />` : html`<${CapaPdf} titulo=${titulo} categoria=${categoria} />`}
+  </div>`;
+}
+
 function MaterialCard({ m, compacto }) {
   const veics = m.veiculos.map(porId).filter(Boolean);
   return html`<article className="material">
-    <div className="mat-ic" aria-hidden="true">${ic("📄")}</div>
+    ${m.link ? html`<${PdfThumb} link=${m.link} titulo=${m.titulo} categoria="calibracao" />` : html`<div className="mat-ic" aria-hidden="true">${ic("📄")}</div>`}
     <div className="mat-body">
       <h3>${m.titulo}</h3>
       <p className="mat-tags">
@@ -3641,7 +3767,7 @@ function MaterialCard({ m, compacto }) {
       ${!compacto && html`<p>${m.descricao}</p>`}
       <div className="result-foot">
         ${m.link
-          ? html`<a className="btn primary" href=${RAW_DE(m.link)} target="_blank" rel="noopener noreferrer">⬇ Baixar PDF</a><a className="btn" href=${m.link} target="_blank" rel="noopener noreferrer">${ic("📄")} Abrir no GitHub</a>`
+          ? html`<a className="btn primary" href=${RAW_DE(m.link)} target="_blank" rel="noopener noreferrer">⬇ Baixar PDF</a>`
           : html`<span className="mat-indisp">Download temporariamente indisponível. Para receber este material, acione o <a href="#/contato">suporte técnico ADAS</a>.</span>`}
         ${compacto ? "" : veics.map(v => html`<a key=${v.id} className="btn" href=${"#/veiculo/" + v.id}>Ficha do ${v.modelo}</a>`)}
         ${compacto ? "" : (m.marcas || []).map(mc => html`<a key=${mc} className="btn" href=${"#/consulta?marca=" + encodeURIComponent(mc)}>Veículos ${mc}</a>`)}
@@ -3685,7 +3811,7 @@ function MaterialItem({ it }) {
   const imgs = it.imagens || [];
   const veic = it.veiculo && porId(it.veiculo);
   return html`<article className=${"mi-card" + (aberto && etapas.length ? " aberto" : "")}>
-    ${capa && html`<${ImagemAlvo} a=${{ codigo: it.titulo, legenda: "", imagem: capa }} />`}
+    ${capa ? html`<${ImagemAlvo} a=${{ codigo: it.titulo, legenda: "", imagem: capa }} />` : it.tipo === "pdf" && it.link ? html`<${PdfThumb} link=${it.link} titulo=${it.titulo} categoria=${it.categoria} />` : null}
     <div className="mi-body">
       <p className="mat-tags"><span className="tag">${ROT_TIPO_MAT[it.tipo] || "Material"}</span>${(it.aplicacao || "") && html`<span className="tag">${it.aplicacao}</span>`}${etapas.length > 0 && html`<span className="tag">${etapas.length} imagens</span>`}</p>
       <h3>${it.titulo}</h3>
@@ -3706,8 +3832,7 @@ function MaterialItem({ it }) {
       ${imgs.length > 1 && html`<div className="mi-galeria">${imgs.slice(1).map((im, i) => html`<${ImagemAlvo} key=${i} a=${{ codigo: it.titulo, legenda: im.legenda || "", imagem: im.src }} />`)}</div>`}
       <div className="mi-acoes">
         ${it.pdf && html`<button type="button" className="btn primary" onClick=${() => baixarPdfEmbutido(it.pdf, it.pdfNome)}>${ic("📄")} Baixar PDF${it.pdfPaginas ? ` (${it.pdfPaginas} páginas)` : ""}</button>`}
-        ${it.link && it.tipo === "pdf" && html`<a className="btn primary" href=${RAW_DE(it.link)} target="_blank" rel="noopener noreferrer">⬇ Baixar PDF</a>
-          <a className="btn" href=${it.link} target="_blank" rel="noopener noreferrer">${ic("📄")} Abrir no GitHub</a>`}
+        ${it.link && it.tipo === "pdf" && html`<a className="btn primary" href=${RAW_DE(it.link)} target="_blank" rel="noopener noreferrer">⬇ Baixar PDF</a>`}
         ${it.link && it.tipo !== "pdf" && html`<a className="btn" href=${it.link} target="_blank" rel="noopener noreferrer">Abrir material</a>`}
         ${veic && html`<a className="btn" href=${"#/veiculo/" + veic.id}>Ficha do ${veic.modelo}</a>`}
       </div>
@@ -3855,7 +3980,7 @@ function MateriaisPagina({ params }) {
       <input id="mi-q" type="search" inputMode="search" enterKeyHint="search" autoComplete="off" autoCapitalize="off" spellCheck=${false} placeholder="Ex.: para-brisa, farol, retrovisor, calibração" value=${q} onInput=${e => setQ(e.target.value)} />
     </div>
     <${StatusRepo} st=${repoSt} />
-    <p className="hint mi-aviso-pdf">${ic("📄")} <strong>Baixar PDF</strong> faz o download do arquivo direto. <strong>Abrir no GitHub</strong> mostra o PDF no site do GitHub; para baixar por lá, use o botão de download (⬇) no canto superior direito do visualizador.</p>
+    <p className="hint mi-aviso-pdf">${ic("📄")} Ao clicar em <strong>Baixar PDF</strong>, o arquivo é baixado direto para o seu computador ou celular.</p>
     ${lista.map(c => {
       const itens = [...(c.itens || []), ...repo.filter(x => x.categoria === c.id)].filter(it => casaBusca([it.titulo, it.resumo, it.aplicacao, (it.passos || []).join(" "), (it.dicas || []).join(" "), (it.etapas || []).map(e => [e.texto, e.seguranca].join(" ")).join(" ")].join(" ")));
       const pdfs = c.incluiMateriaisPdf ? MATERIAIS.filter(m => casaBusca([m.titulo, m.descricao, (m.marcas || []).join(" "), m.veiculos.join(" ")].join(" "))) : [];
@@ -3864,7 +3989,7 @@ function MateriaisPagina({ params }) {
       if (vazio && ts.length && !sel) return null;
       return html`<section className="mi-sec" key=${c.id} id=${"sec-mat-" + c.id}>
         <div className="mi-sec-head"><h2><span aria-hidden="true">${ic(c.icone)}</span> ${c.nome}</h2><p className="lead">${c.descricao}</p></div>
-        ${itens.length > 0 && html`<div className="mi-grid">${itens.map(it => html`<${MaterialItem} key=${it.id} it=${it} />`)}</div>`}
+        ${itens.length > 0 && html`<div className="mi-grid">${itens.map(it => html`<${MaterialItem} key=${it.id} it=${it.categoria ? it : { ...it, categoria: c.id }} />`)}</div>`}
         ${pdfs.length > 0 && html`<div><h3 className="subhead">Manuais em PDF</h3><div className="stack">${pdfs.map(m => html`<${MaterialCard} key=${m.id} m=${m} />`)}</div></div>`}
         ${dicas.length > 0 && html`<div className="subgroup"><h3 className="subhead">Dicas de calibração (válidas para todas as montadoras)</h3>
           <div className="faq">${dicas.map(r => html`<details key=${r.id}><summary>${r.pergunta}</summary><div className="ans"><${RegraConteudo} r=${r} /></div></details>`)}</div>
