@@ -1185,6 +1185,9 @@ footer{background:var(--c-cinza);border-top:1px solid var(--line);box-shadow:non
 .material > .pdf-thumb{flex:none;width:96px;aspect-ratio:3/4;border:1px solid var(--line);border-radius:8px}
 @media (min-width:601px){.material > .pdf-thumb{width:120px}}
 
+.mi-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;max-width:760px;margin-bottom:16px}
+.mi-stats .stat{padding:12px 14px}
+.mi-stats .stat b{font-size:26px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
@@ -2902,6 +2905,18 @@ function Veiculo({ id, params }) {
   const cat = params.get("cat");
   const { todos: todosVideos } = useVideos();
   const repoVeic = useRepoPdfs().lista.filter(x => v && (x.veiculo === v.id || (!x.veiculo && x.marca === v.marca)));
+  // Todo o material instrutivo do veículo: PDFs cadastrados, tutoriais com imagens e PDFs do GitHub
+  const matsVeic = !v ? [] : (() => {
+    const doVeic = it => it.veiculo ? it.veiculo === v.id : MARCAS.some(m => m === v.marca && norm(it.aplicacao || "").split(/\s+/).includes(norm(m)));
+    const fixos = materiaisDe(v).map(m => {
+      const veics = m.veiculos.map(porId).filter(Boolean);
+      return { id: m.id, tipo: "pdf", titulo: m.titulo, resumo: m.descricao, restricao: m.restricao, link: m.link,
+        aplicacao: m.marcas ? m.marcas.join(", ").replace(/, ([^,]*)$/, " e $1") : veics.map(x => x.modelo).join(", ") };
+    });
+    const tutoriais = CENTRAL.flatMap(c => c.itens || []).filter(doVeic);
+    const vistos = new Set();
+    return [...tutoriais, ...fixos, ...repoVeic].filter(it => !vistos.has(it.id) && vistos.add(it.id));
+  })();
   useEffect(() => {
     if (!cat) { window.scrollTo(0, 0); return; }
     const t = setTimeout(() => {
@@ -2937,11 +2952,10 @@ function Veiculo({ id, params }) {
     m && { id: "medidas", t: "📏 Medidas" },
     v.tipoCalibracao && { id: "tipo", t: "🔧 Tipo" },
     v.caminhos.length && { id: "caminho", t: "🛠️ Procedimento" },
-    materiaisDe(v).length && { id: "materiais", t: "📄 Material" },
+    matsVeic.length && { id: "materiais", t: "📄 Material" },
     lista.length && { id: "checklist", t: "✅ Checklist" },
     (v.orientacoes.length || regras.length) && { id: "orientacoes", t: "🧭 Orientações" },
     { id: "fonte", t: "📚 Fonte" },
-    repoVeic.length && { id: "pdfs", t: "📄 PDFs" },
     videosDoVeiculo(todosVideos, v).length && { id: "videos", t: "🎬 Vídeos" }
   ].filter(Boolean);
 
@@ -3020,7 +3034,10 @@ function Veiculo({ id, params }) {
         </div>`)}
       </section>`}
 
-      ${materiaisDe(v).length > 0 && html`<${Painel} id="materiais" icone="📄" titulo="Material instrutivo">${materiaisDe(v).map(mt => html`<${MaterialCard} key=${mt.id} m=${mt} compacto=${true} />`)}<//>`}
+      ${matsVeic.length > 0 && html`<section className="panel" id="sec-materiais" aria-labelledby="h-materiais">
+        <div className="panel-head"><h2 id="h-materiais"><span aria-hidden="true">${ic("📄")}</span>Material instrutivo</h2><a className="btn ghost" href="#/materiais">Todos os materiais</a></div>
+        <div className="mi-grid">${matsVeic.map(it => html`<${MaterialItem} key=${it.id} it=${{ ...it, veiculo: it.veiculo === v.id ? null : it.veiculo }} />`)}</div>
+      </section>`}
 
       ${lista.length > 0 && html`<${Painel} id="checklist" icone="✅" titulo="Checklist antes da calibração"><${ChecklistsSeletor} lista=${lista} chave=${v.id} /><//>`}
 
@@ -3047,10 +3064,6 @@ function Veiculo({ id, params }) {
         ${!q.length && QCAR.url && html`<p className="hint"><a href="#/qcar">Como consultar no QCar</a></p>`}
       </section>
 
-      ${repoVeic.length > 0 && html`<section className="panel" id="sec-pdfs" aria-labelledby="h-pdfs">
-        <div className="panel-head"><h2 id="h-pdfs"><span aria-hidden="true">${ic("📄")}</span>PDFs de instalação e instrução</h2><a className="btn ghost" href="#/materiais">Todos os materiais</a></div>
-        <div className="mi-grid">${repoVeic.map(it => html`<${MaterialItem} key=${it.id} it=${it} />`)}</div>
-      </section>`}
       <${VideosVeiculo} v=${v} />
 
       <p className="hint">Dúvidas gerais (equipamento, internet, vidro, estepe) estão em <a href="#/faq">Perguntas frequentes</a>.</p>
@@ -3315,14 +3328,7 @@ const NAV = [
     { t: "QCar / LAUNCH", h: "#/qcar" },
     { t: "Consulta de alvo e medidas", h: "#/qcar?sec=como" },
     { t: "Consulta de módulo ADAS", h: "#/qcar?sec=fluxo" }] },
-  { id: "materiais", t: "Materiais Instrutivos", i: "🧰", itens: [
-    { t: "Todos os materiais", i: "🧰", h: "#/materiais" },
-    { t: "Vidros automotivos", i: "🪟", h: "#/materiais?cat=vidros" },
-    { t: "Faróis", i: "💡", h: "#/materiais?cat=farois" },
-    { t: "Lanternas", i: "🚨", h: "#/materiais?cat=lanternas" },
-    { t: "Retrovisores", i: "🪞", h: "#/materiais?cat=retrovisores" },
-    { t: "Portas", i: "🚪", h: "#/materiais?cat=portas" },
-    { t: "Dicas e PDF de calibração", i: "🎯", h: "#/materiais?cat=calibracao" }] },
+  { id: "materiais", t: "Materiais Instrutivos", i: "🧰", h: "#/materiais" },
   { id: "videos", t: "Vídeos", i: "🎬", h: "#/videos" },
   { id: "laudos", t: "Laudo Scanners", i: "📋", h: "#/laudos" },
   { id: "info", t: "Informações", i: "ℹ️", itens: [
@@ -3815,6 +3821,7 @@ function MaterialItem({ it }) {
     <div className="mi-body">
       <p className="mat-tags"><span className="tag">${ROT_TIPO_MAT[it.tipo] || "Material"}</span>${(it.aplicacao || "") && html`<span className="tag">${it.aplicacao}</span>`}${etapas.length > 0 && html`<span className="tag">${etapas.length} imagens</span>`}</p>
       <h3>${it.titulo}</h3>
+      ${it.restricao && html`<p className="mat-restricao">${ic("⚠️")} ${it.restricao}</p>`}
       ${it.resumo && html`<p>${it.resumo}</p>`}
       ${it.epis && html`<div className="mi-epi"><strong>Tabela de EPI’s obrigatórios para a execução da atividade:</strong>
         <ul className="plainlist">${it.epis.itens.map((x, i) => html`<li key=${i}>${x}</li>`)}</ul>${it.epis.obs && html`<p className="hint">${it.epis.obs}</p>`}</div>`}
@@ -3959,44 +3966,54 @@ function StatusRepo({ st }) {
 }
 
 function MateriaisPagina({ params }) {
-  const cat = params.get("cat") || "";
-  const [q, setQ] = useState("");
+  const [q, setQ] = useState(params.get("q") || "");
+  const [marca, setMarca] = useState(params.get("marca") || "");
+  const [tipo, setTipo] = useState("");
   const repoSt = useRepoPdfs();
-  const repo = repoSt.lista;
-  const nRepo = c => repo.filter(x => x.categoria === c.id).length;
   const ts = tokens(q);
   const casaBusca = txt => !ts.length || ts.every(t => norm(txt).includes(t));
-  const sel = CENTRAL.find(c => c.id === cat);
-  const lista = sel ? [sel] : CENTRAL;
+  // Todos os materiais numa única lista: tutoriais, PDFs cadastrados e PDFs do GitHub
+  const marcaDe = it => it.marca || (it.veiculo && porId(it.veiculo) ? porId(it.veiculo).marca : null) || MARCAS.find(m => norm(it.aplicacao || "").split(/\s+/).includes(norm(m))) || null;
+  const todos = [
+    ...CENTRAL.flatMap(c => c.itens || []).map(it => ({ ...it, marcas: [marcaDe(it)].filter(Boolean) })),
+    ...MATERIAIS.map(m => {
+      const veics = m.veiculos.map(porId).filter(Boolean);
+      return { id: m.id, tipo: "pdf", titulo: m.titulo, resumo: m.descricao, restricao: m.restricao, link: m.link,
+        aplicacao: m.marcas ? m.marcas.join(", ").replace(/, ([^,]*)$/, " e $1") : veics.map(v => v.modelo).join(", ") + (veics[0] ? " (" + veics[0].marca + ")" : ""),
+        marcas: m.marcas || [...new Set(veics.map(v => v.marca))], veiculo: veics.length === 1 ? veics[0].id : null };
+    }),
+    ...repoSt.lista.map(it => ({ ...it, marcas: [it.marca].filter(Boolean) }))
+  ];
+  const marcasDisp = [...new Set(todos.flatMap(it => it.marcas))].sort((a, b) => a.localeCompare(b, "pt-BR"));
+  const lista = todos.filter(it => (!marca || it.marcas.includes(marca)) && (!tipo || (tipo === "pdf" ? it.tipo === "pdf" : it.tipo !== "pdf"))
+    && casaBusca([it.titulo, it.resumo, it.aplicacao, (it.marcas || []).join(" "), (it.passos || []).join(" "), (it.dicas || []).join(" "), (it.etapas || []).map(e => [e.texto, e.seguranca].join(" ")).join(" ")].join(" ")))
+    .sort((a, b) => a.titulo.localeCompare(b.titulo, "pt-BR"));
+  const dicas = DICAS_CALIBRACAO.filter(r => casaBusca(textoRegra.get(r.id)));
+  const nTut = todos.filter(it => it.tipo !== "pdf").length, nPdf = todos.length - nTut;
   return html`<section className="section"><div className="wrap">
-    <${TituloPagina} t="Materiais Instrutivos" sub="Central de conhecimento técnico com imagens, tutoriais, orientações e dicas para instalação e substituição de peças automotivas." />
-    <nav className="mi-cats" aria-label="Categorias">
-      <a className=${"mi-cat" + (!sel ? " on" : "")} href="#/materiais" aria-current=${!sel ? "page" : undefined}><span className="mi-ic" aria-hidden="true">${ic("🧰")}</span><span><strong>Todos</strong><small>${CENTRAL.reduce((n, c) => n + itensDe(c) + nRepo(c), 0)} materiais</small></span></a>
-      ${CENTRAL.map(c => html`<a key=${c.id} className=${"mi-cat" + (sel && sel.id === c.id ? " on" : "")} href=${"#/materiais?cat=" + c.id} aria-current=${sel && sel.id === c.id ? "page" : undefined}>
-        <span className="mi-ic" aria-hidden="true">${ic(c.icone)}</span><span><strong>${c.nome}</strong><small>${itensDe(c) + nRepo(c)} ${itensDe(c) + nRepo(c) === 1 ? "material" : "materiais"}</small></span></a>`)}
-    </nav>
-    <div className="field mi-busca">
-      <label htmlFor="mi-q">Pesquisar nos materiais</label>
-      <input id="mi-q" type="search" inputMode="search" enterKeyHint="search" autoComplete="off" autoCapitalize="off" spellCheck=${false} placeholder="Ex.: para-brisa, farol, retrovisor, calibração" value=${q} onInput=${e => setQ(e.target.value)} />
+    <${TituloPagina} t="Materiais Instrutivos" sub="Central de conhecimento técnico com PDFs, tutoriais com imagens, orientações e dicas para instalação, substituição de peças e calibração." />
+    <div className="stats mi-stats">
+      <div className="stat"><b>${todos.length}</b><span>Materiais</span></div>
+      <div className="stat"><b>${nPdf}</b><span>PDFs</span></div>
+      <div className="stat"><b>${nTut}</b><span>Tutoriais com imagens</span></div>
+    </div>
+    <div className="filters vid-filtros">
+      <div className="field"><label htmlFor="mi-q">Pesquisar nos materiais</label>
+        <input id="mi-q" type="search" inputMode="search" enterKeyHint="search" autoComplete="off" autoCapitalize="off" spellCheck=${false} placeholder="Ex.: para-brisa, farol, Corolla, calibração" value=${q} onInput=${e => setQ(e.target.value)} /></div>
+      <div className="field"><label htmlFor="mi-m">Montadora</label>
+        <select id="mi-m" value=${marca} onChange=${e => setMarca(e.target.value)}><option value="">Todas</option>${marcasDisp.map(m => html`<option key=${m} value=${m}>${m}</option>`)}</select></div>
+      <div className="field"><label htmlFor="mi-t">Tipo</label>
+        <select id="mi-t" value=${tipo} onChange=${e => setTipo(e.target.value)}><option value="">Todos</option><option value="pdf">PDF</option><option value="tutorial">Tutorial com imagens</option></select></div>
     </div>
     <${StatusRepo} st=${repoSt} />
     <p className="hint mi-aviso-pdf">${ic("📄")} Ao clicar em <strong>Baixar PDF</strong>, o arquivo é baixado direto para o seu computador ou celular.</p>
-    ${lista.map(c => {
-      const itens = [...(c.itens || []), ...repo.filter(x => x.categoria === c.id)].filter(it => casaBusca([it.titulo, it.resumo, it.aplicacao, (it.passos || []).join(" "), (it.dicas || []).join(" "), (it.etapas || []).map(e => [e.texto, e.seguranca].join(" ")).join(" ")].join(" ")));
-      const pdfs = c.incluiMateriaisPdf ? MATERIAIS.filter(m => casaBusca([m.titulo, m.descricao, (m.marcas || []).join(" "), m.veiculos.join(" ")].join(" "))) : [];
-      const dicas = c.incluiDicasGerais ? DICAS_CALIBRACAO.filter(r => casaBusca(textoRegra.get(r.id))) : [];
-      const vazio = !itens.length && !pdfs.length && !dicas.length;
-      if (vazio && ts.length && !sel) return null;
-      return html`<section className="mi-sec" key=${c.id} id=${"sec-mat-" + c.id}>
-        <div className="mi-sec-head"><h2><span aria-hidden="true">${ic(c.icone)}</span> ${c.nome}</h2><p className="lead">${c.descricao}</p></div>
-        ${itens.length > 0 && html`<div className="mi-grid">${itens.map(it => html`<${MaterialItem} key=${it.id} it=${it.categoria ? it : { ...it, categoria: c.id }} />`)}</div>`}
-        ${pdfs.length > 0 && html`<div><h3 className="subhead">Manuais em PDF</h3><div className="stack">${pdfs.map(m => html`<${MaterialCard} key=${m.id} m=${m} />`)}</div></div>`}
-        ${dicas.length > 0 && html`<div className="subgroup"><h3 className="subhead">Dicas de calibração (válidas para todas as montadoras)</h3>
-          <div className="faq">${dicas.map(r => html`<details key=${r.id}><summary>${r.pergunta}</summary><div className="ans"><${RegraConteudo} r=${r} /></div></details>`)}</div>
-          <p className="hint" style=${{ marginTop: "10px" }}>Veja também o <a href="#/checklist">checklist pré-calibração</a> e a <a href="#/qcar">consulta QCar</a>.</p></div>`}
-        ${vazio && html`<div className="empty">${ts.length ? "Nenhum material desta categoria corresponde à pesquisa." : "Ainda não há materiais cadastrados nesta categoria. Envie imagens, tutoriais ou orientações à equipe do Suporte Técnico - CEC para incluí-los aqui."}</div>`}
-      </section>`;
-    })}
+    ${lista.length ? html`<div className="mi-grid mi-geral">${lista.map(it => html`<${MaterialItem} key=${it.id} it=${it} />`)}</div>`
+      : html`<div className="empty">${todos.length ? "Nenhum material corresponde à pesquisa ou aos filtros." : "Ainda não há materiais cadastrados."}</div>`}
+    ${!marca && !tipo && dicas.length > 0 && html`<section className="mi-sec">
+      <div className="mi-sec-head"><h2>${ic("🎯")} Dicas gerais de calibração</h2><p className="lead">Orientações da base que valem para todas as montadoras.</p></div>
+      <div className="faq">${dicas.map(r => html`<details key=${r.id}><summary>${r.pergunta}</summary><div className="ans"><${RegraConteudo} r=${r} /></div></details>`)}</div>
+      <p className="hint" style=${{ marginTop: "10px" }}>Veja também o <a href="#/checklist">checklist pré-calibração</a> e a <a href="#/qcar">consulta QCar</a>.</p>
+    </section>`}
   </div></section>`;
 }
 
