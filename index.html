@@ -1266,6 +1266,54 @@ footer{background:var(--c-cinza);border-top:1px solid var(--line);box-shadow:non
 @media (max-width:600px){.sino-painel{position:fixed;top:calc(52px + env(safe-area-inset-top,0px));left:12px;right:12px;width:auto}}
 @media (max-width:380px){.sb-lupa{display:none}}
 
+/* ===== Assistente CEC ===== */
+.assist-fab{position:fixed;right:16px;bottom:calc(72px + env(safe-area-inset-bottom,0px));z-index:70;display:inline-flex;align-items:center;gap:8px;height:52px;min-width:52px;padding:0 16px;border:0;border-radius:999px;background:#3510B5;color:#FFFFFF;font:inherit;font-weight:600;font-size:15px;cursor:pointer;box-shadow:0 10px 26px rgba(16,8,47,.3);transition:background .2s ease}
+.assist-fab .ic{width:22px;height:22px}
+.assist-fab.aberto{padding:0;width:52px;justify-content:center;font-size:18px;background:#10082F}
+.assist-fab .fab-t{display:none}
+.assist-painel{position:fixed;left:8px;right:8px;bottom:calc(132px + env(safe-area-inset-bottom,0px));z-index:70;height:min(68vh,560px);display:flex;flex-direction:column;background:#FFFFFF;color:var(--text);border:1px solid var(--line);border-radius:16px;box-shadow:0 20px 50px rgba(16,8,47,.28);overflow:hidden}
+.as-head{display:flex;align-items:center;gap:10px;padding:12px 14px;background:#10082F;color:#FFFFFF}
+.as-head strong{display:block;font-size:15.5px}
+.as-head small{display:block;font-size:12px;opacity:.8}
+.as-head > span:nth-child(2){flex:1;min-width:0}
+.as-avatar{flex:none;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:#3510B5}
+.as-avatar .ic{width:20px;height:20px}
+.as-fechar{flex:none;width:36px;height:36px;border:0;border-radius:8px;background:rgba(255,255,255,.12);color:#FFFFFF;font-size:16px;cursor:pointer}
+.as-msgs{flex:1;overflow-y:auto;overscroll-behavior:contain;padding:14px;display:flex;flex-direction:column;gap:10px;background:var(--c-cinza,#F5F5F7)}
+.as-msg{max-width:88%;padding:10px 12px;border-radius:14px;font-size:14.5px;line-height:1.45}
+.as-msg p{margin:0 0 6px}.as-msg p:last-child{margin-bottom:0}
+.as-msg.eu{align-self:flex-end;background:#3510B5;color:#FFFFFF;border-bottom-right-radius:4px}
+.as-msg.bot{align-self:flex-start;background:#FFFFFF;border:1px solid var(--line);border-bottom-left-radius:4px}
+.as-veic{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.as-rot{font-size:12.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+.as-texto{white-space:pre-wrap}
+.as-alerta{background:var(--amber-bg);color:var(--amber-ink);border-radius:8px;padding:6px 8px;font-size:13.5px}
+.as-resumo p{margin:0 0 4px}
+.as-regra{margin-bottom:8px}.as-regra p{white-space:pre-wrap}
+.as-nota{font-size:12.5px;color:var(--muted)}
+.as-acoes{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.as-acoes .btn{min-height:36px;padding:6px 14px;font-size:13.5px}
+.as-chips{display:flex;flex-wrap:wrap;gap:6px}
+.as-sug{margin-top:2px}
+.as-chip{min-height:34px;padding:6px 12px;border:1.5px solid color-mix(in srgb,#3510B5 35%,#FFFFFF);border-radius:999px;background:#FFFFFF;color:#3510B5;font:inherit;font-size:13.5px;font-weight:500;cursor:pointer}
+.as-wa{gap:6px}.as-wa .wa-ic{width:18px;height:18px}
+.as-msg .btn.btn-wa:not(.primary):not(.ghost){border-color:#128C7E;color:#075E54;background:#FFFFFF}
+.as-form{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line);background:#FFFFFF}
+.as-form input{flex:1;min-width:0;min-height:44px;border:1px solid var(--line);border-radius:999px;padding:0 14px;font:inherit;font-size:15px}
+.as-form input:focus{outline:none;border-color:#3510B5;box-shadow:0 0 0 3px color-mix(in srgb,#3510B5 18%,transparent)}
+.as-enviar{flex:none;width:44px;height:44px;border:0;border-radius:50%;background:#3510B5;color:#FFFFFF;display:grid;place-items:center;cursor:pointer}
+.as-enviar[disabled]{opacity:.45;cursor:default}
+@media (min-width:601px){
+  .assist-fab{right:24px}
+  .assist-fab .fab-t{display:inline}
+  .assist-painel{left:auto;right:24px;width:390px}
+}
+@media (min-width:1101px){.assist-fab{bottom:28px}.assist-painel{bottom:92px}}
+@media (hover:hover) and (pointer:fine){.assist-fab:hover{background:#2A0C92}.as-chip:hover{background:#3510B5;color:#FFFFFF}}
+
+/* Contatos na resposta do assistente */
+.as-contatos{margin:0 0 6px;padding-left:18px}
+
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
@@ -2040,6 +2088,7 @@ footer{background:var(--c-cinza);border-top:1px solid var(--line);box-shadow:non
      O id precisa ser único: é ele que marca a novidade como lida no navegador.
      ========================================================== */
   const novidades = [
+    { id: "2026-11-03-assistente", data: "2026-11-03", tipo: "novo", titulo: "Assistente Suel", descricao: "Botão no canto da tela para perguntar sobre um veículo ou dúvida. O Assistente Suel responde com as informações cadastradas no portal." },
     { id: "2026-11-03-sino", data: "2026-11-03", tipo: "novo", titulo: "Sino de novidades", descricao: "O cabeçalho ganhou o sino de notificações. Ele mostra o que foi adicionado, alterado ou melhorado em cada atualização do portal.", link: "#/novidades" },
     { id: "2026-11-03-laudos", data: "2026-11-03", tipo: "novo", titulo: "Laudo Scanners dentro do portal", descricao: "Os laudos técnicos dos scanners agora aparecem na própria aba, com pesquisa, filtros por status e ano e botão para baixar o PDF.", link: "#/laudos" },
     { id: "2026-11-03-mais-acessados", data: "2026-11-03", tipo: "novo", titulo: "Mais acessados na página inicial", descricao: "Abaixo da pesquisa, atalhos diretos para as fichas do Fiat Toro, BMW X1, Toyota Yaris, Chevrolet S10 e Jeep Renegade.", link: "#/" },
@@ -4551,6 +4600,111 @@ function NovidadesPagina() {
   </div></section>`;
 }
 
+/* ---------- Assistente CEC (atendente virtual guiada) ----------
+   Responde só com as informações cadastradas no portal, usando a mesma busca da página inicial.
+   Não usa inteligência artificial: não inventa medidas nem procedimentos. */
+const ASSIST_SUGESTOES = ["Medidas do Toro", "Caminho da S10", "Compass é dinâmica?", "Veículo com estepe calibra?"];
+const ROT_CAT_ASSIST = { caminho: "Caminho da calibração", medidas: "Medidas", tipo: "Tipo de calibração", checklist: "Checklist", orientacoes: "Orientações", alertas: "Alertas" };
+function assistResponder(q) {
+  const n = norm(q).trim();
+  if (!n) return null;
+  // Contato do suporte: só quando a pessoa pede explicitamente ("suporte da câmera" não conta)
+  if (/(falar com|atendente|atendimento|whats|zap|telefone|contato|ligar para|numero do suporte|suporte tecnico|chamar o suporte|acionar o suporte|^suporte\??$)/.test(n)) return { tipo: "contato" };
+  if (/^(oi|ola|bom dia|boa tarde|boa noite|e ai|eai|hello|opa)\b/.test(n) && tokens(q).length <= 3) return { tipo: "saudacao" };
+  if (/^(obrigad|valeu|vlw|show|beleza|ok)\b/.test(n)) return { tipo: "agradece" };
+  const r = buscar(q);
+  if (!r.length) return { tipo: "nada" };
+  const genericas = new Set(["calibra", "calibracao", "calibrar", "veiculo", "carro", "camera", "adas"]);
+  const ts = tokens(q).filter(t => !genericas.has(t)), noTitulo = g => ts.filter(t => norm(g.regra.pergunta).includes(t)).length;
+  const veics = r.filter(x => x.v), regras = r.filter(x => x.regra).sort((a, b) => noTitulo(b) - noTitulo(a));
+  // A busca já ordena por relevância: se o melhor resultado é uma orientação geral, responde com ela
+  if (r[0].regra) return { tipo: "regras", itens: regras.slice(0, 2).map(x => x.regra) };
+  if (veics.length && (veics.length === 1 || veics[0].cat)) return { tipo: "veiculo", v: veics[0].v, cat: veics[0].cat };
+  if (veics.length > 1) return { tipo: "lista", itens: veics.slice(0, 6).map(x => x.v) };
+  return { tipo: "regras", itens: regras.slice(0, 2).map(x => x.regra) };
+}
+function BotoesSuporte() {
+  return html`<div className="as-acoes">${CONTATOS.map(c => html`<a key=${c.numero} className="btn btn-wa as-wa" href=${linkWhatsApp(c.whatsapp)} target="_blank" rel="noopener noreferrer">${ICONE_WHATSAPP}<span>WhatsApp ${c.publico}</span></a>`)}</div>`;
+}
+function RespostaAssist({ r, perguntar }) {
+  if (r.tipo === "saudacao") return html`<p>Olá! Eu sou o Assistente Suel, do Suporte Técnico - CEC. Pergunte sobre um veículo, como <em>medidas do Toro</em>, ou uma dúvida, como <em>veículo com estepe calibra?</em></p>`;
+  if (r.tipo === "contato") return html`<div><p>Este é o contato do suporte técnico ADAS, pelo WhatsApp. Tenha em mãos a marca, o modelo, o ano do veículo e o que já foi verificado.</p>
+    <ul className="as-contatos">${CONTATOS.map(c => html`<li key=${c.numero}><strong>${c.publico}:</strong> ${c.numero}</li>`)}</ul><${BotoesSuporte} /></div>`;
+  if (r.tipo === "agradece") return html`<p>Por nada! Se precisar, é só perguntar de novo.</p>`;
+  if (r.tipo === "nada") return html`<div><p>Não encontrei essa informação no portal. Tente com a marca e o modelo do veículo, por exemplo <em>caminho da calibração do Corolla</em>. Você também pode perguntar assim:</p>
+    <div className="as-chips">${ASSIST_SUGESTOES.map(s => html`<button type="button" key=${s} className="as-chip" onClick=${() => perguntar(s)}>${s}</button>`)}</div></div>`;
+  if (r.tipo === "lista") return html`<div><p>Encontrei estes veículos. Qual deles?</p>
+    <div className="as-chips">${r.itens.map(v => html`<button type="button" key=${v.id} className="as-chip" onClick=${() => perguntar(`${v.marca} ${v.modelo}`)}>${nomeVeiculo(v)}</button>`)}</div></div>`;
+  if (r.tipo === "regras") return html`<div>${r.itens.map(g => html`<div className="as-regra" key=${g.id}><strong>${g.pergunta}</strong><p>${g.resposta}</p></div>`)}
+    <p className="as-nota">Orientação válida para ${g0(r.itens).marcas.includes("TODOS") ? "todas as montadoras" : g0(r.itens).marcas.join(", ")}.</p></div>`;
+  const v = r.v, cat = r.cat;
+  const texto = cat ? textoResposta(v, cat) : "";
+  const cats = ["caminho", "medidas", "checklist"].filter(c => c !== cat && temCat(v, c));
+  return html`<div>
+    <p className="as-veic"><strong>${nomeVeiculo(v)}</strong> <${TipoBadge} v=${v} /></p>
+    ${alertasDe(v).filter(a => a.nivel !== "info").map((a, i) => html`<p className="as-alerta" key=${i}>${ic(a.nivel === "critico" ? "⛔" : "⚠️")} ${a.texto}</p>`)}
+    ${cat && texto ? html`<div><p className="as-rot">${ROT_CAT_ASSIST[cat] || "Informação"}</p><p className="as-texto">${texto}</p>
+        ${["caminho", "medidas"].includes(cat) && html`<${CopyButton} texto=${`${nomeVeiculo(v)}\n${texto}`} rotulo="Copiar" sucesso="Copiado" />`}</div>`
+      : html`<div className="as-resumo">
+        <p><strong>Tipo:</strong> ${v.tipoCalibracao ? DADOS.tiposCalibracao[v.tipoCalibracao].nome : "Não informado."}</p>
+        ${v.alvoRef && html`<p><strong>Alvo:</strong> ${v.alvoRef.codigo}</p>`}
+        ${v.medidas && !soDinamica(v) && html`<p><strong>Medidas:</strong> altura ${v.medidas.altura}; ${v.medidas.etapas.map(e => `${e.rotulo.toLowerCase()} ${e.distancia} ${e.referencia}`).join("; ")}</p>`}
+        ${v.caminhos.length > 0 && html`<p><strong>Caminho:</strong> ${v.caminhos.length} ${v.caminhos.length === 1 ? "registro" : "registros"} na ficha.</p>`}
+      </div>`}
+    <div className="as-acoes">
+      <a className="btn primary" href=${"#/veiculo/" + v.id + (cat ? "?cat=" + cat : "")}>Abrir ficha</a>
+      ${cats.map(c => html`<button type="button" key=${c} className="as-chip" onClick=${() => perguntar(`${ROT_CAT_ASSIST[c]} ${v.marca} ${v.modelo}`)}>${ROT_CAT_ASSIST[c]}</button>`)}
+    </div>
+  </div>`;
+}
+const g0 = l => l[0] || { marcas: [] };
+let ASSIST_MSGS = [{ de: "bot", r: { tipo: "saudacao" } }];
+function Assistente() {
+  const [aberto, setAberto] = useState(false);
+  const [msgs, setMsgs] = useState(ASSIST_MSGS);
+  const [txt, setTxt] = useState("");
+  const fim = useRef(null), campo = useRef(null);
+  useEffect(() => { ASSIST_MSGS = msgs; if (aberto && fim.current) fim.current.scrollIntoView({ block: "end" }); }, [msgs, aberto]);
+  useEffect(() => {
+    if (!aberto) return;
+    setTimeout(() => campo.current && campo.current.focus(), 50);
+    const esc = e => { if (e.key === "Escape") setAberto(false); };
+    document.addEventListener("keydown", esc);
+    return () => document.removeEventListener("keydown", esc);
+  }, [aberto]);
+  const perguntar = q => {
+    const t = String(q || "").trim(); if (!t) return;
+    setMsgs(m => [...m, { de: "eu", t }, { de: "bot", r: assistResponder(t) || { tipo: "nada" } }]);
+    setTxt("");
+  };
+  const fecharNoCelular = e => { if (e.target.closest("a") && window.innerWidth < 601) setAberto(false); };
+  return html`<div className="assist">
+    ${aberto && html`<section className="assist-painel" role="dialog" aria-label="Assistente Suel, do Suporte Técnico - CEC">
+      <header className="as-head">
+        <span className="as-avatar" aria-hidden="true"><${Ic} n="chat" /></span>
+        <span><strong>Assistente Suel</strong><small>Suporte Técnico - CEC</small></span>
+        <button type="button" className="as-fechar" aria-label="Fechar o Assistente Suel" onClick=${() => setAberto(false)}>✕</button>
+      </header>
+      <div className="as-msgs" aria-live="polite" onClick=${fecharNoCelular}>
+        ${msgs.map((m, i) => m.de === "eu"
+          ? html`<div className="as-msg eu" key=${i}><p>${m.t}</p></div>`
+          : html`<div className="as-msg bot" key=${i}><${RespostaAssist} r=${m.r} perguntar=${perguntar} /></div>`)}
+        ${msgs.length <= 1 && html`<div className="as-chips as-sug">${ASSIST_SUGESTOES.map(s => html`<button type="button" key=${s} className="as-chip" onClick=${() => perguntar(s)}>${s}</button>`)}</div>`}
+        <div ref=${fim}></div>
+      </div>
+      <form className="as-form" onSubmit=${e => { e.preventDefault(); perguntar(txt); }}>
+        <label className="sr" htmlFor="as-campo">Sua pergunta</label>
+        <input id="as-campo" ref=${campo} type="text" autoComplete="off" enterKeyHint="send" placeholder="Pergunte sobre um veículo ou dúvida…" value=${txt} onInput=${e => setTxt(e.target.value)} />
+        <button type="submit" className="as-enviar" aria-label="Enviar" disabled=${!txt.trim()}>
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M3.4 20.4 21 12 3.4 3.6 3.4 10l12.6 2-12.6 2z"/></svg></button>
+      </form>
+    </section>`}
+    <button type="button" className=${"assist-fab" + (aberto ? " aberto" : "")} aria-expanded=${aberto} aria-label=${aberto ? "Fechar o Assistente Suel" : "Falar com o Assistente Suel, do Suporte Técnico - CEC"} onClick=${() => setAberto(!aberto)}>
+      ${aberto ? html`<span aria-hidden="true">✕</span>` : html`<${Ic} n="chat" /><span className="fab-t">Assistente Suel</span>`}
+    </button>
+  </div>`;
+}
+
 /* ---------- Estrutura ---------- */
 const LOGO_GRUPO = "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iQ2FtYWRhXzIiIGRhdGEtbmFtZT0iQ2FtYWRhIDIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDYwOS4xNSA2Ny45MiI+CiAgPGRlZnM+CiAgICA8c3R5bGU+CiAgICAgIC5jbHMtMSB7CiAgICAgICAgZmlsbDogIzIwMjFkNDsKICAgICAgfQogICAgPC9zdHlsZT4KICA8L2RlZnM+CiAgPGcgaWQ9IkNhbWFkYV8xLTIiIGRhdGEtbmFtZT0iQ2FtYWRhIDEiPgogICAgPGc+CiAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTIyNy45NSwxLjI3bDIwLjA2LDY1Ljk0Yy4xMy40Mi41MS43Ljk0LjdoMTQuMjdjLjY2LDAsMS4xNC0uNjQuOTQtMS4yN0wyNDQuMTIuN2MtLjEzLS40Mi0uNTEtLjctLjk0LS43aC0xNC4yOGMtLjY2LDAtMS4xNC42NC0uOTQsMS4yN1oiLz4KICAgICAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMjAzLjAzLDU0Ljk1aDE0LjkyYy4zOSwwLC43NS0uMjMuOTEtLjU5bDExLjcxLTI3LjAzYy4yOC0uNjUtLjItMS4zOC0uOTEtMS4zOGgtMTQuOTJjLS4zOSwwLS43NS4yMy0uOTEuNTlsLTExLjcxLDI3LjAzYy0uMjguNjUuMiwxLjM4LjkxLDEuMzhaIi8+CiAgICAgIDxwYXRoIGQ9Ik03NS40LDI1LjNjMC02LjY1LTQuNjUtMTEuNjMtMTMuNjMtMTEuNjNoLTExLjgzYy0uNTQsMC0uOTkuNDQtLjk5Ljk5djIwLjQ5aC0yNC44N2MtLjU0LDAtLjk5LjQ0LS45OS45OWgwYzAsLjU0LjQ0Ljk5Ljk5Ljk5aDE1LjA2Yy0xLjExLDkuMTctOC40MiwxNS44Mi0xNy45NCwxNS44Mi0xMC44MiwwLTE5LjA0LTguMjgtMTkuMDQtMTguOTlTMTAuMjIsMTUuMDIsMjAuODgsMTUuMDJjNy45OCwwLDE0LjQ5LDQuNjksMTcuMzMsMTEuNTUuMTYuMzcuNTEuNjIuOTIuNjJoLjEyYy43LDAsMS4xOS0uNzEuOTItMS4zNi0zLjI0LTcuNzgtMTAuNTMtMTIuODctMTkuMjktMTIuODdDOS4wMywxMi45NywwLDIyLjIyLDAsMzMuOTZzOS4xOSwyMC45OSwyMS4yLDIwLjk5YzEwLjcxLDAsMTguODgtNy42LDIwLjAzLTE3LjgyaDcuNzF2MTYuMTNjMCwuNTQuNDQuOTkuOTkuOTloLjE0Yy41NCwwLC45OS0uNDQuOTktLjk5di0xNi4xNmgxMC43N2MuOTcsMCwxLjg0LS4wNSwyLjctLjE2bDcuNTgsMTYuNzNjLjE2LjM1LjUxLjU4LjkuNThoLjExYy43MiwwLDEuMTktLjc0LjktMS4zOWwtNy4zOC0xNi4zNWM1Ljc5LTEuNTEsOC43Ni01Ljg0LDguNzYtMTEuMlpNNjEuNzcsMzUuMTVoLTEwLjcxVjE1LjY3aDEwLjc3YzguMDYsMCwxMS40MSw0LjQzLDExLjQxLDkuNjNzLTMuMzUsOS44NS0xMS40Nyw5Ljg1WiIvPgogICAgICA8cGF0aCBkPSJNMTA3Ljc1LDM5Ljg1YzAsNy45NS00LjI3LDEzLjA5LTExLjk2LDEzLjA5cy0xMS45Ni01LjE0LTExLjk2LTEzLjA5VjE0LjY2YzAtLjU0LS40NC0uOTktLjk5LS45OWgtLjEzYy0uNTQsMC0uOTkuNDQtLjk5Ljk5djI1LjAzYzAsOS41Miw1LjM1LDE1LjI1LDE0LjA2LDE1LjI1czE0LjAxLTUuNzMsMTQuMDEtMTUuMjVWMTQuNjZjMC0uNTQtLjQ0LS45OS0uOTktLjk5aC0uMDhjLS41NCwwLS45OS40NC0uOTkuOTl2MjUuMloiLz4KICAgICAgPHBhdGggZD0iTTEzMS45OCwxMy42N2gtMTEuNTFjLS41NCwwLS45OS40NC0uOTkuOTl2MzguNmMwLC41NC40NC45OS45OS45OWguMDhjLjU0LDAsLjk5LS40NC45OS0uOTl2LTE1Ljg5aDEwLjQ5YzkuMDMsMCwxMy42My01LjE0LDEzLjYzLTExLjk1cy00LjY1LTExLjc0LTEzLjY5LTExLjc0Wk0xMzIuMDQsMzUuMzZoLTEwLjQ5VjE1LjY3aDEwLjU1YzguMDYsMCwxMS40MSw0LjQ5LDExLjQxLDkuNzRzLTMuMzUsOS45NS0xMS40Nyw5Ljk1WiIvPgogICAgICA8cGF0aCBkPSJNMTcxLjA5LDEyLjk3Yy0xMi4wMSwwLTIxLjE1LDkuMjUtMjEuMTUsMjAuOTlzOS4xNCwyMC45OSwyMS4xNSwyMC45OSwyMS4yLTkuMTksMjEuMi0yMC45OS05LjA5LTIwLjk5LTIxLjItMjAuOTlaTTE3MS4wOSw1Mi45NGMtMTAuNzcsMC0xOC45OS04LjI4LTE4Ljk5LTE4Ljk5czguMjItMTguOTMsMTguOTktMTguOTMsMTkuMDQsOC4yMiwxOS4wNCwxOC45My04LjIyLDE4Ljk5LTE5LjA0LDE4Ljk5WiIvPgogICAgICA8cGF0aCBkPSJNMzQxLjY0LDM5LjA1YzAsNC45Ni0yLjc1LDguMzYtNy42LDguMzZzLTcuNjUtMy40LTcuNjUtOC4zNlYxNC43MWMwLS41NC0uNDQtLjk5LS45OS0uOTloLTYuMzJjLS41NCwwLS45OS40NC0uOTkuOTl2MjMuODVjMCwxMC4xMyw2LjI1LDE2LjM4LDE1Ljk1LDE2LjM4czE1Ljk1LTYuMjUsMTUuOTUtMTYuMzhWMTQuNzFjMC0uNTQtLjQ0LS45OS0uOTktLjk5aC02LjM4Yy0uNTQsMC0uOTkuNDQtLjk5Ljk5djI0LjM0WiIvPgogICAgICA8cGF0aCBkPSJNMzU1LjEsMjAuNjJoNy41M3YzMi41M2MwLC41NC40NC45OS45OS45OWg2LjM4Yy41NCwwLC45OS0uNDQuOTktLjk5VjIwLjYyaDcuNTNjLjU0LDAsLjk5LS40NC45OS0uOTl2LTQuOTJjMC0uNTQtLjQ0LS45OS0uOTktLjk5aC0yMy40MWMtLjU0LDAtLjk5LjQ0LS45OS45OXY0LjkyYzAsLjU0LjQ0Ljk5Ljk5Ljk5WiIvPgogICAgICA8cGF0aCBkPSJNNDAyLjQ3LDEyLjk3Yy0xMi4zOSwwLTIxLjM5LDktMjEuMzksMjAuOTFzOSwyMS4wNywyMS4zOSwyMS4wNywyMS4zOS05LjExLDIxLjM5LTIxLjA3LTguOTQtMjAuOTEtMjEuMzktMjAuOTFaTTQwMi40Nyw0Ny4wOGMtNy42LDAtMTIuOTMtNS42LTEyLjkzLTEzLjFzNS4zNC0xMy4yLDEyLjkzLTEzLjIsMTIuODgsNS42MSwxMi44OCwxMy4yLTUuMjgsMTMuMS0xMi44OCwxMy4xWiIvPgogICAgICA8cGF0aCBkPSJNNDUwLjgxLDMzLjU3djQuMTFjMCwuNTQuNDQuOTkuOTkuOTloMTAuMzhjLTEuNzIsNS4yMy02LjQxLDguODQtMTIuNjEsOC44NC03Ljc2LDAtMTMuMS01LjgyLTEzLjEtMTMuNTNzNS4yOC0xMy40NywxMi44Mi0xMy40N2M1LjE1LDAsOS4zMiwyLjg2LDExLjE5LDYuODMuMTYuMzQuNTEuNTUuODguNTVoNi44OWMuNjgsMCwxLjE2LS42Ny45My0xLjMxLTMuMDItOC40NC0xMC44OC0xMy42MS0yMC4wNi0xMy42MS0xMi4yOSwwLTIxLjEyLDkuMDUtMjEuMTIsMjAuOTZzOC45NSwyMS4wMSwyMS4zOSwyMS4wMWMxMS42NCwwLDIwLjg1LTguOTQsMjAuODUtMjAuNTgsMC0uMTUtLjAxLS40OS0uMDMtLjg0LS4wMy0uNTItLjQ2LS45NC0uOTktLjk0aC0xNy40NWMtLjU0LDAtLjk5LjQ0LS45OS45OVoiLz4KICAgICAgPHBhdGggZD0iTTQ4My40NywxMy43MmgtNi4zOGMtLjU0LDAtLjk5LjQ0LS45OS45OXYzOS40M2gxNy4zM2MuNTQsMCwuOTktLjQ0Ljk5LS45OXYtNC45MmMwLS41NC0uNDQtLjk5LS45OS0uOTloLTguOThWMTQuNzFjMC0uNTQtLjQ0LS45OS0uOTktLjk5WiIvPgogICAgICA8cGF0aCBkPSJNNTYwLjU3LDI4LjkyaC0zLjY3Yy0zLjIzLDAtNC43OS0xLjgzLTQuNzktMy45OSwwLTIuMzcsMS41Ni00LjIsNC43OS00LjJoMTQuN2MuNTQsMCwuOTktLjQ0Ljk5LS45OXYtNS4wM2MwLS41NC0uNDQtLjk5LS45OS0uOTloLTE2LjE1Yy03LjI4LDAtMTIuMTgsNC40Ny0xMi4xOCwxMS4wNXM0LjksMTAuODksMTEuOTYsMTAuODloMy44OGM1LjQ0LDAsNy4wMSwyLjc1LDcuMDEsNS42MSwwLDMuMDItMi4wNSw1Ljg3LTcuMDYsNS44N2gtMTQuNjRjLS41NCwwLS45OS40NC0uOTkuOTl2NS4wM2MwLC41NC40NC45OS45OS45OWgxNS45OWM5LjY1LDAsMTQuMzMtNS44MiwxNC4zMy0xMi43N3MtNC42My0xMi40NS0xNC4xNy0xMi40NVoiLz4KICAgICAgPHBhdGggZD0iTTU5NC45NywyOC45MmgtMy42NmMtMy4yMywwLTQuOC0xLjgzLTQuOC0zLjk5LDAtMi4zNywxLjU2LTQuMiw0LjgtNC4yaDE0LjY5Yy41NCwwLC45OS0uNDQuOTktLjk5di01LjAzYzAtLjU0LS40NC0uOTktLjk5LS45OWgtMTYuMTVjLTcuMjcsMC0xMi4xOCw0LjQ3LTEyLjE4LDExLjA1czQuOTEsMTAuODksMTEuOTYsMTAuODloMy44OGM1LjQ0LDAsNy4wMSwyLjc1LDcuMDEsNS42MSwwLDMuMDItMi4wNSw1Ljg3LTcuMDYsNS44N2gtMTQuNjRjLS41NCwwLS45OS40NC0uOTkuOTl2NS4wM2MwLC41NC40NC45OS45OS45OWgxNS45OWM5LjY1LDAsMTQuMzMtNS44MiwxNC4zMy0xMi43N3MtNC42My0xMi40NS0xNC4xNy0xMi40NVoiLz4KICAgICAgPHBhdGggZD0iTTI5OS41NywxMy43MmgtMTAuMDFjLS40MiwwLS43OS4yNi0uOTMuNjZsLTEzLjYxLDM4LjQ0Yy0uMjMuNjQuMjUsMS4zMi45MywxLjMyaDYuMjZjLjQyLDAsLjc5LS4yNi45My0uNjZsMy40My05LjY5aDE4LjExbDMuNDMsOS42OWMuMTQuMzkuNTEuNjYuOTMuNjZoNi4yNmMuNjgsMCwxLjE2LS42Ny45My0xLjMybC0xMy42MS0zOC40NGMtLjE0LS4zOS0uNTEtLjY2LS45My0uNjZoLTIuMTFaTTI4OC44NywzNy4yN2w1LjcxLTE2LjExaDIuMDhsNS43MSwxNi4xMWgtMTMuNDlaIi8+CiAgICAgIDxwYXRoIGQ9Ik01MjIuNywxMy43MmgtMTAuMDFjLS40MiwwLS43OS4yNi0uOTMuNjZsLTEzLjYxLDM4LjQ0Yy0uMjMuNjQuMjUsMS4zMi45MywxLjMyaDYuMjZjLjQyLDAsLjc5LS4yNi45My0uNjZsMy40My05LjY5aDE4LjExbDMuNDMsOS42OWMuMTQuMzkuNTEuNjYuOTMuNjZoNi4yNmMuNjgsMCwxLjE2LS42Ny45My0xLjMybC0xMy42MS0zOC40NGMtLjE0LS4zOS0uNTEtLjY2LS45My0uNjZoLTIuMTFaTTUxMiwzNy4yN2w1LjcxLTE2LjExaDIuMDhsNS43MSwxNi4xMWgtMTMuNDlaIi8+CiAgICA8L2c+CiAgPC9nPgo8L3N2Zz4=";
 const MENU = [
@@ -4645,6 +4799,7 @@ function App({ sessao, onSair }) {
       ${MENU.map(m => { const on = m.k === "inicio" ? secao === "" : caminhoAtual === m.k; return html`<a key=${m.h} href=${m.h} aria-current=${on ? "page" : undefined}><span aria-hidden="true">${ic(m.i)}</span><span>${m.m}</span></a>`; })}
     </nav>
     <${Toast} />
+    <${Assistente} />
   <//>`;
 }
 
