@@ -1,0 +1,10 @@
+[
+  {
+    "id": "2026-11-10-exemplo",
+    "data": "2026-11-10",
+    "tipo": "novo",
+    "titulo": "Título curto da novidade",
+    "descricao": "O que foi adicionado, alterado ou melhorado nesta atualização.",
+    "link": "#/materiais"
+  }
+]
