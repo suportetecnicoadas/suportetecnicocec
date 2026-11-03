@@ -1275,7 +1275,8 @@ footer{background:var(--c-cinza);border-top:1px solid var(--line);box-shadow:non
     medidas: o.medidas || null,
     checklists: o.checklists,
     alertas: o.alertas || [], orientacoes: o.orientacoes || [],
-    observacoes: o.obs || null
+    observacoes: o.obs || null,
+    apelidos: o.apelidos || [], soMaterial: !!o.soMaterial
   });
   const critico = texto => ({ nivel: "critico", icone: "⛔", titulo: "ATENÇÃO", texto });
   const atencao = texto => ({ nivel: "atencao", icone: "⚠️", titulo: "ATENÇÃO", texto });
@@ -1397,6 +1398,22 @@ footer{background:var(--c-cinza);border-top:1px solid var(--line);box-shadow:non
 
     // ---------------- CITROËN ----------------
     V("Citroën", "C4", { anos: ">=2016", sistema: CF, tipo: "dinamica" /* informado pela equipe Autoglass */, caminho: "DIAGNOSTICO LOCAL > CITROEN > MANULMENTE SELECIONAR > C4 > C4(C41) > CAMERA DE VÍDEO MULTIFUNÇÕES (CVM) > FUNÇÃO ESPECIAL > PACK DESEMPANAGEM > REGULAÇÕES > APRESNIZAGEM DINÂMICA DA CAMERA DE VÍDEO MULTIFUNCIONAL" }),
+
+    // ---------------- Fichas criadas para reunir materiais instrutivos do GitHub ----------------
+    // Sem informações de calibração ADAS cadastradas (tipo, caminho, alvo e medidas ficam como "Não informado.").
+    V("Volkswagen", "Saveiro", { soMaterial: true }),
+    V("Audi", "A4", { soMaterial: true }),
+    V("Audi", "A6", { soMaterial: true }),
+    V("BMW", "Série 1", { soMaterial: true }),
+    V("BMW", "X5", { soMaterial: true }),
+    V("Chery", "Celer", { soMaterial: true }),
+    V("Chery", "Tiggo", { soMaterial: true, apelidos: ["Tyggo"] }),
+    V("Jeep", "Grand Cherokee", { soMaterial: true }),
+    V("Chrysler", "PT Cruiser", { soMaterial: true }),
+    V("Citroën", "Aircross", { soMaterial: true, apelidos: ["Air Cross", "Air"] }),
+    V("Citroën", "C3", { soMaterial: true }),
+    V("Citroën", "DS5", { soMaterial: true }),
+    V("Citroën", "Xsara Picasso", { soMaterial: true, apelidos: ["Picasso"] }),
 
     // ---------------- DODGE ----------------
     V("Dodge", "RAM 1500", { anos: "MAIOR OU IGUAL A 2014", sistema: "Câmera", tipo: "dinamica", caminho: P.dasm,
@@ -2941,6 +2958,19 @@ function Veiculo({ id, params }) {
     <div className="stack">${alertas.map((a, i) => html`<${Alerta} key=${i} a=${a} />`)}</div>
     <${Feedback} key=${v.id} contexto=${v.id} />
   </div>`;
+  if (v.soMaterial) return html`<div className="wrap narrow">
+    <header className="vhead">
+      <div className="brandname">${v.marca}</div>
+      <h1>${v.modelo}</h1>
+    </header>
+    <div className="alert info" role="note"><p>${ic("ℹ️")} Ficha criada para reunir o material instrutivo deste veículo. Ainda não há informações de calibração ADAS cadastradas (tipo, caminho, alvo e medidas).</p></div>
+    ${matsVeic.length > 0 && html`<section className="panel" id="sec-materiais" aria-labelledby="h-materiais">
+      <div className="panel-head"><h2 id="h-materiais"><span aria-hidden="true">${ic("📄")}</span>Material instrutivo</h2><a className="btn ghost" href="#/materiais">Todos os materiais</a></div>
+      <div className="mi-grid">${matsVeic.map(it => html`<${MaterialItem} key=${it.id} it=${{ ...it, naFicha: it.veiculo === v.id }} />`)}</div>
+    </section>`}
+    <${VideosVeiculo} v=${v} />
+    <${Feedback} key=${v.id} contexto=${v.id} />
+  </div>`;
   const lista = checklistsDe(v);
   const regras = regrasDe(v);
   const anos = formatarAnos(v.anos);
@@ -3041,7 +3071,7 @@ function Veiculo({ id, params }) {
 
       ${matsVeic.length > 0 && html`<section className="panel" id="sec-materiais" aria-labelledby="h-materiais">
         <div className="panel-head"><h2 id="h-materiais"><span aria-hidden="true">${ic("📄")}</span>Material instrutivo</h2><a className="btn ghost" href="#/materiais">Todos os materiais</a></div>
-        <div className="mi-grid">${matsVeic.map(it => html`<${MaterialItem} key=${it.id} it=${{ ...it, veiculo: it.veiculo === v.id ? null : it.veiculo }} />`)}</div>
+        <div className="mi-grid">${matsVeic.map(it => html`<${MaterialItem} key=${it.id} it=${{ ...it, naFicha: it.veiculo === v.id }} />`)}</div>
       </section>`}
 
       <${VideosVeiculo} v=${v} />
@@ -3723,7 +3753,7 @@ async function gerarThumb(url) {
   } finally { pdf.destroy(); }
 }
 function CapaPdf({ titulo, categoria }) {
-  const cat = CENTRAL.find(c => c.id === categoria) || {};
+  const cat = { nome: "Material instrutivo", icone: "📄" };
   const ls = linhasTitulo(titulo, 24, 3);
   const f = "Poppins, system-ui, sans-serif";
   return html`<svg className="pdf-capa" viewBox="0 0 320 240" aria-hidden="true" focusable="false">
@@ -3805,7 +3835,7 @@ function MaterialItem({ it }) {
   const primeira = etapas.find(e => IMGS[e.img]);
   const capa = (it.imagens || [])[0] ? it.imagens[0].src : it.capa && IMGS[it.capa] ? IMGS[it.capa] : primeira ? IMGS[primeira.img] : null;
   const imgs = it.imagens || [];
-  const veic = it.veiculo && porId(it.veiculo);
+  const veic = !it.naFicha && it.veiculo && porId(it.veiculo);
   return html`<article className=${"mi-card" + (aberto && etapas.length ? " aberto" : "")}>
     ${capa ? html`<${ImagemAlvo} a=${{ codigo: it.titulo, legenda: "", imagem: capa }} />` : it.tipo === "pdf" && it.link ? html`<${PdfThumb} link=${it.link} titulo=${it.titulo} categoria=${it.categoria} />` : null}
     <div className="mi-body">
@@ -3870,11 +3900,15 @@ function classificarArquivo(nome) {
   const categoria = (CAT_PALAVRAS.find(([, re]) => re.test(base)) || [null])[0];
   let marca = MARCAS.find(m => { const mt = norm(m).split(/\s+/); return mt.every(tem) || tem(norm(m).replace(/\s+/g, "")); }) || null;
   if (!marca) { const k = toks.find(t => MARCA_APELIDOS[t]); if (k) marca = MARCA_APELIDOS[k]; }
-  const candidatos = VEICULOS.filter(v => !v.generico && (!marca || v.marca === marca)).filter(v => {
-    const mt = norm(v.modelo).replace(/[\/()]/g, " ").split(/\s+/).filter(Boolean);
-    return mt.length && mt.every(tem);
-  }).sort((a, b) => norm(b.modelo).length - norm(a.modelo).length);
+  const nomeCasa = n => { const mt = norm(n).replace(/[\/()\-]/g, " ").split(/\s+/).filter(Boolean); return mt.length && mt.every(tem); };
+  const candidatos = VEICULOS.filter(v => !v.generico && (!marca || v.marca === marca)).filter(v => nomeCasa(v.modelo) || (v.apelidos || []).some(nomeCasa))
+    .sort((a, b) => (nomeCasa(b.modelo) - nomeCasa(a.modelo)) || norm(b.modelo).length - norm(a.modelo).length);
   let veiculo = candidatos[0] || null;
+  // Nome com duas montadoras (ex.: "Chrysler Jeep Grand Cherokee"): procura o modelo em todas
+  if (!veiculo && marca) {
+    const outros = VEICULOS.filter(v => !v.generico && (nomeCasa(v.modelo) || (v.apelidos || []).some(nomeCasa)) && toks.some(t => norm(v.marca).split(/\s+/).includes(t)));
+    if (outros.length === 1) veiculo = outros[0];
+  }
   if (veiculo && !marca && candidatos.filter(c => norm(c.modelo) === norm(veiculo.modelo)).length > 1) veiculo = null;
   if (veiculo) marca = veiculo.marca;
   const anos = (base.match(/\b(19|20)\d{2}\b/g) || []);
