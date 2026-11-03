@@ -3839,7 +3839,7 @@ function MaterialItem({ it }) {
    publicada no Claude), o portal usa apenas os PDFs já cadastrados. */
 const REPO_PDFS = {
   repos: [{ dono: "suportetecnicoadas", nome: "PDF-s-F12" }, { dono: "suportetecnicoadas", nome: "suportetecnicocec" }],
-  cache: "cec_repo_pdfs_v3", horas: 3
+  cache: "cec_repo_pdfs_v4", horas: 3
 };
 const REPO_STATE = { lista: [], pronto: false, status: null };
 const repoSubs = new Set();
@@ -3896,41 +3896,61 @@ function montarRepo(arquivos, meta) {
       aplicacao, marca: marca || null, veiculo: veic ? veic.id : null, link: a.html_url };
   });
 }
+// Lê um repositório: lista os PDFs (inclusive em pastas) e o materiais.json
+async function lerRepo(dono, nome) {
+  let r = null;
+  for (const ref of ["HEAD", "main", "master"]) {
+    r = await fetch(`https://api.github.com/repos/${dono}/${nome}/git/trees/${ref}?recursive=1`, { headers: { Accept: "application/vnd.github+json" } });
+    if (r.ok) break;
+    if (r.status === 403 || r.status === 429) throw new Error("limite de consultas do GitHub atingido");
+  }
+  if (!r || !r.ok) throw new Error(r && r.status === 404 ? "repositório não encontrado ou privado" : "erro " + (r ? r.status : "de conexão"));
+  const j = await r.json();
+  const arquivos = [], meta = [];
+  for (const it of j.tree || []) {
+    if (it.type !== "blob") continue;
+    const arq = String(it.path).split("/").pop();
+    if (arq.toLowerCase() === "materiais.json") {
+      try { const rm = await fetch(`https://raw.githubusercontent.com/${dono}/${nome}/HEAD/${caminhoUrl(it.path)}`); if (rm.ok) { const m = await rm.json(); if (Array.isArray(m)) meta.push(...m); } } catch (e) {}
+      continue;
+    }
+    if (/\.pdf$/i.test(arq)) arquivos.push({ name: arq, sha: it.sha, html_url: `https://github.com/${dono}/${nome}/blob/HEAD/${caminhoUrl(it.path)}` });
+  }
+  return { arquivos, meta };
+}
 function iniciarRepo() {
   if (repoIniciado) return;
   repoIniciado = true;
+  const ULTIMA = "cec_repo_ultima_"; // última leitura bem-sucedida de cada repositório (sem prazo)
   const fim = (lista, status) => { REPO_STATE.lista = lista; REPO_STATE.pronto = true; REPO_STATE.status = status; repoSubs.forEach(f => f({ ...REPO_STATE })); };
-  try { const c = JSON.parse(localStorage.getItem(REPO_PDFS.cache) || "null"); if (c && c.t > Date.now() - REPO_PDFS.horas * 3600e3) { const l = montarRepo(c.arquivos, c.meta); return fim(l, { ok: true, n: c.arquivos.filter(a => /\.pdf$/i.test(a.name)).length, novos: l.length, quando: c.t }); } } catch (e) {}
+  try { const c = JSON.parse(localStorage.getItem(REPO_PDFS.cache) || "null"); if (c && c.t > Date.now() - REPO_PDFS.horas * 3600e3) { const l = montarRepo(c.arquivos, c.meta); return fim(l, { ok: true, n: c.arquivos.length, novos: l.length, quando: c.quando || c.t, avisos: c.avisos || [] }); } } catch (e) {}
   (async () => {
-    // Lê todos os PDFs dos repositórios, inclusive dentro de pastas, e junta sem repetir nomes
-    const arquivos = [], meta = [], vistos = new Set(), falhas = [];
-    let algum = false;
+    const arquivos = [], meta = [], vistos = new Set(), avisos = [];
+    let algum = false, falhou = false;
     for (const { dono, nome } of REPO_PDFS.repos) {
+      let res = null;
       try {
-        const r = await fetch(`https://api.github.com/repos/${dono}/${nome}/git/trees/HEAD?recursive=1`, { headers: { Accept: "application/vnd.github+json" } });
-        if (!r.ok) { falhas.push(`${nome}: ${r.status === 404 ? "repositório não encontrado ou privado" : r.status === 403 ? "limite de consultas do GitHub atingido" : "erro " + r.status}`); continue; }
-        const j = await r.json();
-        algum = true;
-        for (const it of j.tree || []) {
-          if (it.type !== "blob") continue;
-          const arq = String(it.path).split("/").pop();
-          const k = arq.toLowerCase();
-          if (k === "materiais.json") {
-            try { const rm = await fetch(`https://raw.githubusercontent.com/${dono}/${nome}/HEAD/${caminhoUrl(it.path)}`); if (rm.ok) { const m = await rm.json(); if (Array.isArray(m)) meta.push(...m); } } catch (e) { falhas.push(`${nome}: materiais.json com formato inválido`); }
-            continue;
-          }
-          if (!/\.pdf$/i.test(arq) || vistos.has(k)) continue;
-          vistos.add(k);
-          arquivos.push({ name: arq, sha: it.sha, html_url: `https://github.com/${dono}/${nome}/blob/HEAD/${caminhoUrl(it.path)}` });
-        }
-      } catch (e) { falhas.push(`${nome}: sem acesso ao GitHub`); }
+        res = await lerRepo(dono, nome);
+        try { localStorage.setItem(ULTIMA + nome, JSON.stringify({ t: Date.now(), ...res })); } catch (e) {}
+      } catch (e) {
+        falhou = true;
+        // Se a consulta falhar, usa a última lista salva desse repositório: os PDFs não somem
+        try { const u = JSON.parse(localStorage.getItem(ULTIMA + nome) || "null"); if (u) { res = u; avisos.push(`${nome}: ${e.message}; mostrando a última lista salva`); } else avisos.push(`${nome}: ${e.message}`); } catch (x) { avisos.push(`${nome}: ${e.message}`); }
+      }
+      if (!res) continue;
+      algum = true;
+      res.arquivos.forEach(a => { const k = a.name.toLowerCase(); if (!vistos.has(k)) { vistos.add(k); arquivos.push(a); } });
+      meta.push(...(res.meta || []));
     }
-    if (!algum) throw new Error(falhas.join(" · ") || "sem acesso ao GitHub");
-    try { localStorage.setItem(REPO_PDFS.cache, JSON.stringify({ t: Date.now(), arquivos, meta })); } catch (e) {}
+    if (!algum) throw new Error(avisos.join(" · ") || "sem acesso ao GitHub");
+    // Com falha, tenta de novo em 10 minutos; sem falha, guarda por 3 horas
+    const t = falhou ? Date.now() - REPO_PDFS.horas * 3600e3 + 10 * 60e3 : Date.now();
+    try { localStorage.setItem(REPO_PDFS.cache, JSON.stringify({ t, quando: Date.now(), arquivos, meta, avisos })); } catch (e) {}
     const l = montarRepo(arquivos, meta);
-    fim(l, { ok: true, n: arquivos.length, novos: l.length, quando: Date.now(), avisos: falhas });
+    fim(l, { ok: true, n: arquivos.length, novos: l.length, quando: Date.now(), avisos });
   })().catch(e => fim([], { ok: false, erro: String(e && e.message || e) }));
 }
+
 function recarregarRepo() {
   try { localStorage.removeItem(REPO_PDFS.cache); } catch (e) {}
   repoIniciado = false; REPO_STATE.pronto = false; REPO_STATE.status = null;
