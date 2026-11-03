@@ -1188,6 +1188,11 @@ footer{background:var(--c-cinza);border-top:1px solid var(--line);box-shadow:non
 .mi-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;max-width:760px;margin-bottom:16px}
 .mi-stats .stat{padding:12px 14px}
 .mi-stats .stat b{font-size:26px}
+/* PDFs do GitHub sem ficha de veículo */
+.mi-semficha{margin:0 0 12px}
+.mi-semficha-acoes{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.tag.tag-semficha{background:var(--amber-bg,#FFF4D4);color:var(--amber-ink,#5E4100);border-color:transparent}
+
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
@@ -3804,7 +3809,7 @@ function MaterialItem({ it }) {
   return html`<article className=${"mi-card" + (aberto && etapas.length ? " aberto" : "")}>
     ${capa ? html`<${ImagemAlvo} a=${{ codigo: it.titulo, legenda: "", imagem: capa }} />` : it.tipo === "pdf" && it.link ? html`<${PdfThumb} link=${it.link} titulo=${it.titulo} categoria=${it.categoria} />` : null}
     <div className="mi-body">
-      <p className="mat-tags"><span className="tag">${ROT_TIPO_MAT[it.tipo] || "Material"}</span>${(it.aplicacao || "") && html`<span className="tag">${it.aplicacao}</span>`}${etapas.length > 0 && html`<span className="tag">${etapas.length} imagens</span>`}</p>
+      <p className="mat-tags"><span className="tag">${ROT_TIPO_MAT[it.tipo] || "Material"}</span>${String(it.id).startsWith("repo-") && !it.veiculo && html`<span className="tag tag-semficha">Sem ficha de veículo</span>`}${(it.aplicacao || "") && html`<span className="tag">${it.aplicacao}</span>`}${etapas.length > 0 && html`<span className="tag">${etapas.length} imagens</span>`}</p>
       <h3>${it.titulo}</h3>
       ${it.restricao && html`<p className="mat-restricao">${ic("⚠️")} ${it.restricao}</p>`}
       ${it.resumo && html`<p>${it.resumo}</p>`}
@@ -3977,6 +3982,7 @@ function MateriaisPagina({ params }) {
   const [q, setQ] = useState(params.get("q") || "");
   const [marca, setMarca] = useState(params.get("marca") || "");
   const [tipo, setTipo] = useState("");
+  const [semFicha, setSemFicha] = useState(params.get("ficha") === "nao");
   const repoSt = useRepoPdfs();
   const ts = tokens(q);
   const casaBusca = txt => !ts.length || ts.every(t => norm(txt).includes(t));
@@ -3993,7 +3999,7 @@ function MateriaisPagina({ params }) {
     ...repoSt.lista.map(it => ({ ...it, marcas: [it.marca].filter(Boolean) }))
   ];
   const marcasDisp = [...new Set(todos.flatMap(it => it.marcas))].sort((a, b) => a.localeCompare(b, "pt-BR"));
-  const lista = todos.filter(it => (!marca || it.marcas.includes(marca)) && (!tipo || (tipo === "pdf" ? it.tipo === "pdf" : it.tipo !== "pdf"))
+  const lista = todos.filter(it => (!marca || it.marcas.includes(marca)) && (!tipo || (tipo === "pdf" ? it.tipo === "pdf" : it.tipo !== "pdf")) && (!semFicha || (String(it.id).startsWith("repo-") && !it.veiculo))
     && casaBusca([it.titulo, it.resumo, it.aplicacao, (it.marcas || []).join(" "), (it.passos || []).join(" "), (it.dicas || []).join(" "), (it.etapas || []).map(e => [e.texto, e.seguranca].join(" ")).join(" ")].join(" ")))
     .sort((a, b) => a.titulo.localeCompare(b.titulo, "pt-BR"));
   const dicas = DICAS_CALIBRACAO.filter(r => casaBusca(textoRegra.get(r.id)));
@@ -4014,6 +4020,19 @@ function MateriaisPagina({ params }) {
         <select id="mi-t" value=${tipo} onChange=${e => setTipo(e.target.value)}><option value="">Todos</option><option value="pdf">PDF</option><option value="tutorial">Tutorial com imagens</option></select></div>
     </div>
     <${StatusRepo} st=${repoSt} />
+    ${(() => {
+      // PDFs do GitHub cujo nome não corresponde a nenhum veículo cadastrado
+      const sem = repoSt.lista.filter(it => !it.veiculo);
+      if (!sem.length) return null;
+      const nomes = sem.map(it => it.titulo + (it.marca ? ` (montadora reconhecida: ${it.marca})` : "")).join("\n");
+      return html`<div className="alert atencao mi-semficha" role="note">
+        <p>${ic("⚠️")} <strong>${sem.length} ${sem.length === 1 ? "PDF do GitHub não está ligado" : "PDFs do GitHub não estão ligados"} a nenhuma ficha de veículo.</strong> O nome do arquivo não corresponde a um modelo cadastrado.</p>
+        <div className="mi-semficha-acoes">
+          <button type="button" className="btn" aria-pressed=${semFicha} onClick=${() => setSemFicha(!semFicha)}>${semFicha ? "Mostrar todos os materiais" : "Ver esses PDFs"}</button>
+          <${CopyButton} texto=${nomes} rotulo="Copiar lista" sucesso="Lista copiada" />
+        </div>
+      </div>`;
+    })()}
     <p className="hint mi-aviso-pdf">${ic("📄")} Ao clicar em <strong>Baixar PDF</strong>, o arquivo é baixado direto para o seu computador ou celular.</p>
     ${lista.length ? html`<div className="mi-grid mi-geral">${lista.map(it => html`<${MaterialItem} key=${it.id} it=${it} />`)}</div>`
       : html`<div className="empty">${todos.length ? "Nenhum material corresponde à pesquisa ou aos filtros." : "Ainda não há materiais cadastrados."}</div>`}
