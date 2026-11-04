@@ -1419,6 +1419,13 @@ footer{background:var(--c-cinza);border-top:1px solid var(--line);box-shadow:non
 .perfil-chips{display:flex;flex-wrap:wrap;gap:8px;margin:0}
 @media (min-width:801px){.perfil-grid{grid-template-columns:1fr 1fr}}
 
+/* Foto do perfil */
+.perfil-foto{flex:none;display:flex;flex-direction:column;align-items:center;gap:4px;width:110px;text-align:center}
+.perfil-foto .perfil-avatar{width:96px;height:96px;font-size:32px}
+img.perfil-avatar{object-fit:cover;border:3px solid #FFFFFF;box-shadow:0 0 0 2px #3510B5}
+.sb-foto{width:28px;height:28px;border-radius:50%;object-fit:cover;border:2px solid #FFFFFF}
+@media (max-width:480px){.perfil-id{flex-direction:column;align-items:center;text-align:center}.perfil-dados{align-items:center}.perfil-dados .nov-ler{align-self:center}}
+
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
@@ -2774,6 +2781,23 @@ function descreverChecklist(chave) {
     : { titulo: "Checklist geral", sub: rot ? "Calibração " + rot.toLowerCase() : "", link: "#/checklist" };
 }
 const quandoBR = t => { const d = new Date(t); return isNaN(d) ? "" : `${d.toLocaleDateString("pt-BR")} às ${d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`; };
+// Foto do perfil: recorta o centro em quadrado e reduz para 256 px (cerca de 20–40 KB)
+async function fotoQuadrada(arquivo) {
+  if (!/^image\//.test(arquivo.type)) throw new Error("Escolha uma imagem (foto).");
+  const url = URL.createObjectURL(arquivo);
+  try {
+    const img = await new Promise((ok, erro) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => erro(new Error("Não foi possível ler a imagem.")); i.src = url; });
+    const lado = Math.min(img.naturalWidth, img.naturalHeight);
+    const cv = document.createElement("canvas"); cv.width = cv.height = 256;
+    cv.getContext("2d").drawImage(img, (img.naturalWidth - lado) / 2, (img.naturalHeight - lado) / 2, lado, lado, 0, 0, 256, 256);
+    return cv.toDataURL("image/jpeg", 0.82);
+  } finally { URL.revokeObjectURL(url); }
+}
+function BotaoPerfil() {
+  usePerfil();
+  const foto = lerLS(PERFIL.dados, {}).foto;
+  return html`<a className="sb-ic sb-perfil" href="#/perfil" title="Meu perfil" aria-label="Meu perfil">${foto ? html`<img className="sb-foto" src=${foto} alt="" width="28" height="28" />` : html`<${Ic} n="user" />`}</a>`;
+}
 
 function FavBotao({ id }) {
   usePerfil();
@@ -2793,13 +2817,25 @@ function PerfilPagina({ sessao }) {
   const buscas = lerLS(PERFIL.buscas, []);
   const checks = Object.entries(lerLS(PERFIL.checks, {})).map(([chave, c]) => ({ chave, ...c, ...descreverChecklist(chave) })).sort((a, b) => b.quando - a.quando);
   const iniciais = (dados.nome || sessao.email).split(/[\s@.]+/).filter(Boolean).slice(0, 2).map(p => p[0].toUpperCase()).join("");
-  const salvar = e => { e.preventDefault(); gravarLS(PERFIL.dados, { nome: form.nome.trim(), loja: form.loja.trim(), tipo: form.tipo }); setEditando(false); toast("Dados do perfil salvos."); };
+  const salvar = e => { e.preventDefault(); gravarLS(PERFIL.dados, { ...lerLS(PERFIL.dados, {}), nome: form.nome.trim(), loja: form.loja.trim(), tipo: form.tipo }); setEditando(false); toast("Dados do perfil salvos."); };
+  const fotoRef = useRef(null);
+  const escolherFoto = async e => {
+    const f = e.target.files && e.target.files[0]; e.target.value = "";
+    if (!f) return;
+    try { const foto = await fotoQuadrada(f); gravarLS(PERFIL.dados, { ...lerLS(PERFIL.dados, {}), foto }); toast("Foto do perfil atualizada."); }
+    catch (x) { toast(x.message || "Não foi possível usar esta imagem."); }
+  };
   const descartarCheck = chave => { try { localStorage.removeItem("cec_check_" + chave); } catch (e) {} const idx = lerLS(PERFIL.checks, {}); delete idx[chave]; gravarLS(PERFIL.checks, idx); };
   return html`<section className="section"><div className="wrap">
     <${TituloPagina} t="Meu perfil" sub="Seus dados, fichas favoritas, últimos acessos, pesquisas e checklists em andamento." />
 
     <div className="panel perfil-id">
-      <span className="perfil-avatar" aria-hidden="true">${iniciais}</span>
+      <div className="perfil-foto">
+        ${dados.foto ? html`<img className="perfil-avatar" src=${dados.foto} alt=${"Foto de " + (dados.nome || "perfil")} width="96" height="96" />` : html`<span className="perfil-avatar" aria-hidden="true">${iniciais}</span>`}
+        <input ref=${fotoRef} className="sr" type="file" accept="image/*" onChange=${escolherFoto} tabIndex="-1" />
+        <button type="button" className="nov-ler" onClick=${() => fotoRef.current && fotoRef.current.click()}>${dados.foto ? "Trocar foto" : "Adicionar foto"}</button>
+        ${dados.foto && html`<button type="button" className="nov-ler" onClick=${() => { gravarLS(PERFIL.dados, { ...lerLS(PERFIL.dados, {}), foto: "" }); toast("Foto removida."); }}>Remover foto</button>`}
+      </div>
       ${editando ? html`<form className="perfil-form" onSubmit=${salvar}>
           <div className="field"><label htmlFor="pf-nome">Nome</label><input id="pf-nome" value=${form.nome} onInput=${e => setForm({ ...form, nome: e.target.value })} placeholder="Seu nome" autoComplete="name" /></div>
           <div className="field"><label htmlFor="pf-loja">Loja</label><input id="pf-loja" value=${form.loja} onInput=${e => setForm({ ...form, loja: e.target.value })} placeholder="Nome ou cidade da loja" /></div>
@@ -5278,7 +5314,7 @@ function App({ sessao, onSair }) {
           <${Sino} />
           <${BotaoChat} />
           <a className="sb-ic" href="#/contato" aria-label="Contato / Suporte ADAS" title="Suporte ADAS"><${Ic} n="question" /></a>
-          <a className="sb-ic sb-perfil" href="#/perfil" title="Meu perfil" aria-label="Meu perfil"><${Ic} n="user" /></a>
+          <${BotaoPerfil} />
           <button type="button" className="sb-ic sb-sair" onClick=${onSair} title=${"Sair (" + sessao.email + ")"} aria-label=${"Sair da conta " + sessao.email}><${Ic} n="logout" /><span>Sair</span></button>
           <button type="button" className="hamb" aria-expanded=${menuAberto} aria-controls="menu-mobile" onClick=${() => setMenuAberto(!menuAberto)}>
             <span aria-hidden="true">${ic(menuAberto ? "✕" : "☰")}</span> <span className="hamb-t">${menuAberto ? "Fechar" : "Menu"}</span>
