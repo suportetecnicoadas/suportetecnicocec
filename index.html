@@ -1426,6 +1426,7 @@ img.perfil-avatar{object-fit:cover;border:3px solid #FFFFFF;box-shadow:0 0 0 2px
 .sb-foto{width:28px;height:28px;border-radius:50%;object-fit:cover;border:2px solid #FFFFFF}
 @media (max-width:480px){.perfil-id{flex-direction:column;align-items:center;text-align:center}.perfil-dados{align-items:center}.perfil-dados .nov-ler{align-self:center}}
 
+@media (min-width:801px){.perfil-grid > .panel:last-child:nth-child(odd){grid-column:1/-1}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
@@ -2200,7 +2201,7 @@ img.perfil-avatar{object-fit:cover;border:3px solid #FFFFFF;box-shadow:0 0 0 2px
      O id precisa ser único: é ele que marca a novidade como lida no navegador.
      ========================================================== */
   const novidades = [
-    { id: "2026-11-04-perfil", data: "2026-11-04", tipo: "novo", titulo: "Meu perfil", descricao: "Novo perfil com seus dados, fichas favoritas, últimos acessos, pesquisas recentes e checklists em andamento. Use o botão Favoritar na ficha do veículo e acesse pelo ícone de pessoa no topo.", link: "#/perfil" },
+    { id: "2026-11-04-perfil", data: "2026-11-04", tipo: "novo", titulo: "Meu perfil", descricao: "Novo perfil com seus dados, foto, fichas favoritas, últimos acessos e pesquisas recentes. Use o botão Favoritar na ficha do veículo e acesse pelo ícone de pessoa no topo.", link: "#/perfil" },
     { id: "2026-11-04-chat", data: "2026-11-04", tipo: "novo", titulo: "Chat CEC (em preparação)", descricao: "Chat geral entre lojas próprias e credenciadas, com fotos tiradas pelo celular, busca no histórico e avisos de novas mensagens. Por enquanto funciona em modo de demonstração, até a ligação com o servidor da Autoglass.", link: "#/chat" },
     { id: "2026-11-03-assistente", data: "2026-11-03", tipo: "novo", titulo: "Assistente Zayon", descricao: "Botão no canto da tela para perguntar sobre um veículo ou dúvida. O Assistente Zayon responde com as informações cadastradas no portal." },
     { id: "2026-11-03-sino", data: "2026-11-03", tipo: "novo", titulo: "Sino de novidades", descricao: "O cabeçalho ganhou o sino de notificações. Ele mostra o que foi adicionado, alterado ou melhorado em cada atualização do portal.", link: "#/novidades" },
@@ -2815,7 +2816,6 @@ function PerfilPagina({ sessao }) {
   const favs = lerLS(PERFIL.fav, []).map(porId).filter(Boolean);
   const hist = lerLS(PERFIL.hist, []).map(h => ({ ...h, v: porId(h.id) })).filter(h => h.v);
   const buscas = lerLS(PERFIL.buscas, []);
-  const checks = Object.entries(lerLS(PERFIL.checks, {})).map(([chave, c]) => ({ chave, ...c, ...descreverChecklist(chave) })).sort((a, b) => b.quando - a.quando);
   const iniciais = (dados.nome || sessao.email).split(/[\s@.]+/).filter(Boolean).slice(0, 2).map(p => p[0].toUpperCase()).join("");
   const salvar = e => { e.preventDefault(); gravarLS(PERFIL.dados, { ...lerLS(PERFIL.dados, {}), nome: form.nome.trim(), loja: form.loja.trim(), tipo: form.tipo }); setEditando(false); toast("Dados do perfil salvos."); };
   const fotoRef = useRef(null);
@@ -2825,9 +2825,8 @@ function PerfilPagina({ sessao }) {
     try { const foto = await fotoQuadrada(f); gravarLS(PERFIL.dados, { ...lerLS(PERFIL.dados, {}), foto }); toast("Foto do perfil atualizada."); }
     catch (x) { toast(x.message || "Não foi possível usar esta imagem."); }
   };
-  const descartarCheck = chave => { try { localStorage.removeItem("cec_check_" + chave); } catch (e) {} const idx = lerLS(PERFIL.checks, {}); delete idx[chave]; gravarLS(PERFIL.checks, idx); };
   return html`<section className="section"><div className="wrap">
-    <${TituloPagina} t="Meu perfil" sub="Seus dados, fichas favoritas, últimos acessos, pesquisas e checklists em andamento." />
+    <${TituloPagina} t="Meu perfil" sub="Seus dados, fichas favoritas, últimos acessos e pesquisas recentes." />
 
     <div className="panel perfil-id">
       <div className="perfil-foto">
@@ -2869,11 +2868,6 @@ function PerfilPagina({ sessao }) {
           : html`<p className="hint">O que você pesquisar na página inicial ou na Consulta aparece aqui.</p>`}
       </section>
 
-      <section className="panel" aria-labelledby="pf-check"><div className="panel-head"><h2 id="pf-check">${ic("✅")} Checklists em andamento</h2></div>
-        ${checks.length ? html`<ul className="perfil-lista">${checks.map(c => html`<li key=${c.chave}><a href=${c.link}><strong>${c.titulo}</strong></a><span className="hint">${c.sub} · ${c.feitos} de ${c.total} itens · ${quandoBR(c.quando)}</span>
-            <span className="perfil-mini-acoes"><a className="nov-ler" href=${c.link}>Continuar</a><button type="button" className="nov-ler" onClick=${() => descartarCheck(c.chave)}>Descartar</button></span></li>`)}</ul>`
-          : html`<p className="hint">Checklists que você começar e não terminar ficam aqui para continuar depois.</p>`}
-      </section>
     </div>
     <p className="hint" style=${{ marginTop: "12px" }}>Seus dados de perfil ficam salvos neste navegador. Em outro celular ou computador, o perfil começa vazio.</p>
   </div></section>`;
@@ -3425,6 +3419,7 @@ function Veiculo({ id, params }) {
         <span>Sistema: <strong>${v.sistema || "Não informado."}</strong></span>
       </div>
       <div className="vmeta"><${TipoBadge} v=${v} />${!v.generico && html`<${Completude} v=${v} />`}</div>
+      ${!v.generico && html`<${FavBotao} id=${v.id} />`}
     </header>
 
     ${alertas.length > 0 && html`<div style=${{ marginBottom: "16px" }} id="sec-alertas">${alertas.map((a, i) => html`<${Alerta} key=${i} a=${a} />`)}</div>`}
