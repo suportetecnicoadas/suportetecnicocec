@@ -5313,7 +5313,6 @@ function App({ sessao, onSair }) {
           <a className="sb-ic sb-lupa" href="#/consulta" aria-label="Pesquisar veículo"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" d="M10.5 4a6.5 6.5 0 1 1 0 13 6.5 6.5 0 0 1 0-13zM15.5 15.5 20 20"/></svg></a>
           <${Sino} />
           <${BotaoChat} />
-          <a className="sb-ic" href="#/contato" aria-label="Contato / Suporte ADAS" title="Suporte ADAS"><${Ic} n="question" /></a>
           <${BotaoPerfil} />
           <button type="button" className="sb-ic sb-sair" onClick=${onSair} title=${"Sair (" + sessao.email + ")"} aria-label=${"Sair da conta " + sessao.email}><${Ic} n="logout" /><span>Sair</span></button>
           <button type="button" className="hamb" aria-expanded=${menuAberto} aria-controls="menu-mobile" onClick=${() => setMenuAberto(!menuAberto)}>
