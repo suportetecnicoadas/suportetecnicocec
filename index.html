@@ -5354,7 +5354,7 @@ function App({ sessao, onSair }) {
       <img className="footlogo" src=${LOGO_GRUPO} alt="Grupo Autoglass" width="609" height="68" />
       <p><strong>Importante:</strong> As informações deste portal são destinadas à consulta técnica e devem ser utilizadas conforme os procedimentos e orientações vigentes da Autoglass. Em caso de divergência ou situação não contemplada, acione o suporte técnico ADAS.</p>
       ${secao !== "" && html`<p className="footcontato"><a href="#/contato"><strong>Suporte Técnico ADAS</strong></a>, acionamento via WhatsApp: credenciados <span>+55 0800 025 6301</span> | loja Autoglass <span>+55 27 3202-4646</span></p>`}
-      <p>Suporte Técnico - CEC, Grupo Autoglass, versão MVP. <a href="#/sobre">Sobre o projeto</a></p>
+      <p>Suporte Técnico - CEC, Grupo Autoglass. <a href="#/sobre">Sobre o projeto</a></p>
     </div></footer>
     <nav className="bottomnav" aria-label="Acesso rápido">
       ${MENU.map(m => { const on = m.k === "inicio" ? secao === "" : caminhoAtual === m.k; return html`<a key=${m.h} href=${m.h} aria-current=${on ? "page" : undefined}><span aria-hidden="true">${ic(m.i)}</span><span>${m.m}</span></a>`; })}
