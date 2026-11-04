@@ -910,7 +910,7 @@ h1,h2,h3{color:var(--heading)}
 @media (max-width:1100px){.jump{top:calc(52px + env(safe-area-inset-top,0px))}[id^="sec-"]{scroll-margin-top:110px}}
 .mmenu{max-height:calc(100dvh - 52px - env(safe-area-inset-top,0px))}
 @media (hover:hover) and (pointer:fine){.sb-ic:hover{background:rgba(255,255,255,.12)}}
-@media (max-width:380px){.sb-acoes .sb-ic:not(.sb-lupa):not(.sb-sino){display:none}.sb-nome{font-size:14px}.sb-logo{padding:5px 8px}.suitebar .wrap{gap:8px}}
+@media (max-width:380px){.sb-acoes .sb-ic:not(.sb-lupa):not(.sb-sino):not(.sb-chat){display:none}.sb-nome{font-size:14px}.sb-logo{padding:5px 8px}.suitebar .wrap{gap:8px}}
 
 /* ---------- Menu de navegação branco (estilo SharePoint) ---------- */
 @media (min-width:1101px){
@@ -1040,7 +1040,7 @@ footer{background:var(--c-cinza);border-top:1px solid var(--line);box-shadow:non
 /* Nome mais longo no cabeçalho do celular: quebra em duas linhas e o atalho de suporte fica no menu */
 @media (max-width:600px){
   .sb-nome{white-space:normal;max-width:118px;font-size:13px;line-height:1.15}
-  .sb-acoes .sb-ic:not(.sb-lupa):not(.sb-sino){display:none}
+  .sb-acoes .sb-ic:not(.sb-lupa):not(.sb-sino):not(.sb-chat){display:none}
   .sb-logo img{height:11px}
 }
 @media (max-width:380px){.sb-logo img{height:10px}.sb-nome{max-width:108px;font-size:12.5px}}
@@ -1264,7 +1264,7 @@ footer{background:var(--c-cinza);border-top:1px solid var(--line);box-shadow:non
 .nov-grupo{margin-bottom:18px}
 .nov-grupo .nov-lista{background:#FFFFFF;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
 @media (max-width:600px){.sino-painel{position:fixed;top:calc(52px + env(safe-area-inset-top,0px));left:12px;right:12px;width:auto}}
-@media (max-width:380px){.sb-lupa{display:none}}
+@media (max-width:420px){.sb-lupa{display:none}}
 
 /* ===== Assistente CEC ===== */
 .assist-fab{position:fixed;right:16px;bottom:calc(72px + env(safe-area-inset-bottom,0px));z-index:70;display:inline-flex;align-items:center;gap:8px;height:52px;min-width:52px;padding:0 16px;border:0;border-radius:999px;background:#3510B5;color:#FFFFFF;font:inherit;font-weight:600;font-size:15px;cursor:pointer;box-shadow:0 10px 26px rgba(16,8,47,.3);transition:background .2s ease}
@@ -1313,6 +1313,111 @@ footer{background:var(--c-cinza);border-top:1px solid var(--line);box-shadow:non
 
 /* Contatos na resposta do assistente */
 .as-contatos{margin:0 0 6px;padding-left:18px}
+
+/* ===== Chat CEC ===== */
+.sb-chat{position:relative}
+.op-selo{display:inline-block;font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;white-space:nowrap;vertical-align:middle}
+.op-propria{background:color-mix(in srgb,#3510B5 12%,#FFFFFF);color:#3510B5}
+.op-credenciada{background:var(--amber-bg);color:var(--amber-ink)}
+.chat-login{max-width:420px}
+.chat{display:grid;grid-template-columns:minmax(0,1fr);border:1px solid var(--line);border-radius:var(--radius);background:#FFFFFF;overflow:hidden;height:min(72vh,680px);min-height:420px}
+.chat-lado{display:flex;flex-direction:column;min-height:0;min-width:0;border-right:1px solid var(--line)}
+.chat.com-conversa .chat-lado{display:none}
+.chat:not(.com-conversa) .chat-main{display:none}
+.chat-eu{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line);background:var(--c-cinza,#F5F5F7)}
+.chat-eu > span:first-child{flex:1;min-width:0}
+.chat-eu strong,.chat-eu small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chat-eu small{color:var(--muted);font-size:12.5px}
+.chat-ferr{display:flex;gap:8px;padding:10px 12px}
+.chat-ferr input{flex:1;min-width:0;min-height:40px;border:1px solid var(--line);border-radius:999px;padding:0 12px;font:inherit;font-size:14.5px}
+.chat-ferr .btn{min-height:40px;padding:6px 14px;font-size:14px}
+.chat-notif{margin:0 12px 8px;text-align:left}
+.chat-lista{list-style:none;margin:0;padding:0;overflow-y:auto;flex:1}
+.chat-lista button{position:relative;display:grid;grid-template-columns:1fr auto;gap:2px 8px;width:100%;padding:10px 12px;border:0;border-bottom:1px solid var(--line);background:#FFFFFF;text-align:left;font:inherit;cursor:pointer}
+.chat-lista button[aria-current="true"]{background:color-mix(in srgb,#3510B5 7%,#FFFFFF)}
+.cl-nome{font-weight:600;color:var(--c-roxo-escuro,#10082F);display:inline-flex;align-items:center;gap:6px;min-width:0}
+.cl-ult{grid-column:1;color:var(--muted);font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cl-hora{grid-column:2;grid-row:1;font-size:12px;color:var(--muted)}
+.cl-badge{grid-column:2;grid-row:2;justify-self:end;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:#E5484D;color:#FFFFFF;font-size:11.5px;font-weight:700;display:grid;place-items:center}
+.cl-vazio{padding:12px}
+.chat-main{display:flex;flex-direction:column;min-height:0;min-width:0}
+.chat-vazio{flex:1;display:grid;place-items:center;color:var(--muted);padding:20px;text-align:center}
+.chat-topo{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line)}
+.chat-topo small{display:block;color:var(--muted);font-size:12.5px}
+.chat-voltar{width:36px;height:36px;border:0;border-radius:8px;background:var(--c-cinza,#F5F5F7);font-size:22px;line-height:1;cursor:pointer}
+.chat-msgs{flex:1;overflow-y:auto;overscroll-behavior:contain;padding:12px;display:flex;flex-direction:column;gap:8px;background:var(--c-cinza,#F5F5F7)}
+.chat-dia{align-self:center;font-size:12px;color:var(--muted);background:#FFFFFF;border:1px solid var(--line);border-radius:999px;padding:2px 10px}
+.cm{max-width:min(78%,520px);align-self:flex-start;background:#FFFFFF;border:1px solid var(--line);border-radius:14px;border-bottom-left-radius:4px;padding:8px 10px}
+.cm.minha{align-self:flex-end;background:#3510B5;color:#FFFFFF;border-color:#3510B5;border-bottom-left-radius:14px;border-bottom-right-radius:4px}
+.cm.oficial{border:2px solid var(--ok,#1F7A3D)}
+.cm p{margin:4px 0 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.cm-autor{font-size:12.5px;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.cm-autor strong{color:var(--c-roxo-escuro,#10082F)}
+.cm-oficial{font-size:12px;font-weight:700;color:var(--ok,#1F7A3D);margin-top:2px}
+.cm-img{display:block;margin-top:6px;padding:0;border:0;background:none;cursor:zoom-in}
+.cm-img img{display:block;max-width:100%;width:260px;height:auto;border-radius:10px}
+.cm-rodape{display:flex;gap:10px;justify-content:flex-end;margin-top:4px;font-size:11.5px;opacity:.85}
+.cm.minha .nov-ler{color:#FFFFFF}
+.chat-previa{display:flex;align-items:center;gap:10px;padding:8px 12px;border-top:1px solid var(--line)}
+.chat-previa img{width:64px;height:64px;object-fit:cover;border-radius:8px}
+.chat-form{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line)}
+.chat-form input[type=text]{flex:1;min-width:0;min-height:44px;border:1px solid var(--line);border-radius:999px;padding:0 14px;font:inherit;font-size:15px}
+.chat-foto{flex:none;width:44px;height:44px;border:1px solid var(--line);border-radius:50%;background:#FFFFFF;color:#3510B5;display:grid;place-items:center;cursor:pointer}
+.chat-foto .ic{width:22px;height:22px}
+.chat-modal{position:fixed;inset:0;z-index:90;background:rgba(16,8,47,.6);display:grid;place-items:center;padding:16px}
+.chat-modal-box{width:min(460px,100%);max-height:86vh;overflow:auto;background:#FFFFFF;border-radius:16px;padding:16px}
+.cm-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.cm-x{background:var(--c-cinza,#F5F5F7);color:var(--text)}
+.cm-lista{list-style:none;margin:0 0 10px;padding:0;max-height:40vh;overflow:auto}
+.cm-lista label{display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid var(--line);cursor:pointer}
+.cm-lista label > span{flex:1;min-width:0}
+.cm-lista small{display:block;color:var(--muted)}
+.cm-acoes{display:flex;justify-content:flex-end;gap:8px}
+.chat-zoom{max-width:96vw;max-height:88vh;border-radius:10px}
+@media (min-width:801px){
+  .chat{grid-template-columns:320px minmax(0,1fr)}
+  .chat.com-conversa .chat-lado{display:flex}
+  .chat:not(.com-conversa) .chat-main{display:flex}
+  .chat-voltar{display:none}
+}
+@media (max-width:380px){.sb-chat{display:none!important}}
+
+/* Chat geral único */
+.chat.chat-unico{grid-template-columns:minmax(0,1fr)!important}
+.chat-unico .chat-main{display:flex!important}
+.chat-topo{justify-content:space-between;flex-wrap:wrap}
+.chat-topo-t strong{display:inline-flex;align-items:center;gap:6px}
+.chat-eu-mini{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;flex-wrap:wrap}
+.chat-unico .chat-ferr{border-bottom:1px solid var(--line)}
+.chat-busca-info{margin:0;padding:6px 12px;font-size:13.5px;color:var(--muted);border-bottom:1px solid var(--line)}
+
+/* ===== Perfil do usuário ===== */
+.fav-btn{display:inline-flex;align-items:center;gap:6px;margin-top:8px;min-height:36px;padding:6px 14px;border:1.5px solid color-mix(in srgb,#3510B5 35%,#FFFFFF);border-radius:999px;background:#FFFFFF;color:#3510B5;font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.fav-btn.on{background:#FFF4D4;border-color:#E0A800;color:#8A5A00}
+.perfil-id{display:flex;gap:16px;align-items:flex-start;margin-bottom:16px}
+.perfil-avatar{flex:none;width:64px;height:64px;border-radius:50%;display:grid;place-items:center;background:#3510B5;color:#FFFFFF;font-size:24px;font-weight:700}
+.perfil-dados{display:flex;flex-direction:column;gap:4px;min-width:0}
+.perfil-dados strong{font-size:20px;color:var(--c-roxo-escuro,#10082F)}
+.perfil-dados > span{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.perfil-dados .nov-ler{align-self:flex-start;margin-top:4px}
+.perfil-form{flex:1;min-width:0;display:grid;gap:4px}
+.perfil-form input[type=text],.perfil-form input:not([type]){width:100%}
+.perfil-tipo{border:0;padding:0;margin:0 0 8px;display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+.perfil-tipo legend{font-weight:600;font-size:14px;margin-bottom:6px;padding:0}
+.perfil-tipo label{display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.perfil-acoes{display:flex;gap:8px}
+.perfil-grid{display:grid;grid-template-columns:1fr;gap:14px}
+.perfil-grid .panel{margin:0}
+.perfil-grid .panel-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.perfil-lista{list-style:none;margin:0;padding:0}
+.perfil-lista li{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;padding:9px 0;border-bottom:1px solid var(--line)}
+.perfil-lista li:last-child{border-bottom:0}
+.perfil-lista li > a{color:var(--c-roxo-escuro,#10082F);text-decoration:none}
+.perfil-lista li > a:hover{text-decoration:underline}
+.perfil-lista li .nov-ler:last-child{margin-left:auto}
+.perfil-mini-acoes{display:flex;gap:12px;margin-left:auto}
+.perfil-chips{display:flex;flex-wrap:wrap;gap:8px;margin:0}
+@media (min-width:801px){.perfil-grid{grid-template-columns:1fr 1fr}}
 
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 </style>
@@ -2088,7 +2193,9 @@ footer{background:var(--c-cinza);border-top:1px solid var(--line);box-shadow:non
      O id precisa ser único: é ele que marca a novidade como lida no navegador.
      ========================================================== */
   const novidades = [
-    { id: "2026-11-03-assistente", data: "2026-11-03", tipo: "novo", titulo: "Assistente Suel", descricao: "Botão no canto da tela para perguntar sobre um veículo ou dúvida. O Assistente Suel responde com as informações cadastradas no portal." },
+    { id: "2026-11-04-perfil", data: "2026-11-04", tipo: "novo", titulo: "Meu perfil", descricao: "Novo perfil com seus dados, fichas favoritas, últimos acessos, pesquisas recentes e checklists em andamento. Use o botão Favoritar na ficha do veículo e acesse pelo ícone de pessoa no topo.", link: "#/perfil" },
+    { id: "2026-11-04-chat", data: "2026-11-04", tipo: "novo", titulo: "Chat CEC (em preparação)", descricao: "Chat geral entre lojas próprias e credenciadas, com fotos tiradas pelo celular, busca no histórico e avisos de novas mensagens. Por enquanto funciona em modo de demonstração, até a ligação com o servidor da Autoglass.", link: "#/chat" },
+    { id: "2026-11-03-assistente", data: "2026-11-03", tipo: "novo", titulo: "Assistente Zayon", descricao: "Botão no canto da tela para perguntar sobre um veículo ou dúvida. O Assistente Zayon responde com as informações cadastradas no portal." },
     { id: "2026-11-03-sino", data: "2026-11-03", tipo: "novo", titulo: "Sino de novidades", descricao: "O cabeçalho ganhou o sino de notificações. Ele mostra o que foi adicionado, alterado ou melhorado em cada atualização do portal.", link: "#/novidades" },
     { id: "2026-11-03-laudos", data: "2026-11-03", tipo: "novo", titulo: "Laudo Scanners dentro do portal", descricao: "Os laudos técnicos dos scanners agora aparecem na própria aba, com pesquisa, filtros por status e ano e botão para baixar o PDF.", link: "#/laudos" },
     { id: "2026-11-03-mais-acessados", data: "2026-11-03", tipo: "novo", titulo: "Mais acessados na página inicial", descricao: "Abaixo da pesquisa, atalhos diretos para as fichas do Fiat Toro, BMW X1, Toyota Yaris, Chevrolet S10 e Jeep Renegade.", link: "#/" },
@@ -2630,11 +2737,120 @@ function Medidas({ m, compacto, pos, semAlvo }) {
   </div>`;
 }
 
+/* ---------- Perfil do usuário ----------
+   Por enquanto tudo fica salvo neste navegador (localStorage). Quando o servidor da TI
+   existir, estas funções passam a gravar na conta da pessoa. */
+const PERFIL = { dados: "cec_perfil", fav: "cec_favoritos", hist: "cec_ultimos", buscas: "cec_buscas", checks: "cec_checks" };
+const lerLS = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k) || "null"); return v == null ? d : v; } catch (e) { return d; } };
+const perfilSubs = new Set();
+const gravarLS = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} perfilSubs.forEach(f => f(x => x + 1)); };
+function usePerfil() { const [, setV] = useState(0); useEffect(() => { perfilSubs.add(setV); return () => { perfilSubs.delete(setV); }; }, []); }
+const ehFavorito = id => lerLS(PERFIL.fav, []).includes(id);
+function alternarFavorito(id) { const l = lerLS(PERFIL.fav, []); const sai = l.includes(id); gravarLS(PERFIL.fav, sai ? l.filter(x => x !== id) : [id, ...l]); toast(sai ? "Ficha retirada dos favoritos." : "Ficha adicionada aos favoritos."); }
+function registrarAcesso(id) { const l = lerLS(PERFIL.hist, []).filter(x => x.id !== id); gravarLS(PERFIL.hist, [{ id, quando: Date.now() }, ...l].slice(0, 10)); }
+let buscaTimer = null;
+function registrarBusca(q) {
+  clearTimeout(buscaTimer);
+  const t = String(q || "").trim(); if (t.length < 3) return;
+  buscaTimer = setTimeout(() => {
+    const tn = norm(t);
+    const l = lerLS(PERFIL.buscas, []).filter(x => { const xn = norm(x.q); return xn !== tn && !tn.startsWith(xn); });
+    gravarLS(PERFIL.buscas, [{ q: t, quando: Date.now() }, ...l].slice(0, 8));
+  }, 1500);
+}
+// Checklist: guarda o que foi marcado e mantém um índice dos que estão em andamento
+function salvarChecklist(chave, marcados, total) {
+  const feitos = marcados.length, idx = lerLS(PERFIL.checks, {});
+  try { feitos ? localStorage.setItem("cec_check_" + chave, JSON.stringify(marcados)) : localStorage.removeItem("cec_check_" + chave); } catch (e) {}
+  if (feitos > 0 && feitos < total) idx[chave] = { feitos, total, quando: Date.now() }; else delete idx[chave];
+  gravarLS(PERFIL.checks, idx);
+}
+function descreverChecklist(chave) {
+  const tipo = /dinamica$/.test(chave) ? "dinamica" : /estatica$/.test(chave) ? "estatica" : "";
+  const base = tipo ? chave.slice(0, -tipo.length) : chave;
+  const v = porId(base);
+  const rot = tipo === "dinamica" ? "Dinâmica" : tipo === "estatica" ? "Estática" : "";
+  return v ? { titulo: nomeVeiculo(v), sub: rot ? "Checklist " + rot.toLowerCase() : "Checklist", link: "#/veiculo/" + v.id + "?cat=checklist" }
+    : { titulo: "Checklist geral", sub: rot ? "Calibração " + rot.toLowerCase() : "", link: "#/checklist" };
+}
+const quandoBR = t => { const d = new Date(t); return isNaN(d) ? "" : `${d.toLocaleDateString("pt-BR")} às ${d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`; };
+
+function FavBotao({ id }) {
+  usePerfil();
+  const fav = ehFavorito(id);
+  return html`<button type="button" className=${"fav-btn" + (fav ? " on" : "")} aria-pressed=${fav} onClick=${() => alternarFavorito(id)}>
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 3.5l2.6 5.3 5.8.8-4.2 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z" fill=${fav ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"/></svg>
+    <span>${fav ? "Favorito" : "Favoritar"}</span></button>`;
+}
+
+function PerfilPagina({ sessao }) {
+  usePerfil();
+  const dados = lerLS(PERFIL.dados, { nome: "", loja: "", tipo: "propria" });
+  const [editando, setEditando] = useState(!dados.nome);
+  const [form, setForm] = useState(dados);
+  const favs = lerLS(PERFIL.fav, []).map(porId).filter(Boolean);
+  const hist = lerLS(PERFIL.hist, []).map(h => ({ ...h, v: porId(h.id) })).filter(h => h.v);
+  const buscas = lerLS(PERFIL.buscas, []);
+  const checks = Object.entries(lerLS(PERFIL.checks, {})).map(([chave, c]) => ({ chave, ...c, ...descreverChecklist(chave) })).sort((a, b) => b.quando - a.quando);
+  const iniciais = (dados.nome || sessao.email).split(/[\s@.]+/).filter(Boolean).slice(0, 2).map(p => p[0].toUpperCase()).join("");
+  const salvar = e => { e.preventDefault(); gravarLS(PERFIL.dados, { nome: form.nome.trim(), loja: form.loja.trim(), tipo: form.tipo }); setEditando(false); toast("Dados do perfil salvos."); };
+  const descartarCheck = chave => { try { localStorage.removeItem("cec_check_" + chave); } catch (e) {} const idx = lerLS(PERFIL.checks, {}); delete idx[chave]; gravarLS(PERFIL.checks, idx); };
+  return html`<section className="section"><div className="wrap">
+    <${TituloPagina} t="Meu perfil" sub="Seus dados, fichas favoritas, últimos acessos, pesquisas e checklists em andamento." />
+
+    <div className="panel perfil-id">
+      <span className="perfil-avatar" aria-hidden="true">${iniciais}</span>
+      ${editando ? html`<form className="perfil-form" onSubmit=${salvar}>
+          <div className="field"><label htmlFor="pf-nome">Nome</label><input id="pf-nome" value=${form.nome} onInput=${e => setForm({ ...form, nome: e.target.value })} placeholder="Seu nome" autoComplete="name" /></div>
+          <div className="field"><label htmlFor="pf-loja">Loja</label><input id="pf-loja" value=${form.loja} onInput=${e => setForm({ ...form, loja: e.target.value })} placeholder="Nome ou cidade da loja" /></div>
+          <fieldset className="field perfil-tipo"><legend>Tipo de operação</legend>
+            <label><input type="radio" name="pf-tipo" checked=${form.tipo === "propria"} onChange=${() => setForm({ ...form, tipo: "propria" })} /> Autoglass</label>
+            <label><input type="radio" name="pf-tipo" checked=${form.tipo === "credenciada"} onChange=${() => setForm({ ...form, tipo: "credenciada" })} /> Credenciado</label></fieldset>
+          <div className="perfil-acoes"><button type="submit" className="btn primary">Salvar</button>${dados.nome && html`<button type="button" className="btn ghost" onClick=${() => { setForm(dados); setEditando(false); }}>Cancelar</button>`}</div>
+        </form>`
+        : html`<div className="perfil-dados">
+          <strong>${dados.nome}</strong>
+          <span>${dados.loja || "Loja não informada"} <${SeloOperacao} u=${{ tipoOperacao: dados.tipo }} /></span>
+          <span className="hint">${sessao.email}</span>
+          <button type="button" className="nov-ler" onClick=${() => { setForm(dados); setEditando(true); }}>Editar dados</button>
+        </div>`}
+    </div>
+
+    <div className="perfil-grid">
+      <section className="panel" aria-labelledby="pf-fav"><div className="panel-head"><h2 id="pf-fav"><span aria-hidden="true">★</span> Fichas favoritas</h2></div>
+        ${favs.length ? html`<ul className="perfil-lista">${favs.map(v => html`<li key=${v.id}><a href=${"#/veiculo/" + v.id}><strong>${nomeVeiculo(v)}</strong></a><${TipoBadge} v=${v} />
+            <button type="button" className="nov-ler" aria-label=${"Retirar " + nomeVeiculo(v) + " dos favoritos"} onClick=${() => alternarFavorito(v.id)}>Retirar</button></li>`)}</ul>`
+          : html`<p className="hint">Toque em <strong>☆ Favoritar</strong> na ficha de um veículo para guardá-la aqui.</p>`}
+      </section>
+
+      <section className="panel" aria-labelledby="pf-hist"><div className="panel-head"><h2 id="pf-hist">${ic("🧭")} Últimos acessos</h2>${hist.length > 0 && html`<button type="button" className="nov-ler" onClick=${() => gravarLS(PERFIL.hist, [])}>Limpar</button>`}</div>
+        ${hist.length ? html`<ul className="perfil-lista">${hist.map(h => html`<li key=${h.id}><a href=${"#/veiculo/" + h.id}><strong>${nomeVeiculo(h.v)}</strong></a><span className="hint">${quandoBR(h.quando)}</span></li>`)}</ul>`
+          : html`<p className="hint">As últimas 10 fichas que você abrir aparecem aqui.</p>`}
+      </section>
+
+      <section className="panel" aria-labelledby="pf-busca"><div className="panel-head"><h2 id="pf-busca">${ic("🔎")} Pesquisas recentes</h2>${buscas.length > 0 && html`<button type="button" className="nov-ler" onClick=${() => gravarLS(PERFIL.buscas, [])}>Limpar</button>`}</div>
+        ${buscas.length ? html`<p className="perfil-chips">${buscas.map(b => html`<a key=${b.q} className="ma-chip" href=${"#/consulta?q=" + encodeURIComponent(b.q)}><strong>${b.q}</strong></a>`)}</p>`
+          : html`<p className="hint">O que você pesquisar na página inicial ou na Consulta aparece aqui.</p>`}
+      </section>
+
+      <section className="panel" aria-labelledby="pf-check"><div className="panel-head"><h2 id="pf-check">${ic("✅")} Checklists em andamento</h2></div>
+        ${checks.length ? html`<ul className="perfil-lista">${checks.map(c => html`<li key=${c.chave}><a href=${c.link}><strong>${c.titulo}</strong></a><span className="hint">${c.sub} · ${c.feitos} de ${c.total} itens · ${quandoBR(c.quando)}</span>
+            <span className="perfil-mini-acoes"><a className="nov-ler" href=${c.link}>Continuar</a><button type="button" className="nov-ler" onClick=${() => descartarCheck(c.chave)}>Descartar</button></span></li>`)}</ul>`
+          : html`<p className="hint">Checklists que você começar e não terminar ficam aqui para continuar depois.</p>`}
+      </section>
+    </div>
+    <p className="hint" style=${{ marginTop: "12px" }}>Seus dados de perfil ficam salvos neste navegador. Em outro celular ou computador, o perfil começa vazio.</p>
+  </div></section>`;
+}
+
 function Checklist({ itens, chave }) {
-  const [marcados, setMarcados] = useState(() => new Set());
+  const ler = () => new Set(lerLS("cec_check_" + chave, []).filter(i => i < itens.length));
+  const [marcados, setMarcadosEstado] = useState(ler);
   const [concluido, setConcluido] = useState(false);
-  useEffect(() => { setMarcados(new Set()); setConcluido(false); }, [chave]);
+  useEffect(() => { setMarcadosEstado(ler()); setConcluido(false); }, [chave]);
   const total = itens.length, feitos = marcados.size;
+  // Guarda o progresso: o checklist pode ser retomado depois, pelo perfil
+  const setMarcados = n => { setMarcadosEstado(n); salvarChecklist(chave, [...n], total); };
   const alternar = i => { const n = new Set(marcados); n.has(i) ? n.delete(i) : n.add(i); setMarcados(n); setConcluido(false); };
   return html`<div>
     <div className="hint">${feitos} de ${total} itens conferidos</div>
@@ -2837,6 +3053,7 @@ const ICONES = {
   chat: '<path d="M4 5.5h16v10H9.5L5.5 19v-3.5H4z"/>',
   cone: '<path d="M9.5 4h5l4 14.5h-13z"/><path d="M8 11.5h8M3.5 20.5h17"/>',
   info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.5v.01"/>',
+  user: '<circle cx="12" cy="8" r="4"/><path d="M4.5 20.5a7.5 7.5 0 0 1 15 0"/>',
   sino: '<path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2.5h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/>',
   logout: '<path d="M14 4h4a1.5 1.5 0 0 1 1.5 1.5v13A1.5 1.5 0 0 1 18 20h-4"/><path d="M10 16l4-4-4-4M14 12H4"/>',
   scanner: '<rect x="4" y="3" width="13" height="16" rx="2"/><path d="M7.5 7h6M7.5 10.5h6M7.5 14h3M17 12h2.5a1.5 1.5 0 0 1 1.5 1.5V20"/>'
@@ -2867,6 +3084,7 @@ const MAIS_ACESSADOS = [
 function Inicio() {
   const [q, setQ] = useState("");
   const res = useMemo(() => buscar(q), [q]);
+  useEffect(() => registrarBusca(q), [q]);
   const resRef = useRef(null);
   const atalhos = [
     { em: "🚗", t: "Consultar veículo", h: "#/consulta" },
@@ -2974,6 +3192,7 @@ function Consulta({ params }) {
   const filtroOk = v => (!marca || v.marca === marca) && (!modelo || v.id === modelo) && filtroExtraOk(v, f);
 
   let resultados = null, tiles = null;
+  useEffect(() => registrarBusca(q), [q]);
   if (q.trim()) {
     resultados = buscar(q).filter(r => r.regra ? !extraAtivo && (!marca || r.regra.marcas.includes(marca) || r.regra.marcas.includes("TODOS")) && !modelo && (!cat || r.regra.categoria === cat) : filtroOk(r.v));
     if (cat) {
@@ -3087,6 +3306,7 @@ function Veiculo({ id, params }) {
   const v = porId(id);
   const cat = params.get("cat");
   const { todos: todosVideos } = useVideos();
+  useEffect(() => { if (v) registrarAcesso(v.id); }, [id]);
   const repoVeic = useRepoPdfs().lista.filter(x => v && (x.veiculo === v.id || (!x.veiculo && x.marca === v.marca)));
   // Todo o material instrutivo do veículo: PDFs cadastrados, tutoriais com imagens e PDFs do GitHub
   const matsVeic = !v ? [] : (() => {
@@ -3117,6 +3337,7 @@ function Veiculo({ id, params }) {
     <header className="vhead">
       <div className="brandname">${v.marca}</div>
       <h1>${v.modelo}</h1>
+      <${FavBotao} id=${v.id} />
     </header>
     <div className="stack">${alertas.map((a, i) => html`<${Alerta} key=${i} a=${a} />`)}</div>
     <${Feedback} key=${v.id} contexto=${v.id} />
@@ -3125,6 +3346,7 @@ function Veiculo({ id, params }) {
     <header className="vhead">
       <div className="brandname">${v.marca}</div>
       <h1>${v.modelo}</h1>
+      <${FavBotao} id=${v.id} />
     </header>
     <div className="alert info" role="note"><p>${ic("ℹ️")} Ficha criada para reunir o material instrutivo deste veículo. Ainda não há informações de calibração ADAS cadastradas (tipo, caminho, alvo e medidas).</p></div>
     ${matsVeic.length > 0 && html`<section className="panel" id="sec-materiais" aria-labelledby="h-materiais">
@@ -3561,6 +3783,7 @@ const NAV = [
   { id: "materiais", t: "Materiais Instrutivos", i: "🧰", h: "#/materiais" },
   { id: "videos", t: "Vídeos", i: "🎬", h: "#/videos" },
   { id: "laudos", t: "Laudo Scanners", i: "📋", h: "#/laudos" },
+  { id: "chat", t: "Chat", i: "💬", h: "#/chat" },
   { id: "info", t: "Informações", i: "ℹ️", itens: [
     { t: "Sobre o projeto e como utilizar", h: "#/sobre" },
     { t: "Ferramentas externas (QCar / LAUNCH)", h: "#/qcar" },
@@ -3568,7 +3791,7 @@ const NAV = [
     { t: "Avisos importantes", h: "#/avisos" },
     { t: "Contato / Suporte ADAS", h: "#/contato" }] }
 ];
-const TITULOS = { cobertura: "Informações por veículo" };
+const TITULOS = { cobertura: "Informações por veículo", perfil: "Meu perfil" };
 const ROT_SEC_VEIC = { materiais: "Material instrutivo", alvo: "Alvo / calibração dinâmica", medidas: "Medidas", tipo: "Tipo de calibração", caminho: "Procedimento", checklist: "Checklist", orientacoes: "Orientações", fonte: "Fonte", alertas: "Alertas" };
 const caminhoDe = h => h.replace(/^#/, "").split("?")[0];
 // Descobre em qual seção/item do menu o usuário está
@@ -3630,6 +3853,7 @@ function MenuMobile({ ativo, atual, fechar, email, onSair }) {
               <span className="si" aria-hidden="true">${ic(it.i || "")}</span>${it.t}</a></li>`)}</ul>`}
           </li>`
         : html`<li key=${n.id} className=${"mm-sec" + (ativo === n.id ? " active" : "")}><a className="mm-top" href=${n.h} onClick=${fechar}><span aria-hidden="true">${ic(n.i)}</span><span className="mm-t">${n.t}</span></a></li>`)}
+        <li className="mm-sec"><a className="mm-top" href="#/perfil" onClick=${fechar}><span aria-hidden="true"><${Ic} n="user" /></span><span className="mm-t">Meu perfil</span></a></li>
         ${onSair && html`<li className="mm-sec mm-sair"><button type="button" className="mm-top" onClick=${onSair}>
           <span aria-hidden="true"><${Ic} n="logout" /></span><span className="mm-t">Sair<small>${email}</small></span></button></li>`}
       </ul>
@@ -4627,7 +4851,7 @@ function BotoesSuporte() {
   return html`<div className="as-acoes">${CONTATOS.map(c => html`<a key=${c.numero} className="btn btn-wa as-wa" href=${linkWhatsApp(c.whatsapp)} target="_blank" rel="noopener noreferrer">${ICONE_WHATSAPP}<span>WhatsApp ${c.publico}</span></a>`)}</div>`;
 }
 function RespostaAssist({ r, perguntar }) {
-  if (r.tipo === "saudacao") return html`<p>Olá! Eu sou o Assistente Suel, do Suporte Técnico - CEC. Pergunte sobre um veículo, como <em>medidas do Toro</em>, ou uma dúvida, como <em>veículo com estepe calibra?</em></p>`;
+  if (r.tipo === "saudacao") return html`<p>Olá! Eu sou o Assistente Zayon, do Suporte Técnico - CEC. Pergunte sobre um veículo, como <em>medidas do Toro</em>, ou uma dúvida, como <em>veículo com estepe calibra?</em></p>`;
   if (r.tipo === "contato") return html`<div><p>Este é o contato do suporte técnico ADAS, pelo WhatsApp. Tenha em mãos a marca, o modelo, o ano do veículo e o que já foi verificado.</p>
     <ul className="as-contatos">${CONTATOS.map(c => html`<li key=${c.numero}><strong>${c.publico}:</strong> ${c.numero}</li>`)}</ul><${BotoesSuporte} /></div>`;
   if (r.tipo === "agradece") return html`<p>Por nada! Se precisar, é só perguntar de novo.</p>`;
@@ -4679,11 +4903,11 @@ function Assistente() {
   };
   const fecharNoCelular = e => { if (e.target.closest("a") && window.innerWidth < 601) setAberto(false); };
   return html`<div className="assist">
-    ${aberto && html`<section className="assist-painel" role="dialog" aria-label="Assistente Suel, do Suporte Técnico - CEC">
+    ${aberto && html`<section className="assist-painel" role="dialog" aria-label="Assistente Zayon, do Suporte Técnico - CEC">
       <header className="as-head">
         <span className="as-avatar" aria-hidden="true"><${Ic} n="chat" /></span>
-        <span><strong>Assistente Suel</strong><small>Suporte Técnico - CEC</small></span>
-        <button type="button" className="as-fechar" aria-label="Fechar o Assistente Suel" onClick=${() => setAberto(false)}>✕</button>
+        <span><strong>Assistente Zayon</strong><small>Suporte Técnico - CEC</small></span>
+        <button type="button" className="as-fechar" aria-label="Fechar o Assistente Zayon" onClick=${() => setAberto(false)}>✕</button>
       </header>
       <div className="as-msgs" aria-live="polite" onClick=${fecharNoCelular}>
         ${msgs.map((m, i) => m.de === "eu"
@@ -4699,10 +4923,286 @@ function Assistente() {
           <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M3.4 20.4 21 12 3.4 3.6 3.4 10l12.6 2-12.6 2z"/></svg></button>
       </form>
     </section>`}
-    <button type="button" className=${"assist-fab" + (aberto ? " aberto" : "")} aria-expanded=${aberto} aria-label=${aberto ? "Fechar o Assistente Suel" : "Falar com o Assistente Suel, do Suporte Técnico - CEC"} onClick=${() => setAberto(!aberto)}>
-      ${aberto ? html`<span aria-hidden="true">✕</span>` : html`<${Ic} n="chat" /><span className="fab-t">Assistente Suel</span>`}
+    <button type="button" className=${"assist-fab" + (aberto ? " aberto" : "")} aria-expanded=${aberto} aria-label=${aberto ? "Fechar o Assistente Zayon" : "Falar com o Assistente Zayon, do Suporte Técnico - CEC"} onClick=${() => setAberto(!aberto)}>
+      ${aberto ? html`<span aria-hidden="true">✕</span>` : html`<${Ic} n="chat" /><span className="fab-t">Assistente Zayon</span>`}
     </button>
   </div>`;
+}
+
+/* =====================================================================
+   CHAT CEC — conversa entre lojas próprias e credenciadas
+   O chat conversa com o servidor da Autoglass pela API descrita na
+   especificação técnica "Chat CEC — Especificação para a TI".
+   Enquanto CHAT_CONFIG.api estiver vazio, o chat funciona em MODO
+   DEMONSTRAÇÃO: as mensagens ficam só neste navegador.
+   ===================================================================== */
+const CHAT_CONFIG = {
+  api: "",            // endereço da API da TI, ex.: "https://chat-api.autoglass.com.br/v1"
+  imagemMaxPx: 1280,  // maior lado da foto depois de reduzida
+  imagemQualidade: 0.8,
+  imagemMaxBytes: 2 * 1024 * 1024
+};
+const ROT_OPERACAO = { propria: "Autoglass", credenciada: "Credenciado" };
+const horaCurta = iso => { const d = new Date(iso); return isNaN(d) ? "" : d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }); };
+const diaCurto = iso => { const d = new Date(iso); if (isNaN(d)) return ""; const h = new Date(); const ontem = new Date(h); ontem.setDate(h.getDate() - 1);
+  return d.toDateString() === h.toDateString() ? "Hoje" : d.toDateString() === ontem.toDateString() ? "Ontem" : d.toLocaleDateString("pt-BR"); };
+
+// Reduz a foto do celular antes de enviar (JPEG, até 1280 px)
+async function reduzirImagem(arquivo) {
+  if (!/^image\//.test(arquivo.type)) throw new Error("Envie apenas imagens (fotos).");
+  const url = URL.createObjectURL(arquivo);
+  try {
+    const img = await new Promise((ok, erro) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => erro(new Error("Não foi possível ler a imagem.")); i.src = url; });
+    const esc = Math.min(1, CHAT_CONFIG.imagemMaxPx / Math.max(img.naturalWidth, img.naturalHeight));
+    const cv = document.createElement("canvas"); cv.width = Math.round(img.naturalWidth * esc); cv.height = Math.round(img.naturalHeight * esc);
+    cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height);
+    const blob = await new Promise(ok => cv.toBlob(ok, "image/jpeg", CHAT_CONFIG.imagemQualidade));
+    if (!blob || blob.size > CHAT_CONFIG.imagemMaxBytes) throw new Error("A foto ficou grande demais. Tente outra.");
+    return { blob, largura: cv.width, altura: cv.height };
+  } finally { URL.revokeObjectURL(url); }
+}
+
+/* ---------- Conexão com o servidor da TI (API REST + eventos SSE) ---------- */
+function criarChatHttp(base) {
+  let token = null;
+  try { token = sessionStorage.getItem("cec_chat_token"); } catch (e) {}
+  const req = async (metodo, caminho, corpo, ehForm) => {
+    const r = await fetch(base + caminho, { method: metodo, headers: { ...(token ? { Authorization: "Bearer " + token } : {}), ...(corpo && !ehForm ? { "Content-Type": "application/json" } : {}) },
+      body: corpo ? (ehForm ? corpo : JSON.stringify(corpo)) : undefined });
+    if (r.status === 401) { token = null; try { sessionStorage.removeItem("cec_chat_token"); } catch (e) {} const e = new Error("Sua sessão expirou. Entre de novo."); e.code = 401; throw e; }
+    if (!r.ok) { let m = ""; try { m = (await r.json()).mensagem; } catch (e) {} throw new Error(m || "Não foi possível falar com o servidor do chat (erro " + r.status + ")."); }
+    return r.status === 204 ? null : r.json();
+  };
+  return {
+    demo: false,
+    temSessao: () => !!token,
+    async entrar(email, senha) { const d = await req("POST", "/auth/login", { email, senha }); token = d.token; try { sessionStorage.setItem("cec_chat_token", token); } catch (e) {} return d.usuario; },
+    eu: () => req("GET", "/auth/me"),
+    async sair() { try { await req("POST", "/auth/logout"); } catch (e) {} token = null; try { sessionStorage.removeItem("cec_chat_token"); } catch (e) {} },
+    usuarios: q => req("GET", "/usuarios?busca=" + encodeURIComponent(q || "")),
+    conversas: () => req("GET", "/conversas"),
+    criarConversa: dados => req("POST", "/conversas", dados),
+    mensagens: (cid, antes) => req("GET", `/conversas/${encodeURIComponent(cid)}/mensagens?limite=50${antes ? "&antes=" + encodeURIComponent(antes) : ""}`),
+    async enviar(cid, { texto, imagem }) {
+      if (imagem) { const f = new FormData(); if (texto) f.append("texto", texto); f.append("imagem", imagem.blob, "foto.jpg"); f.append("largura", imagem.largura); f.append("altura", imagem.altura);
+        return req("POST", `/conversas/${encodeURIComponent(cid)}/mensagens`, f, true); }
+      return req("POST", `/conversas/${encodeURIComponent(cid)}/mensagens`, { texto });
+    },
+    marcarLida: (cid, mid) => req("POST", `/conversas/${encodeURIComponent(cid)}/lida`, { ultimaMensagemId: mid }),
+    marcarOficial: (mid, oficial) => req("PATCH", `/mensagens/${encodeURIComponent(mid)}`, { oficial }),
+    remover: mid => req("DELETE", `/mensagens/${encodeURIComponent(mid)}`),
+    buscar: q => req("GET", "/busca?q=" + encodeURIComponent(q)),
+    assinar(aoEvento) {
+      if (!token || !("EventSource" in window)) return () => {};
+      const es = new EventSource(base + "/eventos?token=" + encodeURIComponent(token));
+      ["mensagem.nova", "mensagem.atualizada", "mensagem.removida", "conversa.nova"].forEach(t => es.addEventListener(t, ev => { try { aoEvento(t, JSON.parse(ev.data)); } catch (e) {} }));
+      return () => es.close();
+    }
+  };
+}
+
+/* ---------- Modo demonstração (sem servidor): tudo fica neste navegador ---------- */
+function criarChatDemo() {
+  const CH = "cec_chat_demo_v2";
+  const agora = () => new Date().toISOString();
+  const pessoas = [
+    { id: "u-voce", nome: "Você", email: "", loja: "Sua loja", tipoOperacao: "propria", papel: "usuario" },
+    { id: "u-suporte", nome: "Suporte Técnico ADAS (exemplo)", email: "", loja: "CEC", tipoOperacao: "propria", papel: "suporte" },
+    { id: "u-cred", nome: "Técnico credenciado (exemplo)", email: "", loja: "Credenciada exemplo", tipoOperacao: "credenciada", papel: "usuario" },
+    { id: "u-loja", nome: "Técnico de loja própria (exemplo)", email: "", loja: "Loja própria exemplo", tipoOperacao: "propria", papel: "usuario" }
+  ];
+  const inicial = () => {
+    const t0 = Date.now() - 3600e3;
+    const m = (id, cid, autor, texto, min, oficial) => ({ id, conversaId: cid, autor: pessoas.find(p => p.id === autor), texto, imagem: null, oficial: !!oficial, criadaEm: new Date(t0 + min * 60e3).toISOString() });
+    return {
+      conversas: [
+        { id: "c-geral", tipo: "grupo", nome: "Geral", participantes: pessoas, lidaAte: {} }
+      ],
+      mensagens: [
+        m("m1", "c-geral", "u-suporte", "Bem-vindos ao Chat CEC! Esta é uma conversa de demonstração: as mensagens ficam só neste navegador.", 0, true),
+        m("m2", "c-geral", "u-cred", "Exemplo de pergunta: alguém já calibrou um veículo com este procedimento?", 10),
+        m("m3", "c-geral", "u-suporte", "Exemplo de resposta do suporte, marcada como oficial.", 14, true),
+        m("m4", "c-geral", "u-loja", "Exemplo de boa prática compartilhada entre as lojas.", 30)
+      ]
+    };
+  };
+  let st; try { st = JSON.parse(localStorage.getItem(CH) || "null"); } catch (e) {} if (!st) st = inicial();
+  const salvar = () => { try { localStorage.setItem(CH, JSON.stringify(st)); } catch (e) {} };
+  const ouvintes = new Set();
+  const emitir = (t, d) => ouvintes.forEach(f => f(t, d));
+  const eu = pessoas[0];
+  const resumo = c => { const ms = st.mensagens.filter(x => x.conversaId === c.id); const ult = ms[ms.length - 1] || null; const lida = c.lidaAte[eu.id] || "";
+    return { ...c, ultimaMensagem: ult, naoLidas: ms.filter(x => x.autor.id !== eu.id && x.criadaEm > lida).length, atualizadoEm: ult ? ult.criadaEm : "" }; };
+  return {
+    demo: true,
+    temSessao: () => true,
+    entrar: async () => eu, eu: async () => eu, sair: async () => {},
+    usuarios: async q => pessoas.filter(p => p.id !== eu.id && norm(p.nome + " " + p.loja).includes(norm(q || ""))),
+    conversas: async () => st.conversas.map(resumo).sort((a, b) => String(b.atualizadoEm).localeCompare(String(a.atualizadoEm))),
+    async criarConversa({ tipo, nome, participantes }) {
+      const ps = [eu, ...pessoas.filter(p => participantes.includes(p.id))];
+      if (tipo === "individual") { const ex = st.conversas.find(c => c.tipo === "individual" && c.participantes.some(p => p.id === participantes[0])); if (ex) return resumo(ex); }
+      const c = { id: "c-" + Date.now(), tipo, nome: tipo === "grupo" ? nome : "", participantes: ps, lidaAte: {} };
+      st.conversas.push(c); salvar(); emitir("conversa.nova", resumo(c)); return resumo(c);
+    },
+    mensagens: async cid => st.mensagens.filter(x => x.conversaId === cid),
+    async enviar(cid, { texto, imagem }) {
+      let img = null;
+      if (imagem) img = { url: await new Promise(ok => { const r = new FileReader(); r.onload = () => ok(r.result); r.readAsDataURL(imagem.blob); }), largura: imagem.largura, altura: imagem.altura };
+      const msg = { id: "m-" + Date.now(), conversaId: cid, autor: eu, texto: texto || "", imagem: img, oficial: false, criadaEm: agora() };
+      st.mensagens.push(msg); salvar(); emitir("mensagem.nova", msg); return msg;
+    },
+    async marcarLida(cid) { const c = st.conversas.find(x => x.id === cid); if (c) { c.lidaAte[eu.id] = agora(); salvar(); } },
+    async marcarOficial(mid, oficial) { const m = st.mensagens.find(x => x.id === mid); if (m) { m.oficial = oficial; salvar(); emitir("mensagem.atualizada", m); } },
+    async remover(mid) { st.mensagens = st.mensagens.filter(x => x.id !== mid); salvar(); emitir("mensagem.removida", { id: mid }); },
+    buscar: async q => { const ts = tokens(q); return st.mensagens.filter(m => ts.length && ts.every(t => norm(m.texto + " " + m.autor.nome + " " + m.autor.loja).includes(t)))
+      .map(m => ({ mensagem: m, conversa: resumo(st.conversas.find(c => c.id === m.conversaId)) })).reverse().slice(0, 50); },
+    assinar(f) { ouvintes.add(f); return () => ouvintes.delete(f); }
+  };
+}
+const CHAT = CHAT_CONFIG.api ? criarChatHttp(CHAT_CONFIG.api.replace(/\/$/, "")) : criarChatDemo();
+
+/* ---------- Estado global do chat (contador de não lidas no menu) ---------- */
+const CHAT_ST = { naoLidas: 0 };
+const chatSubs = new Set();
+const avisarChat = () => chatSubs.forEach(f => f({ ...CHAT_ST }));
+function useChatNaoLidas() {
+  const [s, setS] = useState({ ...CHAT_ST });
+  useEffect(() => { chatSubs.add(setS); return () => { chatSubs.delete(setS); }; }, []);
+  return s.naoLidas;
+}
+const nomeConversa = (c, eu) => c.tipo === "grupo" ? c.nome : ((c.participantes || []).find(p => p.id !== (eu && eu.id)) || {}).nome || "Conversa";
+function notificarNavegador(msg, conversa, eu) {
+  if (!("Notification" in window) || Notification.permission !== "granted" || !document.hidden) return;
+  try { new Notification(`${msg.autor.nome} · ${conversa ? nomeConversa(conversa, eu) : "Chat CEC"}`, { body: msg.texto || "📷 Foto", tag: "cec-chat-" + msg.conversaId }); } catch (e) {}
+}
+
+function SeloOperacao({ u }) {
+  if (!u) return null;
+  return html`<span className=${"op-selo op-" + (u.tipoOperacao || "propria")}>${ROT_OPERACAO[u.tipoOperacao] || "Loja"}</span>`;
+}
+
+function ChatLogin({ aoEntrar }) {
+  const [email, setEmail] = useState(""); const [senha, setSenha] = useState(""); const [erro, setErro] = useState(""); const [ocupado, setOcupado] = useState(false);
+  const entrar = async e => { e.preventDefault(); setErro(""); setOcupado(true);
+    try { aoEntrar(await CHAT.entrar(email.trim(), senha)); } catch (x) { setErro(x.message); } finally { setOcupado(false); } };
+  return html`<form className="panel chat-login" onSubmit=${entrar}>
+    <h2>Entrar no chat</h2><p className="hint">Use o e-mail e a senha cadastrados pela TI da Autoglass.</p>
+    <div className="field"><label htmlFor="ch-email">E-mail</label><input id="ch-email" type="email" autoComplete="username" value=${email} onInput=${e => setEmail(e.target.value)} /></div>
+    <div className="field"><label htmlFor="ch-senha">Senha</label><input id="ch-senha" type="password" autoComplete="current-password" value=${senha} onInput=${e => setSenha(e.target.value)} /></div>
+    ${erro && html`<p className="login-erro" role="alert">${ic("⚠️")} ${erro}</p>`}
+    <button type="submit" className="btn primary" disabled=${ocupado}>${ocupado ? "Entrando…" : "Entrar"}</button>
+  </form>`;
+}
+
+// Chat único: a conversa "Geral" (grupo com todos). Sem conversas individuais nem outros grupos.
+const ehGeral = c => c && c.tipo === "grupo" && norm(c.nome || "") === "geral";
+const conversaGeral = lista => (lista || []).find(ehGeral) || (lista || []).find(c => c.tipo === "grupo") || null;
+
+function ChatPagina() {
+  const [eu, setEu] = useState(null); const [carregando, setCarregando] = useState(true);
+  const [geral, setGeral] = useState(null);
+  const [msgs, setMsgs] = useState([]); const [txt, setTxt] = useState(""); const [foto, setFoto] = useState(null);
+  const [busca, setBusca] = useState(""); const [achados, setAchados] = useState(null);
+  const [erro, setErro] = useState(""); const [enviando, setEnviando] = useState(false); const [zoom, setZoom] = useState(null);
+  const fim = useRef(null), arquivo = useRef(null);
+  const atualizarContador = c => { CHAT_ST.naoLidas = c ? c.naoLidas || 0 : 0; avisarChat(); };
+  useEffect(() => { (async () => { if (CHAT.temSessao()) { try { setEu(await CHAT.eu()); } catch (e) {} } setCarregando(false); })(); }, []);
+  useEffect(() => { if (!eu) return; let vivo = true;
+    (async () => { try {
+      const c = conversaGeral(await CHAT.conversas());
+      if (!vivo) return;
+      if (!c) { setErro("O chat geral ainda não foi criado no servidor."); return; }
+      setGeral(c);
+      const l = await CHAT.mensagens(c.id) || []; if (!vivo) return; setMsgs(l);
+      const ult = l[l.length - 1]; if (ult) await CHAT.marcarLida(c.id, ult.id).catch(() => {});
+      atualizarContador(null);
+    } catch (e) { setErro(e.message); } })();
+    return () => { vivo = false; }; }, [eu]);
+  useEffect(() => { if (!eu || !geral) return;
+    return CHAT.assinar((tipo, d) => {
+      if (d && d.conversaId && d.conversaId !== geral.id) return;
+      if (tipo === "mensagem.nova") { setMsgs(m => m.some(x => x.id === d.id) ? m : [...m, d]); CHAT.marcarLida(geral.id, d.id).catch(() => {});
+        if (d.autor && d.autor.id !== eu.id) notificarNavegador(d, geral, eu); }
+      if (tipo === "mensagem.atualizada") setMsgs(m => m.map(x => x.id === d.id ? d : x));
+      if (tipo === "mensagem.removida") setMsgs(m => m.filter(x => x.id !== d.id));
+    }); }, [eu, geral]);
+  useEffect(() => { if (fim.current && !achados) fim.current.scrollIntoView({ block: "end" }); }, [msgs.length, achados]);
+  useEffect(() => { const t = busca.trim(); if (t.length < 2) { setAchados(null); return; } let vivo = true;
+    const id = setTimeout(() => CHAT.buscar(t).then(r => vivo && setAchados((r || []).filter(a => !geral || a.mensagem.conversaId === geral.id).map(a => a.mensagem))).catch(e => vivo && setErro(e.message)), 250);
+    return () => { vivo = false; clearTimeout(id); }; }, [busca, geral]);
+  const escolherFoto = async e => { const f = e.target.files && e.target.files[0]; e.target.value = ""; if (!f) return; setErro("");
+    try { const r = await reduzirImagem(f); setFoto({ ...r, previa: URL.createObjectURL(r.blob) }); } catch (x) { setErro(x.message); } };
+  const enviar = async e => { e.preventDefault(); const t = txt.trim(); if ((!t && !foto) || !geral || enviando) return; setEnviando(true); setErro("");
+    try { const m = await CHAT.enviar(geral.id, { texto: t, imagem: foto }); setTxt(""); if (foto) URL.revokeObjectURL(foto.previa); setFoto(null); if (m) setMsgs(l => l.some(x => x.id === m.id) ? l : [...l, m]); }
+    catch (x) { setErro(x.message); } finally { setEnviando(false); } };
+  const pedirNotificacao = () => { if ("Notification" in window && Notification.permission === "default") Notification.requestPermission(); };
+  const ehSuporte = eu && eu.papel === "suporte";
+  const lista = achados || msgs;
+
+  return html`<section className="section chat-sec"><div className="wrap">
+    <${TituloPagina} t="Chat CEC" sub="Chat geral para troca de experiências, dúvidas e boas práticas entre lojas próprias e credenciadas." />
+    ${CHAT.demo && html`<div className="alert atencao" role="note"><p>${ic("⚠️")} <strong>Demonstração.</strong> O chat ainda não está ligado ao servidor da Autoglass. As mensagens desta tela ficam só neste navegador e ninguém mais as vê.</p></div>`}
+    ${erro && html`<div className="alert critico" role="alert"><p>${erro}</p></div>`}
+    ${carregando ? html`<p className="hint">Carregando…</p>` : !eu ? html`<${ChatLogin} aoEntrar=${setEu} />` : html`
+    <div className="chat chat-unico">
+      <div className="chat-main">
+        <header className="chat-topo">
+          <span className="chat-topo-t"><strong>${ic("💬")} Chat geral</strong><small>Lojas próprias e credenciadas</small></span>
+          <span className="chat-eu-mini"><span>${eu.nome}</span><${SeloOperacao} u=${eu} />${!CHAT.demo && html`<button type="button" className="nov-ler" onClick=${async () => { await CHAT.sair(); setEu(null); setGeral(null); setMsgs([]); }}>Sair</button>`}</span>
+        </header>
+        <div className="chat-ferr">
+          <input type="search" aria-label="Buscar no histórico do chat" placeholder="Buscar no histórico do chat" value=${busca} onInput=${e => setBusca(e.target.value)} />
+          ${"Notification" in window && Notification.permission === "default" && html`<button type="button" className="btn" onClick=${pedirNotificacao}>${ic("🔔")} Avisos</button>`}
+        </div>
+        ${achados && html`<p className="chat-busca-info">${achados.length ? `${achados.length} ${achados.length === 1 ? "mensagem encontrada" : "mensagens encontradas"}` : "Nada encontrado no histórico."} <button type="button" className="nov-ler" onClick=${() => setBusca("")}>Limpar busca</button></p>`}
+        <div className="chat-msgs" aria-live="polite">
+          ${!lista.length && !achados && html`<div className="chat-vazio"><p>Nenhuma mensagem ainda. Comece a conversa!</p></div>`}
+          ${lista.map((m, i) => { const minha = m.autor.id === eu.id; const novoDia = i === 0 || diaCurto(lista[i - 1].criadaEm) !== diaCurto(m.criadaEm);
+            return html`<${React.Fragment} key=${m.id}>${novoDia && html`<div className="chat-dia">${diaCurto(m.criadaEm)}</div>`}
+            <div className=${"cm" + (minha ? " minha" : "") + (m.oficial ? " oficial" : "")}>
+              ${!minha && html`<div className="cm-autor"><strong>${m.autor.nome}</strong> · ${m.autor.loja} <${SeloOperacao} u=${m.autor} /></div>`}
+              ${m.oficial && html`<div className="cm-oficial">${ic("✅")} Resposta oficial do suporte</div>`}
+              ${m.imagem && html`<button type="button" className="cm-img" onClick=${() => setZoom(m.imagem.url)} aria-label="Ampliar foto"><img src=${m.imagem.url} alt="Foto enviada no chat" loading="lazy" width=${m.imagem.largura} height=${m.imagem.altura} /></button>`}
+              ${m.texto && html`<p>${m.texto}</p>`}
+              <div className="cm-rodape"><span>${horaCurta(m.criadaEm)}</span>
+                ${ehSuporte && html`<button type="button" className="nov-ler" onClick=${() => CHAT.marcarOficial(m.id, !m.oficial).catch(e => setErro(e.message))}>${m.oficial ? "Desmarcar oficial" : "Marcar como oficial"}</button>`}
+                ${(minha || ehSuporte) && html`<button type="button" className="nov-ler" onClick=${() => confirm("Apagar esta mensagem?") && CHAT.remover(m.id).catch(e => setErro(e.message))}>Apagar</button>`}</div>
+            </div><//>`; })}
+          <div ref=${fim}></div>
+        </div>
+        ${foto && html`<div className="chat-previa"><img src=${foto.previa} alt="Prévia da foto" /><button type="button" className="nov-ler" onClick=${() => { URL.revokeObjectURL(foto.previa); setFoto(null); }}>Remover foto</button></div>`}
+        <form className="chat-form" onSubmit=${enviar}>
+          <input ref=${arquivo} className="sr" type="file" accept="image/*" capture="environment" onChange=${escolherFoto} tabIndex="-1" />
+          <button type="button" className="chat-foto" aria-label="Enviar foto" title="Enviar foto" onClick=${() => arquivo.current && arquivo.current.click()}>${ic("📷")}</button>
+          <label className="sr" htmlFor="ch-txt">Mensagem</label>
+          <input id="ch-txt" type="text" autoComplete="off" enterKeyHint="send" placeholder="Escreva uma mensagem" value=${txt} onInput=${e => setTxt(e.target.value)} />
+          <button type="submit" className="as-enviar" aria-label="Enviar" disabled=${enviando || (!txt.trim() && !foto)}><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M3.4 20.4 21 12 3.4 3.6 3.4 10l12.6 2-12.6 2z"/></svg></button>
+        </form>
+      </div>
+    </div>`}
+    ${zoom && html`<div className="chat-modal" role="dialog" aria-modal="true" aria-label="Foto ampliada" onClick=${() => setZoom(null)}><img className="chat-zoom" src=${zoom} alt="Foto ampliada" /></div>`}
+    <p className="hint" style=${{ marginTop: "12px" }}>As informações oficiais de calibração são as do portal. No chat, as respostas oficiais do suporte aparecem com o selo “Resposta oficial do suporte”.</p>
+  </div></section>`;
+}
+
+// Acompanha as conversas em segundo plano: contador de não lidas e aviso do navegador fora da página do chat
+function ChatVigia({ naPagina }) {
+  useEffect(() => {
+    if (!CHAT.temSessao()) return;
+    let eu = null, conversas = [], parar = () => {}, vivo = true;
+    const atualizar = async () => { try { conversas = await CHAT.conversas() || []; const g = conversaGeral(conversas); CHAT_ST.naoLidas = g ? g.naoLidas || 0 : 0; avisarChat(); } catch (e) {} };
+    (async () => { try { eu = await CHAT.eu(); } catch (e) { return; } if (!vivo) return; await atualizar();
+      parar = CHAT.assinar((tipo, d) => { const g = conversaGeral(conversas); if (g && d && d.conversaId && d.conversaId !== g.id) return; if (tipo === "mensagem.nova" && d.autor && eu && d.autor.id !== eu.id && !naPagina) notificarNavegador(d, g, eu); if (!naPagina) atualizar(); }); })();
+    const t = setInterval(() => { if (!naPagina) atualizar(); }, 60000);
+    return () => { vivo = false; parar(); clearInterval(t); };
+  }, [naPagina]);
+  return null;
+}
+function BotaoChat() {
+  const n = useChatNaoLidas();
+  return html`<a className="sb-ic sb-chat" href="#/chat" title="Chat CEC" aria-label=${n ? `Chat CEC: ${n} ${n === 1 ? "mensagem não lida" : "mensagens não lidas"}` : "Chat CEC"}>
+    <${Ic} n="chat" />${n > 0 && html`<span className="sino-badge" aria-hidden="true">${n > 9 ? "9+" : n}</span>`}</a>`;
 }
 
 /* ---------- Estrutura ---------- */
@@ -4751,6 +5251,8 @@ function App({ sessao, onSair }) {
     case "videos": pagina = html`<${VideosPagina} params=${params} />`; break;
     case "laudos": pagina = html`<${LaudosPagina} />`; break;
     case "novidades": pagina = html`<${NovidadesPagina} />`; break;
+    case "chat": pagina = html`<${ChatPagina} key="chat" />`; break;
+    case "perfil": pagina = html`<${PerfilPagina} sessao=${sessao} />`; break;
     case "marcas": pagina = html`<${MarcasPagina} />`; break;
     case "modelos": pagina = html`<${ModelosPagina} />`; break;
     case "cobertura": pagina = html`<${CoberturaPagina} />`; break;
@@ -4774,7 +5276,9 @@ function App({ sessao, onSair }) {
         <div className="sb-acoes">
           <a className="sb-ic sb-lupa" href="#/consulta" aria-label="Pesquisar veículo"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" d="M10.5 4a6.5 6.5 0 1 1 0 13 6.5 6.5 0 0 1 0-13zM15.5 15.5 20 20"/></svg></a>
           <${Sino} />
-          <a className="sb-ic" href="#/contato" aria-label="Contato / Suporte ADAS" title="Suporte ADAS"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" d="M4 5.5h16v10H9.5L5.5 19v-3.5H4z"/></svg></a>
+          <${BotaoChat} />
+          <a className="sb-ic" href="#/contato" aria-label="Contato / Suporte ADAS" title="Suporte ADAS"><${Ic} n="question" /></a>
+          <a className="sb-ic sb-perfil" href="#/perfil" title="Meu perfil" aria-label="Meu perfil"><${Ic} n="user" /></a>
           <button type="button" className="sb-ic sb-sair" onClick=${onSair} title=${"Sair (" + sessao.email + ")"} aria-label=${"Sair da conta " + sessao.email}><${Ic} n="logout" /><span>Sair</span></button>
           <button type="button" className="hamb" aria-expanded=${menuAberto} aria-controls="menu-mobile" onClick=${() => setMenuAberto(!menuAberto)}>
             <span aria-hidden="true">${ic(menuAberto ? "✕" : "☰")}</span> <span className="hamb-t">${menuAberto ? "Fechar" : "Menu"}</span>
@@ -4799,7 +5303,8 @@ function App({ sessao, onSair }) {
       ${MENU.map(m => { const on = m.k === "inicio" ? secao === "" : caminhoAtual === m.k; return html`<a key=${m.h} href=${m.h} aria-current=${on ? "page" : undefined}><span aria-hidden="true">${ic(m.i)}</span><span>${m.m}</span></a>`; })}
     </nav>
     <${Toast} />
-    <${Assistente} />
+    ${secao !== "chat" && html`<${Assistente} />`}
+    <${ChatVigia} naPagina=${secao === "chat"} />
   <//>`;
 }
 
