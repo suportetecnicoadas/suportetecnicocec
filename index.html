@@ -1427,6 +1427,48 @@ img.perfil-avatar{object-fit:cover;border:3px solid #FFFFFF;box-shadow:0 0 0 2px
 @media (max-width:480px){.perfil-id{flex-direction:column;align-items:center;text-align:center}.perfil-dados{align-items:center}.perfil-dados .nov-ler{align-self:center}}
 
 @media (min-width:801px){.perfil-grid > .panel:last-child:nth-child(odd){grid-column:1/-1}}
+/* Laudo Scanners: layout simplificado */
+.ld-busca label{display:block;font-weight:600;margin-bottom:6px}
+.ld-campo{display:flex;align-items:center;gap:10px;min-height:52px;padding:0 16px;border:1.5px solid var(--line);border-radius:999px;background:#FFFFFF}
+.ld-campo:focus-within{border-color:#3510B5;box-shadow:0 0 0 3px color-mix(in srgb,#3510B5 18%,transparent)}
+.ld-campo .ic{width:20px;height:20px;color:var(--muted)}
+.ld-campo input{flex:1;min-width:0;border:0;outline:none;font:inherit;font-size:16px;background:transparent}
+.ld-filtros{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+.ld-filtro{min-height:40px;padding:6px 14px;border:1.5px solid var(--line);border-radius:999px;background:#FFFFFF;font:inherit;font-size:14.5px;font-weight:600;color:var(--text);cursor:pointer}
+.ld-filtro span{margin-left:4px;font-weight:700;color:var(--muted)}
+.ld-filtro[aria-pressed="true"]{background:#3510B5;border-color:#3510B5;color:#FFFFFF}
+.ld-filtro[aria-pressed="true"] span{color:#FFFFFF}
+.ld-total{margin:0 0 8px;color:var(--muted);font-size:14px}
+.ld-lista{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.ld-item{background:#FFFFFF;border:1px solid var(--line);border-radius:var(--radius);padding:16px}
+.ld-topo{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}
+.ld-id{display:flex;flex-direction:column}
+.ld-rot{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+.ld-id strong{font-size:22px;color:var(--c-roxo-escuro,#10082F);word-break:break-all}
+.ld-st{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;border-radius:999px;font-size:13.5px;font-weight:700;background:var(--c-cinza,#F5F5F7);color:var(--muted)}
+.ld-st.st-analise{background:var(--amber-bg);color:var(--amber-ink)}
+.ld-st.st-encaminhado{background:color-mix(in srgb,#3510B5 10%,#FFFFFF);color:#3510B5}
+.ld-st.st-resolvido{background:var(--ok-bg);color:var(--ok)}
+.ld-meta{margin:4px 0 10px;color:var(--muted);font-size:14.5px}
+.ld-dl{margin:0 0 12px;display:grid;gap:8px}
+.ld-dl div{background:var(--c-cinza,#F5F5F7);border-radius:10px;padding:8px 12px}
+.ld-dl dt{font-size:12.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+.ld-dl dd{margin:2px 0 0;white-space:pre-wrap}
+.ld-baixar{width:100%;justify-content:center}
+@media (min-width:601px){.ld-dl{grid-template-columns:1fr 1fr}.ld-baixar{width:auto}}
+
+/* Laudo Scanners: lista de PDFs */
+.ld-busca{margin-bottom:14px}
+.ld-linha{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.ld-ic{flex:none;width:44px;height:44px;border-radius:10px;display:grid;place-items:center;background:var(--c-cinza,#F5F5F7);color:#3510B5}
+.ld-ic .ic{width:22px;height:22px}
+.ld-linha .ld-id{flex:1;min-width:160px}
+.ld-meta{display:block;margin:2px 0 0;font-size:14px;color:var(--muted)}
+.ld-arq{display:block;font-size:12.5px;color:var(--muted);word-break:break-word}
+.ld-item .ld-dl{margin:12px 0 0}
+.ld-linha .ld-baixar{flex:none}
+@media (max-width:600px){.ld-linha .ld-baixar{width:100%}}
+
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
@@ -4719,54 +4761,39 @@ const URL_LAUDOS = "https://claude.ai/artifact/56X53wZV9zcuYMBXNiAP1J";
 function LaudosPagina() {
   const st = useRepoPdfs();
   const [q, setQ] = useState("");
-  const [status, setStatus] = useState("");
-  const [ano, setAno] = useState("");
   const laudos = st.laudos || [];
   const ts = tokens(q);
-  const anos = [...new Set(laudos.map(l => String(l.data || "").slice(0, 4)).filter(a => /^\d{4}$/.test(a)))].sort().reverse();
-  const lista = laudos.filter(l => (!status || l.status === status) && (!ano || String(l.data || "").startsWith(ano))
-    && (!ts.length || ts.every(t => norm([l.titulo, l.scanner, l.loja, l.problema, l.atendimento, l.responsavel].join(" ")).includes(t))))
+  const lista = laudos.filter(l => !ts.length || ts.every(t => norm([l.titulo, l.scanner, l.loja, l.problema, l.atendimento].join(" ")).includes(t)))
     .sort((a, b) => String(b.data || "").localeCompare(String(a.data || "")) || a.titulo.localeCompare(b.titulo, "pt-BR"));
-  const modelo = MATERIAIS.concat(CENTRAL.flatMap(c => c.itens || [])).find(m => /laudo/i.test(m.titulo || "") && m.link);
-  const n = s => laudos.filter(l => l.status === s).length;
-  return html`<section className="section"><div className="wrap">
-    <${TituloPagina} t="Laudo Scanners" sub="Laudos técnicos em PDF dos scanners que apresentaram problemas e precisaram do suporte do CEC." />
-    <div className="stats mi-stats">
-      <div className="stat"><b>${laudos.length}</b><span>Laudos</span></div>
-      <div className="stat"><b>${n("analise")}</b><span>Em análise</span></div>
-      <div className="stat"><b>${n("resolvido")}</b><span>Resolvidos</span></div>
+  const falhou = st.pronto && st.status && !st.status.ok && !laudos.length;
+  return html`<section className="section"><div className="wrap narrow">
+    <${TituloPagina} t="Laudo Scanners" sub="Laudos técnicos dos scanners que apresentaram problema e passaram pelo suporte do CEC. Encontre o laudo e baixe o PDF." />
+
+    <div className="ld-busca">
+      <label htmlFor="ld-q">Procure pelo número do scanner ou pelo nome do arquivo</label>
+      <div className="ld-campo">${ic("🔎")}<input id="ld-q" type="search" inputMode="search" autoComplete="off" spellCheck=${false} placeholder="Ex.: 988774097955" value=${q} onInput=${e => setQ(e.target.value)} /></div>
     </div>
-    <div className="filters vid-filtros">
-      <div className="field"><label htmlFor="ld-q">Pesquisar</label><input id="ld-q" type="search" inputMode="search" autoComplete="off" spellCheck=${false} placeholder="Scanner, loja, problema ou atendimento" value=${q} onInput=${e => setQ(e.target.value)} /></div>
-      <div className="field"><label htmlFor="ld-s">Status</label><select id="ld-s" value=${status} onChange=${e => setStatus(e.target.value)}><option value="">Todos</option><option value="analise">Em análise</option><option value="encaminhado">Encaminhado</option><option value="resolvido">Resolvido</option></select></div>
-      <div className="field"><label htmlFor="ld-a">Ano da ocorrência</label><select id="ld-a" value=${ano} onChange=${e => setAno(e.target.value)}><option value="">Todos</option>${anos.map(a => html`<option key=${a} value=${a}>${a}</option>`)}</select></div>
-    </div>
-    <${StatusRepo} st=${st} />
-    ${lista.length ? html`<div className="mi-grid">${lista.map(l => html`<article className="mi-card laudo" key=${l.id}>
-        <${PdfThumb} link=${l.link} titulo=${l.titulo} rotulo="Laudo técnico" />
-        <div className="mi-body">
-          <p className="mat-tags">${l.status && html`<span className=${"tag st-" + l.status}>${ROT_STATUS_LAUDO[l.status] || l.status}</span>`}${l.data && html`<span className="tag">${dataBR(l.data)}</span>`}${l.loja && html`<span className="tag">${l.loja}</span>`}</p>
-          <h3>${l.scanner ? "Scanner " + l.scanner : l.titulo}</h3>
-          ${l.scanner && l.titulo !== "Scanner " + l.scanner && html`<p className="hint">${l.titulo}</p>`}
-          <dl className="laudo-dl">
-            <dt>Problema</dt><dd>${l.problema || "Não informado."}</dd>
-            <dt>Atendimento realizado pelo CEC</dt><dd>${l.atendimento || "Não informado."}</dd>
-            ${l.responsavel && html`<dt>Responsável</dt><dd>${l.responsavel}</dd>`}
-          </dl>
-          <div className="mi-acoes"><a className="btn primary" href=${RAW_DE(l.link)} target="_blank" rel="noopener noreferrer">⬇ Baixar PDF</a></div>
-        </div>
-      </article>`)}</div>`
-      : html`<div className="empty">${laudos.length ? "Nenhum laudo corresponde à pesquisa ou aos filtros." : st.pronto ? "Ainda não há laudos no GitHub. Coloque os PDFs dos laudos numa pasta chamada laudos no repositório." : "Procurando laudos no GitHub…"}</div>`}
-    <details className="panel laudo-ajuda">
-      <summary><strong>Como incluir um laudo</strong></summary>
-      <ol className="mi-passos">
-        <li>No repositório do GitHub, coloque o PDF do laudo dentro de uma pasta chamada <strong>laudos</strong>.</li>
-        <li>Se quiser, use no nome do arquivo o número do scanner e a data, como <code>Laudo 988774097955 2026-04-29.pdf</code>: o portal reconhece os dois.</li>
-        <li>Para informar loja, problema, atendimento e status, acrescente o laudo no arquivo <strong>laudos.json</strong> (na mesma pasta ou na raiz), com os campos <code>arquivo</code>, <code>scanner</code>, <code>data</code> (AAAA-MM-DD), <code>loja</code>, <code>problema</code>, <code>atendimento</code>, <code>status</code> (analise, encaminhado ou resolvido) e <code>responsavel</code>.</li>
-      </ol>
-      ${modelo && html`<p><a className="btn" href=${RAW_DE(modelo.link)} target="_blank" rel="noopener noreferrer">⬇ Baixar o checklist do laudo técnico</a></p>`}
-      <p className="hint">Atenção: os arquivos de um repositório público podem ser abertos por qualquer pessoa que tenha o link.</p>
-    </details>
+
+    ${!st.pronto ? html`<p className="hint ld-total">Carregando os laudos…</p>`
+      : falhou ? html`<div className="alert atencao" role="note"><p>Não foi possível carregar os laudos agora. Tente de novo em alguns minutos.</p><p><button type="button" className="btn" onClick=${recarregarRepo}>Tentar de novo</button></p></div>`
+      : !laudos.length ? html`<div className="empty">Ainda não há laudos publicados.</div>`
+      : !lista.length ? html`<div className="empty">Nenhum laudo encontrado. Confira o número do scanner.</div>`
+      : html`<p className="ld-total">${lista.length} ${lista.length === 1 ? "laudo" : "laudos"}${ts.length ? (lista.length === 1 ? " encontrado" : " encontrados") : ""}</p>
+        <ul className="ld-lista">${lista.map(l => html`<li className="ld-item" key=${l.id}>
+          <div className="ld-linha">
+            <span className="ld-ic" aria-hidden="true">${ic("📄")}</span>
+            <div className="ld-id">
+              ${l.scanner ? html`<span className="ld-rot">Scanner</span><strong>${l.scanner}</strong>` : html`<strong>${l.titulo}</strong>`}
+              ${(l.data || l.loja) && html`<span className="ld-meta">${[l.data && dataBR(l.data), l.loja].filter(Boolean).join(" · ")}</span>`}
+              ${l.scanner && html`<span className="ld-arq">${l.titulo}</span>`}
+            </div>
+            <a className="btn primary ld-baixar" href=${RAW_DE(l.link)} target="_blank" rel="noopener noreferrer">⬇ Baixar PDF</a>
+          </div>
+          ${(l.problema || l.atendimento) && html`<dl className="ld-dl">
+            ${l.problema && html`<div><dt>Problema</dt><dd>${l.problema}</dd></div>`}
+            ${l.atendimento && html`<div><dt>O que o CEC fez</dt><dd>${l.atendimento}</dd></div>`}
+          </dl>`}
+        </li>`)}</ul>`}
   </div></section>`;
 }
 
