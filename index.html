@@ -1469,6 +1469,11 @@ img.perfil-avatar{object-fit:cover;border:3px solid #FFFFFF;box-shadow:0 0 0 2px
 .ld-linha .ld-baixar{flex:none}
 @media (max-width:600px){.ld-linha .ld-baixar{width:100%}}
 
+.as-mats{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:8px}
+.as-mats li{display:flex;flex-direction:column;gap:4px;padding:8px;border:1px solid var(--line);border-radius:10px}
+.as-mats small{color:var(--muted);font-size:12.5px}
+.as-mats .btn{align-self:flex-start;min-height:34px;padding:4px 12px;font-size:13.5px}
+
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
@@ -2203,6 +2208,8 @@ img.perfil-avatar{object-fit:cover;border:3px solid #FFFFFF;box-shadow:0 0 0 2px
     { id: "avaliacao", nome: "Teste seu conhecimento", icone: "📝" }
   ];
   // Links do Portal CEC informados pela equipe Autoglass
+  // Público de cada vídeo (campo publico): "propria" (lojas Autoglass, padrão), "credenciada" ou "todos".
+  // Os vídeos abaixo são exclusivos das lojas Autoglass; os das credenciadas entram com publico: "credenciada".
   const CEC = "https://www.cecautoglass.com.br/course/";
   const videos = [
     // Conteúdos completos
@@ -2243,6 +2250,7 @@ img.perfil-avatar{object-fit:cover;border:3px solid #FFFFFF;box-shadow:0 0 0 2px
      O id precisa ser único: é ele que marca a novidade como lida no navegador.
      ========================================================== */
   const novidades = [
+    { id: "2026-11-04-acessos", data: "2026-11-04", tipo: "novo", titulo: "Acesso para lojas Autoglass e credenciados", descricao: "Lojas Autoglass entram com o e-mail @autoglass.com.br; credenciados entram com o CNPJ da loja. Cada acesso mostra as páginas do seu perfil de operação." },
     { id: "2026-11-04-perfil", data: "2026-11-04", tipo: "novo", titulo: "Meu perfil", descricao: "Novo perfil com seus dados, foto, fichas favoritas, últimos acessos e pesquisas recentes. Use o botão Favoritar na ficha do veículo e acesse pelo ícone de pessoa no topo.", link: "#/perfil" },
     { id: "2026-11-04-chat", data: "2026-11-04", tipo: "novo", titulo: "Chat CEC (em preparação)", descricao: "Chat geral entre lojas próprias e credenciadas, com fotos tiradas pelo celular, busca no histórico e avisos de novas mensagens. Por enquanto funciona em modo de demonstração, até a ligação com o servidor da Autoglass.", link: "#/chat" },
     { id: "2026-11-03-assistente", data: "2026-11-03", tipo: "novo", titulo: "Assistente Zayon", descricao: "Botão no canto da tela para perguntar sobre um veículo ou dúvida. O Assistente Zayon responde com as informações cadastradas no portal." },
@@ -2852,13 +2860,13 @@ function FavBotao({ id }) {
 
 function PerfilPagina({ sessao }) {
   usePerfil();
-  const dados = lerLS(PERFIL.dados, { nome: "", loja: "", tipo: "propria" });
+  const dados = { ...lerLS(PERFIL.dados, { nome: "", loja: "" }), tipo: ACESSO };
   const [editando, setEditando] = useState(!dados.nome);
   const [form, setForm] = useState(dados);
   const favs = lerLS(PERFIL.fav, []).map(porId).filter(Boolean);
   const hist = lerLS(PERFIL.hist, []).map(h => ({ ...h, v: porId(h.id) })).filter(h => h.v);
   const buscas = lerLS(PERFIL.buscas, []);
-  const iniciais = (dados.nome || sessao.email).split(/[\s@.]+/).filter(Boolean).slice(0, 2).map(p => p[0].toUpperCase()).join("");
+  const iniciais = (dados.nome || (ACESSO === "credenciada" ? "Credenciado" : sessao.email)).split(/[\s@.]+/).filter(p => /^[a-zà-ú]/i.test(p)).slice(0, 2).map(p => p[0].toUpperCase()).join("") || "?";
   const salvar = e => { e.preventDefault(); gravarLS(PERFIL.dados, { ...lerLS(PERFIL.dados, {}), nome: form.nome.trim(), loja: form.loja.trim(), tipo: form.tipo }); setEditando(false); toast("Dados do perfil salvos."); };
   const fotoRef = useRef(null);
   const escolherFoto = async e => {
@@ -2880,15 +2888,13 @@ function PerfilPagina({ sessao }) {
       ${editando ? html`<form className="perfil-form" onSubmit=${salvar}>
           <div className="field"><label htmlFor="pf-nome">Nome</label><input id="pf-nome" value=${form.nome} onInput=${e => setForm({ ...form, nome: e.target.value })} placeholder="Seu nome" autoComplete="name" /></div>
           <div className="field"><label htmlFor="pf-loja">Loja</label><input id="pf-loja" value=${form.loja} onInput=${e => setForm({ ...form, loja: e.target.value })} placeholder="Nome ou cidade da loja" /></div>
-          <fieldset className="field perfil-tipo"><legend>Tipo de operação</legend>
-            <label><input type="radio" name="pf-tipo" checked=${form.tipo === "propria"} onChange=${() => setForm({ ...form, tipo: "propria" })} /> Autoglass</label>
-            <label><input type="radio" name="pf-tipo" checked=${form.tipo === "credenciada"} onChange=${() => setForm({ ...form, tipo: "credenciada" })} /> Credenciado</label></fieldset>
+          <p className="hint">Tipo de acesso: <${SeloOperacao} u=${{ tipoOperacao: ACESSO }} /> (definido pelo login)</p>
           <div className="perfil-acoes"><button type="submit" className="btn primary">Salvar</button>${dados.nome && html`<button type="button" className="btn ghost" onClick=${() => { setForm(dados); setEditando(false); }}>Cancelar</button>`}</div>
         </form>`
         : html`<div className="perfil-dados">
           <strong>${dados.nome}</strong>
           <span>${dados.loja || "Loja não informada"} <${SeloOperacao} u=${{ tipoOperacao: dados.tipo }} /></span>
-          <span className="hint">${sessao.email}</span>
+          <span className="hint">${sessao.perfil === "credenciada" ? "CNPJ " + sessao.email : sessao.email}</span>
           <button type="button" className="nov-ler" onClick=${() => { setForm(dados); setEditando(true); }}>Editar dados</button>
         </div>`}
     </div>
@@ -3143,6 +3149,27 @@ const ic = e => { const k = ICON_DE[String(e || "").trim()]; return k ? html`<${
 // Texto que começa com emoji conhecido (“🎯 Alvo”) → ícone + texto
 const rotIc = t => { const m = /^(\S+)\s+(.*)$/.exec(String(t || "")); return m && ICON_DE[m[1]] ? html`<span className="ic-txt">${ic(m[1])}${m[2]}</span>` : t; };
 
+/* ---------- Perfis de acesso ----------
+   Loja própria (e-mail @autoglass.com.br): portal completo.
+   Credenciada (CNPJ): sem Materiais Instrutivos e Laudo Scanners.
+   Separação visual, até a base de dados da TI conferir o acesso no servidor. */
+let ACESSO = "propria";
+const ehCredenciada = () => ACESSO === "credenciada";
+const SECOES_SO_PROPRIA = ["materiais", "laudos"];
+const navAtual = () => ehCredenciada() ? NAV.filter(n => !SECOES_SO_PROPRIA.includes(n.id)) : NAV;
+const linkPermitido = h => !ehCredenciada() || !SECOES_SO_PROPRIA.some(s => String(h || "").startsWith("#/" + s));
+const formatarCNPJ = d => d.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5");
+
+// Todos os materiais (tutoriais, PDFs cadastrados e PDFs do GitHub) para o Assistente Zayon
+function todosMateriais() {
+  return [
+    ...CENTRAL.flatMap(c => c.itens || []),
+    ...MATERIAIS.map(m => ({ id: m.id, tipo: "pdf", titulo: m.titulo, resumo: m.descricao, link: m.link,
+      aplicacao: m.marcas ? m.marcas.join(", ") : m.veiculos.map(porId).filter(Boolean).map(nomeVeiculo).join(", ") })),
+    ...REPO_STATE.lista
+  ];
+}
+
 /* Veículos "mais acessados" da página inicial: lista definida pela equipe Autoglass
    (não há contagem real de acessos). Para mudar, edite os itens abaixo. */
 const MAIS_ACESSADOS = [
@@ -3229,7 +3256,7 @@ function Inicio() {
           <p>Consulte caminhos de calibração, medidas, alvos, checklists e orientações técnicas cadastrados pela equipe de suporte técnico ADAS do <strong>Grupo Autoglass</strong>.</p>
           <p><strong>Escolha o recurso desejado.</strong></p>
         </div>
-        <div className="dl-btns">${atalhos.map(a => html`<a className="pill-btn" key=${a.t} href=${a.h}><span className="pb-ic" aria-hidden="true">${ic(a.em)}</span>${a.t}</a>`)}</div>
+        <div className="dl-btns">${atalhos.filter(a => linkPermitido(a.h)).map(a => html`<a className="pill-btn" key=${a.t} href=${a.h}><span className="pb-ic" aria-hidden="true">${ic(a.em)}</span>${a.t}</a>`)}</div>
       </div>
     </div></section>
 
@@ -3381,7 +3408,7 @@ function Veiculo({ id, params }) {
   useEffect(() => { if (v) registrarAcesso(v.id); }, [id]);
   const repoVeic = useRepoPdfs().lista.filter(x => v && (x.veiculo === v.id || (!x.veiculo && x.marca === v.marca)));
   // Todo o material instrutivo do veículo: PDFs cadastrados, tutoriais com imagens e PDFs do GitHub
-  const matsVeic = !v ? [] : (() => {
+  const matsVeic = !v || ehCredenciada() ? [] : (() => {
     const doVeic = it => it.veiculo ? it.veiculo === v.id : MARCAS.some(m => m === v.marca && norm(it.aplicacao || "").split(/\s+/).includes(norm(m)));
     const fixos = materiaisDe(v).map(m => {
       const veics = m.veiculos.map(porId).filter(Boolean);
@@ -3420,7 +3447,7 @@ function Veiculo({ id, params }) {
       <h1>${v.modelo}</h1>
       <${FavBotao} id=${v.id} />
     </header>
-    <div className="alert info" role="note"><p>${ic("ℹ️")} Ficha criada para reunir o material instrutivo deste veículo. Ainda não há informações de calibração ADAS cadastradas (tipo, caminho, alvo e medidas).</p></div>
+    <div className="alert info" role="note"><p>${ic("ℹ️")} ${ehCredenciada() ? "Ainda não há informações de calibração ADAS cadastradas para este veículo." : "Ficha criada para reunir o material instrutivo deste veículo. Ainda não há informações de calibração ADAS cadastradas (tipo, caminho, alvo e medidas)."}</p></div>
     ${matsVeic.length > 0 && html`<section className="panel" id="sec-materiais" aria-labelledby="h-materiais">
       <div className="panel-head"><h2 id="h-materiais"><span aria-hidden="true">${ic("📄")}</span>Material instrutivo</h2><a className="btn ghost" href="#/materiais">Todos os materiais</a></div>
       <div className="mi-grid">${matsVeic.map(it => html`<${MaterialItem} key=${it.id} it=${{ ...it, naFicha: it.veiculo === v.id }} />`)}</div>
@@ -3811,7 +3838,7 @@ function Sobre() {
     <p>O Suporte Técnico - CEC reúne, em um só lugar, as informações de calibração ADAS mantidas pela equipe de suporte técnico do Grupo Autoglass. Lojas próprias, credenciadas e técnicos encontram a resposta em poucos cliques, e o suporte se concentra nos casos mais complexos.</p>
 
     <h2 className="sobre-h2">O que você encontra</h2>
-    <div className="sobre-grid">${recursos.map(r => html`<a className="sobre-card" key=${r.t} href=${r.h}>
+    <div className="sobre-grid">${recursos.filter(r => linkPermitido(r.h)).map(r => html`<a className="sobre-card" key=${r.t} href=${r.h}>
       <span className="sobre-ic" aria-hidden="true">${ic(r.i)}</span>
       <span><strong>${r.t}</strong><span>${r.d}</span></span>
     </a>`)}</div>
@@ -3894,7 +3921,7 @@ function MenuDesktop({ ativo, atual }) {
   }, []);
   useEffect(() => setAberto(null), [atual]);
   return html`<nav className="menubar" aria-label="Menu principal" ref=${ref}><div className="wrap"><ul className="menu">
-    ${NAV.map(n => n.itens
+    ${navAtual().map(n => n.itens
       ? html`<li key=${n.id} className=${"menu-item" + (aberto === n.id ? " open" : "") + (ativo === n.id ? " active" : "")}
           onPointerEnter=${e => { if (e.pointerType === "mouse") { porHover.current = true; setAberto(n.id); } }}
           onPointerLeave=${e => { if (e.pointerType === "mouse") { porHover.current = false; setAberto(null); } }}>
@@ -3917,7 +3944,7 @@ function MenuMobile({ ativo, atual, fechar, email, onSair }) {
   return html`<div className="mmenu-wrap">
     <div className="mmenu-fundo" onClick=${fechar} aria-hidden="true"></div>
     <nav className="mmenu" id="menu-mobile" aria-label="Menu principal">
-      <ul>${NAV.map(n => n.itens
+      <ul>${navAtual().map(n => n.itens
         ? html`<li key=${n.id} className=${"mm-sec" + (ativo === n.id ? " active" : "")}>
             <button type="button" className="mm-top" aria-expanded=${abertos.has(n.id)} onClick=${() => alternar(n.id)}>
               <span aria-hidden="true">${ic(n.i)}</span><span className="mm-t">${n.t}</span><span className="caret" aria-hidden="true">▾</span>
@@ -4596,7 +4623,10 @@ function iniciarVideos() {
 function useVideos() {
   const [st, setSt] = useState({ ...VIDEO_STATE });
   useEffect(() => { videoSubs.add(setSt); iniciarVideos(); setSt({ ...VIDEO_STATE }); return () => { videoSubs.delete(setSt); }; }, []);
+  // Cada acesso vê só os vídeos do seu público (sem o campo, o vídeo é das lojas Autoglass)
+  const publicoOk = x => { const pub = x.publico || "propria"; return pub === "todos" || pub === (ehCredenciada() ? "credenciada" : "propria"); };
   const todos = [...(DADOS.videos || []).map(x => ({ ...x, origem: "base" })), ...st.lista]
+    .filter(publicoOk)
     .sort((a, b) => (a.titulo || "").localeCompare(b.titulo || "", "pt-BR"));
   return { ...st, todos };
 }
@@ -4740,7 +4770,7 @@ function VideosPagina({ params }) {
     ${form && html`<${VideoForm} key=${form.id || "novo"} inicial=${form} db=${db} onFechar=${() => setForm(null)} />`}
     ${!pronto && !todos.length ? html`<p className="hint">Carregando vídeos…</p>`
       : lista.length ? html`<div className="mi-grid">${lista.map(x => html`<${VideoCard} key=${x.origem + x.id} x=${x} podeEditar=${podeEditar} onEditar=${setForm} onExcluir=${excluir} />`)}</div>`
-      : html`<div className="empty">${todos.length ? "Nenhum vídeo corresponde aos filtros." : "Ainda não há vídeos cadastrados. Os vídeos são incluídos pela equipe do Suporte Técnico - CEC com o link do Portal CEC."}</div>`}
+      : html`<div className="empty">${todos.length ? "Nenhum vídeo corresponde aos filtros." : ehCredenciada() ? "Os vídeos para lojas credenciadas serão publicados em breve." : "Ainda não há vídeos cadastrados. Os vídeos são incluídos pela equipe do Suporte Técnico - CEC com o link do Portal CEC."}</div>`}
   </div></section>`;
 }
 
@@ -4815,6 +4845,7 @@ function useNovidades() {
   const vistos = new Set();
   const todas = [...(repo.novidades || []), ...(DADOS.novidades || [])]
     .filter(n => n && n.id && n.titulo && !vistos.has(n.id) && vistos.add(n.id))
+    .filter(n => !ehCredenciada() || (linkPermitido(n.link) && !/material|laudo|pdf/i.test(n.titulo + " " + (n.descricao || ""))))
     .map((n, i) => ({ ...n, _i: i }))
     .sort((a, b) => String(b.data || "").localeCompare(String(a.data || "")) || a._i - b._i);
   return { todas, lidas, naoLidas: todas.filter(n => !lidas.has(n.id)) };
@@ -4894,6 +4925,20 @@ function assistResponder(q) {
   if (/(falar com|atendente|atendimento|whats|zap|telefone|contato|ligar para|numero do suporte|suporte tecnico|chamar o suporte|acionar o suporte|^suporte\??$)/.test(n)) return { tipo: "contato" };
   if (/^(oi|ola|bom dia|boa tarde|boa noite|e ai|eai|hello|opa)\b/.test(n) && tokens(q).length <= 3) return { tipo: "saudacao" };
   if (/^(obrigad|valeu|vlw|show|beleza|ok)\b/.test(n)) return { tipo: "agradece" };
+  // Materiais instrutivos e laudos: só para loja própria
+  if (!ehCredenciada()) {
+    const tsM = tokens(q).filter(t => !["pdf", "material", "materiais", "manual", "tutorial", "instrutivo", "laudo", "laudos", "de", "do", "da"].includes(t));
+    if (/\blaudo/.test(n)) {
+      const ls = (REPO_STATE.laudos || []).filter(l => !tsM.length || tsM.every(t => norm([l.titulo, l.scanner, l.loja].join(" ")).includes(t))).slice(0, 5);
+      return { tipo: "laudos", itens: ls };
+    }
+    const pedeMaterial = /\b(pdf|material|materiais|manual|tutorial|instrutivo)\b/.test(n);
+    if (pedeMaterial || tsM.length) {
+      const ms = todosMateriais().filter(m => tsM.length && tsM.every(t => norm([m.titulo, m.aplicacao, m.resumo].join(" ")).includes(t))).slice(0, 5);
+      if (ms.length && (pedeMaterial || !buscar(q).length)) return { tipo: "materiais", itens: ms };
+      if (pedeMaterial && !ms.length) return { tipo: "materiais", itens: [] };
+    }
+  }
   const r = buscar(q);
   if (!r.length) return { tipo: "nada" };
   const genericas = new Set(["calibra", "calibracao", "calibrar", "veiculo", "carro", "camera", "adas"]);
@@ -4915,6 +4960,14 @@ function RespostaAssist({ r, perguntar }) {
   if (r.tipo === "agradece") return html`<p>Por nada! Se precisar, é só perguntar de novo.</p>`;
   if (r.tipo === "nada") return html`<div><p>Não encontrei essa informação no portal. Tente com a marca e o modelo do veículo, por exemplo <em>caminho da calibração do Corolla</em>. Você também pode perguntar assim:</p>
     <div className="as-chips">${ASSIST_SUGESTOES.map(s => html`<button type="button" key=${s} className="as-chip" onClick=${() => perguntar(s)}>${s}</button>`)}</div></div>`;
+  if (r.tipo === "materiais") return r.itens.length ? html`<div><p>Encontrei estes materiais instrutivos:</p>
+    <ul className="as-mats">${r.itens.map(m => html`<li key=${m.id}><strong>${m.titulo}</strong>${m.aplicacao && html`<small>${m.aplicacao}</small>`}
+      ${m.link ? html`<a className="btn primary" href=${RAW_DE(m.link)} target="_blank" rel="noopener noreferrer">⬇ Baixar PDF</a>` : html`<a className="btn" href="#/materiais">Ver em Materiais</a>`}</li>`)}</ul></div>`
+    : html`<div><p>Não encontrei esse material. Veja todos em <a href="#/materiais">Materiais Instrutivos</a>.</p></div>`;
+  if (r.tipo === "laudos") return r.itens.length ? html`<div><p>Encontrei estes laudos:</p>
+    <ul className="as-mats">${r.itens.map(l => html`<li key=${l.id}><strong>${l.scanner ? "Scanner " + l.scanner : l.titulo}</strong>${l.data && html`<small>${dataBR(l.data)}</small>`}
+      <a className="btn primary" href=${RAW_DE(l.link)} target="_blank" rel="noopener noreferrer">⬇ Baixar PDF</a></li>`)}</ul></div>`
+    : html`<div><p>Não encontrei esse laudo. Veja todos em <a href="#/laudos">Laudo Scanners</a>.</p></div>`;
   if (r.tipo === "lista") return html`<div><p>Encontrei estes veículos. Qual deles?</p>
     <div className="as-chips">${r.itens.map(v => html`<button type="button" key=${v.id} className="as-chip" onClick=${() => perguntar(`${v.marca} ${v.modelo}`)}>${nomeVeiculo(v)}</button>`)}</div></div>`;
   if (r.tipo === "regras") return html`<div>${r.itens.map(g => html`<div className="as-regra" key=${g.id}><strong>${g.pergunta}</strong><p>${g.resposta}</p></div>`)}
@@ -5094,7 +5147,7 @@ function criarChatDemo() {
   return {
     demo: true,
     temSessao: () => true,
-    entrar: async () => eu, eu: async () => eu, sair: async () => {},
+    entrar: async () => (eu.tipoOperacao = ACESSO, eu), eu: async () => (eu.tipoOperacao = ACESSO, eu), sair: async () => {},
     usuarios: async q => pessoas.filter(p => p.id !== eu.id && norm(p.nome + " " + p.loja).includes(norm(q || ""))),
     conversas: async () => st.conversas.map(resumo).sort((a, b) => String(b.atualizadoEm).localeCompare(String(a.atualizadoEm))),
     async criarConversa({ tipo, nome, participantes }) {
@@ -5298,7 +5351,8 @@ function App({ sessao, onSair }) {
   const atual = "#" + chave;
   const caminhoAtual = "/" + secao;
   let pagina;
-  switch (secao) {
+  if (SECOES_SO_PROPRIA.includes(secao) && ehCredenciada()) pagina = html`<${EmDesenvolvimento} titulo="Página não disponível" texto="Esta página não está disponível para o seu acesso." />`;
+  else switch (secao) {
     case "consulta": pagina = html`<${Consulta} params=${params} />`; break;
     case "veiculo": pagina = html`<${Veiculo} id=${partes[1]} params=${params} />`; break;
     case "checklist": pagina = html`<${ChecklistPagina} />`; break;
@@ -5376,11 +5430,15 @@ const SENHA_PADRAO = "1234";
 const SESSAO_CHAVE = "cec_sessao";
 const SESSAO_MS = 8 * 60 * 60 * 1000; // 8 horas sem uso encerram a sessão
 function lerSessao() {
-  try { const s = JSON.parse(localStorage.getItem(SESSAO_CHAVE) || "null"); if (s && s.email && s.exp > Date.now() && LOGIN_DOMINIO.test(s.email)) return s; } catch (e) {}
+  try { const s = JSON.parse(localStorage.getItem(SESSAO_CHAVE) || "null");
+    if (s && s.email && s.exp > Date.now()) {
+      if (s.perfil === "credenciada" && /^\d{14}$/.test(s.email)) return s;
+      if (s.perfil !== "credenciada" && LOGIN_DOMINIO.test(s.email)) return { ...s, perfil: "propria" };
+    } } catch (e) {}
   return null;
 }
-function gravarSessao(email) {
-  const s = { email, exp: Date.now() + SESSAO_MS };
+function gravarSessao(email, perfil) {
+  const s = { email, perfil: perfil || "propria", exp: Date.now() + SESSAO_MS };
   try { localStorage.setItem(SESSAO_CHAVE, JSON.stringify(s)); } catch (e) {}
   return s;
 }
@@ -5394,10 +5452,19 @@ function Login({ onEntrar }) {
   const entrar = e => {
     e.preventDefault();
     const em = email.trim().toLowerCase();
-    if (!em || !senha) return setErro("Informe o e-mail e a senha.");
-    if (!LOGIN_DOMINIO.test(em)) return setErro("Acesso permitido apenas para e-mails corporativos @autoglass.com.br.");
+    if (!em || !senha) return setErro("Informe o e-mail ou o CNPJ e a senha.");
+    let id, perfil;
+    if (em.includes("@")) {
+      if (!LOGIN_DOMINIO.test(em)) return setErro("Para lojas próprias, use o e-mail corporativo @autoglass.com.br.");
+      id = em; perfil = "propria";
+    } else {
+      const d = em.replace(/\s+/g, "");
+      if (!/^\d+$/.test(d)) return setErro("Digite o CNPJ só com números, sem pontos, barra ou traço.");
+      if (d.length !== 14) return setErro("O CNPJ precisa ter 14 dígitos.");
+      id = d; perfil = "credenciada";
+    }
     if (senha !== SENHA_PADRAO) return setErro("Senha incorreta.");
-    onEntrar(em);
+    onEntrar(id, perfil);
   };
   return html`<main className="login">
     <svg className="login-cena" viewBox="0 0 1000 320" preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false">
@@ -5419,9 +5486,9 @@ function Login({ onEntrar }) {
     <form className="login-card" onSubmit=${entrar} noValidate=${true}>
       <img className="login-logo" src=${LOGO_GRUPO} alt="Grupo Autoglass" width="609" height="68" />
       <h1>Suporte Técnico - CEC</h1>
-      <p className="login-sub">Acesso exclusivo para colaboradores com e-mail corporativo @autoglass.com.br.</p>
-      <div className="field"><label htmlFor="lg-email">E-mail corporativo</label>
-        <input id="lg-email" type="email" inputMode="email" autoComplete="username" autoCapitalize="off" spellCheck=${false} placeholder="nome@autoglass.com.br" value=${email} onInput=${e => { setEmail(e.target.value); setErro(""); }} /></div>
+      <p className="login-sub"><strong>Lojas Autoglass:</strong> entre com o e-mail @autoglass.com.br.<br /><strong>Credenciados:</strong> entre com o CNPJ da loja, só os 14 números.</p>
+      <div className="field"><label htmlFor="lg-email">E-mail corporativo ou CNPJ</label>
+        <input id="lg-email" type="text" autoComplete="username" autoCapitalize="off" spellCheck=${false} placeholder="E-mail ou CNPJ" value=${email} onInput=${e => { setEmail(e.target.value); setErro(""); }} /></div>
       <div className="field"><label htmlFor="lg-senha">Senha</label>
         <div className="lg-senha"><input id="lg-senha" type=${ver ? "text" : "password"} autoComplete="current-password" value=${senha} onInput=${e => { setSenha(e.target.value); setErro(""); }} />
           <button type="button" className="btn ghost" aria-pressed=${ver} onClick=${() => setVer(!ver)}>${ver ? "Ocultar" : "Mostrar"}</button></div></div>
@@ -5439,13 +5506,14 @@ function Raiz() {
     const renovar = () => {
       const s = lerSessao();
       if (!s) { setSessao(null); return; }
-      if (s.exp - Date.now() < SESSAO_MS - 60000) gravarSessao(s.email);
+      if (s.exp - Date.now() < SESSAO_MS - 60000) gravarSessao(s.email, s.perfil);
     };
     const eventos = ["hashchange", "click", "keydown", "focus"];
     eventos.forEach(ev => window.addEventListener(ev, renovar));
     return () => eventos.forEach(ev => window.removeEventListener(ev, renovar));
   }, [sessao]);
-  if (!sessao) return html`<${Login} onEntrar=${em => setSessao(gravarSessao(em))} />`;
+  ACESSO = sessao ? sessao.perfil || "propria" : "propria";
+  if (!sessao) return html`<${Login} onEntrar=${(id, perfil) => setSessao(gravarSessao(id, perfil))} />`;
   return html`<${App} sessao=${sessao} onSair=${() => { encerrarSessao(); setSessao(null); }} />`;
 }
 
