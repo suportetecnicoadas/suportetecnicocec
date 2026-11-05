@@ -1785,6 +1785,7 @@ img.perfil-avatar{object-fit:cover;border:3px solid #FFFFFF;box-shadow:0 0 0 2px
     V("Toyota", "Etios", { soMaterial: true }),
     V("Toyota", "Prius", { soMaterial: true }),
     V("Volkswagen", "Bora", { soMaterial: true }),
+    V("Volkswagen", "Delivery", { soMaterial: true, apelidos: ["CAM 680", "Caminhão 680"] }),
     V("Volkswagen", "Constellation", { soMaterial: true, apelidos: ["Constellatons"] }),
     V("Volkswagen", "Fox", { soMaterial: true }),
     V("Volkswagen", "Fusca", { soMaterial: true }),
@@ -4616,8 +4617,11 @@ function montarRepo(arquivos, meta) {
     const auto = classificarArquivo(a.name);
     // O materiais.json tem prioridade; sem ele, a organização vem do nome do arquivo
     const cat = CENTRAL.some(c => c.id === m.categoria) ? m.categoria : auto.categoria && CENTRAL.some(c => c.id === auto.categoria) ? auto.categoria : "calibracao";
-    const veicJson = m.montadora && (m.modelos || []).length ? VEICULOS.find(v => norm(v.marca) === norm(m.montadora) && norm(v.modelo) === norm(m.modelos[0])) : null;
-    const veic = veicJson || (m.montadora ? null : auto.veiculo);
+    // materiais.json: montadora e modelo escritos de qualquer jeito ("VW", "Saveiro 2010") passam pelo mesmo reconhecimento dos nomes de arquivo
+    const doJson = m.montadora || (m.modelos || []).length ? classificarArquivo([m.montadora, ...(m.modelos || [])].filter(Boolean).join(" ")) : null;
+    const veicJson = doJson && doJson.veiculo;
+    // Se o materiais.json não identificar o veículo, vale o reconhecimento pelo nome do arquivo
+    const veic = veicJson || auto.veiculo;
     const marca = m.montadora || (veic ? veic.marca : auto.marca);
     const aplicacao = m.montadora ? [m.montadora, (m.modelos || []).join(", ")].filter(Boolean).join(" ") : [veic ? nomeVeiculo(veic) : auto.marca, auto.ano].filter(Boolean).join(" ");
     return { id: "repo-" + a.sha, tipo: "pdf", categoria: cat, titulo: m.titulo || limparNome(a.name), resumo: m.descricao || "",
