@@ -1479,6 +1479,20 @@ img.perfil-avatar{object-fit:cover;border:3px solid #FFFFFF;box-shadow:0 0 0 2px
 
 .result.mat-res{border-left:4px solid #3510B5}
 .result.mat-res h3{margin:6px 0 2px}
+/* Botão da Área do Credenciado */
+.sb-area-cred{display:none;align-items:center;gap:6px;min-height:36px;padding:0 12px;border-radius:8px;background:#FFFFFF;color:#3510B5;font-weight:600;font-size:14px;text-decoration:none;white-space:nowrap}
+.sb-area-cred .ic{width:18px;height:18px}
+@media (min-width:801px){.sb-area-cred{display:inline-flex}}
+.area-cred{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px 16px;border-radius:14px;background:#3510B5;color:#FFFFFF;text-decoration:none;box-shadow:0 8px 22px rgba(53,16,181,.25)}
+.ac-ic{flex:none;width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:rgba(255,255,255,.16)}
+.ac-ic .ic{width:24px;height:24px}
+.ac-txt{flex:1;min-width:0;display:flex;flex-direction:column}
+.ac-txt strong{font-size:17px}
+.ac-txt small{font-size:13.5px;opacity:.9}
+.ac-seta{flex:none;font-size:22px;font-weight:700}
+.mm-area-cred .mm-top{color:#3510B5;font-weight:700}
+@media (hover:hover) and (pointer:fine){.area-cred:hover{background:#2A0C92}.sb-area-cred:hover{background:#F0EDFC}}
+
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
@@ -3368,6 +3382,7 @@ const rotIc = t => { const m = /^(\S+)\s+(.*)$/.exec(String(t || "")); return m 
    Separação visual, até a base de dados da TI conferir o acesso no servidor. */
 let ACESSO = "propria";
 const ehCredenciada = () => ACESSO === "credenciada";
+const URL_AREA_CREDENCIADO = "https://areadocredenciado.autoglass.com.br/#/app/inicio";
 const SECOES_SO_PROPRIA = ["materiais", "laudos"];
 const navAtual = () => ehCredenciada() ? NAV.filter(n => !SECOES_SO_PROPRIA.includes(n.id)) : NAV;
 const linkPermitido = h => !ehCredenciada() || !SECOES_SO_PROPRIA.some(s => String(h || "").startsWith("#/" + s));
@@ -4166,6 +4181,7 @@ function MenuMobile({ ativo, atual, fechar, email, onSair }) {
               <span className="si" aria-hidden="true">${ic(it.i || "")}</span>${it.t}</a></li>`)}</ul>`}
           </li>`
         : html`<li key=${n.id} className=${"mm-sec" + (ativo === n.id ? " active" : "")}><a className="mm-top" href=${n.h} onClick=${fechar}><span aria-hidden="true">${ic(n.i)}</span><span className="mm-t">${n.t}</span></a></li>`)}
+        ${ehCredenciada() && html`<li className="mm-sec mm-area-cred"><a className="mm-top" href=${URL_AREA_CREDENCIADO} target="_blank" rel="noopener noreferrer" onClick=${fechar}><span aria-hidden="true"><${Ic} n="garage" /></span><span className="mm-t">Área do Credenciado ↗</span></a></li>`}
         <li className="mm-sec"><a className="mm-top" href="#/perfil" onClick=${fechar}><span aria-hidden="true"><${Ic} n="user" /></span><span className="mm-t">Meu perfil</span></a></li>
         ${onSair && html`<li className="mm-sec mm-sair"><button type="button" className="mm-top" onClick=${onSair}>
           <span aria-hidden="true"><${Ic} n="logout" /></span><span className="mm-t">Sair<small>${email}</small></span></button></li>`}
@@ -5553,6 +5569,7 @@ function App({ sessao, onSair }) {
           <a className="sb-ic sb-lupa" href="#/consulta" aria-label="Pesquisar veículo"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" d="M10.5 4a6.5 6.5 0 1 1 0 13 6.5 6.5 0 0 1 0-13zM15.5 15.5 20 20"/></svg></a>
           <${Sino} />
           <${BotaoChat} />
+          ${ehCredenciada() && html`<a className="sb-area-cred" href=${URL_AREA_CREDENCIADO} target="_blank" rel="noopener noreferrer" title="Abrir a Área do Credenciado"><${Ic} n="garage" /><span>Área do Credenciado</span></a>`}
           <${BotaoPerfil} />
           <button type="button" className="sb-ic sb-sair" onClick=${onSair} title=${"Sair (" + sessao.email + ")"} aria-label=${"Sair da conta " + sessao.email}><${Ic} n="logout" /><span>Sair</span></button>
           <button type="button" className="hamb" aria-expanded=${menuAberto} aria-controls="menu-mobile" onClick=${() => setMenuAberto(!menuAberto)}>
