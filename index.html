@@ -2429,6 +2429,37 @@ document.documentElement.setAttribute("data-theme", "light");
 const { useState, useEffect, useMemo, useRef } = React;
 const html = htm.bind(React.createElement);
 const DADOS = window.ADAS_DADOS;
+// Anos nos textos: ">=2024" vira "maior ou igual a 2024" e "<=2023" vira "menor ou igual a 2023".
+// O campo "anos" (usado nos filtros por ano) continua no formato original.
+// Unidades por extenso: "1300 mm" vira "1300 milímetros"; "3m" vira "3 metros"; "8,5 cm" vira "8,5 centímetros"
+const UNIDADES = { mm: ["milímetro", "milímetros"], cm: ["centímetro", "centímetros"], m: ["metro", "metros"] };
+// No caminho do equipamento, "m" só é convertido com casa decimal (1,20M), para não mudar opções de menu como "TAMANHO ALVO: 120M"
+const UNIDADES_EM_TEXTO = (t, caminho) => String(t).replace(/(\d+(?:[.,]\d+)?)\s?(mm|cm|m)\b(?![²³])/gi, (x, n, u) => {
+  if (caminho && u.toLowerCase() === "m" && !/[.,]/.test(n)) return x;
+  const par = UNIDADES[u.toLowerCase()]; const um = parseFloat(n.replace(",", ".")) === 1;
+  const p = um ? par[0] : par[1];
+  return `${n} ${u === u.toUpperCase() && u.length > 1 || u === "M" ? p.toUpperCase() : p}`;
+});
+const ANOS_EM_TEXTO = t => String(t)
+  .replace(/(?:>=|=>|≥)\s*(\d{4})/g, "maior ou igual a $1")
+  .replace(/(?:<=|=<|≤)\s*(\d{4})/g, "menor ou igual a $1")
+  .replace(/(^|[\s(])>\s*(\d{4})/g, "$1maior que $2")
+  .replace(/(^|[\s(])<\s*(\d{4})/g, "$1menor que $2");
+(function ajustarAnos(o, chave, semUnidades) {
+  // Imagens (data:) ficam intactas; caminhos de calibração seguem o texto do equipamento (ex.: "TAMANHO ALVO: 120M") e não têm as unidades convertidas
+  const conv = t => { if (typeof t !== "string" || t.startsWith("data:")) return t; let r = t;
+    if (/(>=|<=|=>|=<|≥|≤|[<>]\s*\d{4})/.test(r)) r = ANOS_EM_TEXTO(r);
+    if (/\d\s?(mm|cm|m)\b/i.test(r)) r = UNIDADES_EM_TEXTO(r, semUnidades);
+    return r; };
+  if (Array.isArray(o)) { o.forEach((x, i) => { if (typeof x === "string") { if (chave !== "anos" && chave !== "palavras") o[i] = conv(x); } else ajustarAnos(x, chave, semUnidades); }); return; }
+  if (!o || typeof o !== "object") return;
+  Object.keys(o).forEach(k => {
+    if (["anos", "imagem", "url", "link", "id", "src", "palavras", "imagensMateriais"].includes(k)) return;
+    const v = o[k];
+    if (typeof v === "string") o[k] = conv(v);
+    else ajustarAnos(v, k, semUnidades || k === "caminhos" || k === "caminho");
+  });
+})(DADOS);
 const VEICULOS = DADOS.veiculos;
 const REGRAS = DADOS.regras.map((r, i) => ({ ...r, id: "r" + i }));
 
@@ -2566,10 +2597,11 @@ function filtroExtraOk(v, f) {
 }
 // Converte "1415 mm", "1,70 m", "10 cm" em milímetros para comparar fontes
 function emMm(txt) {
-  const m = String(txt || "").replace(",", ".").match(/(\d+(?:\.\d+)?)\s*(mm|cm|m)\b/i);
+  const m = String(txt || "").replace(",", ".").match(/(\d+(?:\.\d+)?)\s*(milímetros?|centímetros?|metros?|mm|cm|m)\b/i);
   if (!m) return null;
   const n = parseFloat(m[1]), u = m[2].toLowerCase();
-  return Math.round(u === "mm" ? n : u === "cm" ? n * 10 : n * 1000);
+  const mm = u === "mm" || u.startsWith("milím"), cm = u === "cm" || u.startsWith("centím");
+  return Math.round(mm ? n : cm ? n * 10 : n * 1000);
 }
 const rotTipos = s => [...s].sort().map(t => t === "estatica" ? "Estática" : "Dinâmica").join(" + ");
 function divergencias(v) {
@@ -2632,12 +2664,13 @@ const MARCAS = [...new Set(VEICULOS.map(v => v.marca))].sort((a, b) => a.localeC
 function formatarAnos(a) {
   if (!a || a === "TODOS") return null;
   let m;
-  if ((m = a.match(/^MAIOR OU IGUAL A (\d{4})$/i))) return `A partir de ${m[1]}`;
-  if ((m = a.match(/^\?\s*>=\s*(\d{4})$/))) return `A partir de ${m[1]} (a confirmar)`;
-  if ((m = a.match(/^>=\s*(\d{4})$/))) return `A partir de ${m[1]}`;
-  if ((m = a.match(/^<=\s*(\d{4})$/))) return `Até ${m[1]}`;
-  if ((m = a.match(/^>\s*(\d{4})$/))) return `Acima de ${m[1]}`;
-  return a;
+  if ((m = a.match(/^MAIOR OU IGUAL A (\d{4})$/i))) return `Maior ou igual a ${m[1]}`;
+  if ((m = a.match(/^\?\s*>=\s*(\d{4})$/))) return `Maior ou igual a ${m[1]} (a confirmar)`;
+  if ((m = a.match(/^>=\s*(\d{4})$/))) return `Maior ou igual a ${m[1]}`;
+  if ((m = a.match(/^<=\s*(\d{4})$/))) return `Menor ou igual a ${m[1]}`;
+  if ((m = a.match(/^>\s*(\d{4})$/))) return `Maior que ${m[1]}`;
+  if ((m = a.match(/^<\s*(\d{4})$/))) return `Menor que ${m[1]}`;
+  return ANOS_EM_TEXTO(a);
 }
 const ORDEM_NIVEL = { critico: 0, atencao: 1, info: 2 };
 function alertasDe(v) {
