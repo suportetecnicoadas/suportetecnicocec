@@ -1474,6 +1474,11 @@ img.perfil-avatar{object-fit:cover;border:3px solid #FFFFFF;box-shadow:0 0 0 2px
 .as-mats small{color:var(--muted);font-size:12.5px}
 .as-mats .btn{align-self:flex-start;min-height:34px;padding:4px 12px;font-size:13.5px}
 
+/* Contador único de materiais */
+.mi-stats.mi-stats-1{grid-template-columns:minmax(0,260px)}
+
+.result.mat-res{border-left:4px solid #3510B5}
+.result.mat-res h3{margin:6px 0 2px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
@@ -2587,7 +2592,10 @@ const PALAVRAS = {
   orientacoes: { erro: 3, falha: 3, painel: 3, volante: 3, desalinhado: 3, desalinhamento: 3, fisico: 3, fisica: 3, posicao: 2, orientacao: 3, orientacoes: 3, problema: 2, travado: 3, trava: 2 },
   equipamento: { equipamento: 3, scanner: 3, tablet: 3, internet: 3, aplicativo: 3, atualizacao: 3, formatou: 3, formatar: 3 }
 };
-const tokens = q => norm(q).replace(/[^a-z0-9ª\s-]/g, " ").replace(/-/g, " ").split(/\s+/).filter(t => t && !STOP.has(t));
+// GM e Chevrolet são a mesma montadora: "gm" (e "chevy") na pesquisa vale como "chevrolet"
+const APELIDOS_BUSCA = { gm: "chevrolet", chevy: "chevrolet" };
+const rotMarca = m => m === "Chevrolet" ? "Chevrolet (GM)" : m;
+const tokens = q => norm(q).replace(/[^a-z0-9ª\s-]/g, " ").replace(/-/g, " ").split(/\s+/).filter(t => t && !STOP.has(t)).map(t => APELIDOS_BUSCA[t] || t);
 const casa = (t, kw) => t === kw || (t.length >= 4 && kw.startsWith(t)) || (kw.length >= 4 && t.startsWith(kw));
 const ehCat = t => Object.values(PALAVRAS).some(kws => Object.keys(kws).some(kw => casa(t, kw)));
 const semImagem = (k, val) => k === "imagem" ? undefined : val;
@@ -3112,14 +3120,45 @@ function Resultado({ r }) {
   </article>`;
 }
 
+// Materiais instrutivos que combinam com a pesquisa (montadora, modelo ou palavra-chave como "SFD"); só para lojas Autoglass
+const PALAVRAS_SO_FICHA = new Set(["medidas", "medida", "caminho", "alvo", "alvos", "tipo", "checklist", "calibracao", "calibrar", "calibragem", "orientacoes", "orientacao", "alertas", "alerta", "ano"]);
+function buscarMateriais(q) {
+  if (ehCredenciada()) return [];
+  const ts = tokens(q).filter(t => !PALAVRAS_SO_FICHA.has(t));
+  if (!ts.length) return [];
+  return todosMateriais().filter(m => {
+    const veic = m.veiculo && porId(m.veiculo);
+    const txt = norm([m.titulo, m.aplicacao, m.resumo, veic ? nomeVeiculo(veic) : ""].join(" "));
+    return ts.every(t => txt.includes(t));
+  }).slice(0, 6);
+}
+function ResultadoMaterial({ m }) {
+  return html`<article className="result mat-res">
+    <div className="result-head"><span className="tag ic-txt">${ic("📄")}Material instrutivo</span></div>
+    <h3>${m.titulo}</h3>
+    ${m.aplicacao && html`<p className="hint">${m.aplicacao}</p>`}
+    <div className="result-foot">${m.link ? html`<a className="btn primary" href=${RAW_DE(m.link)} target="_blank" rel="noopener noreferrer">⬇ Baixar PDF</a>`
+      : html`<a className="btn" href=${"#/materiais?q=" + encodeURIComponent(m.titulo)}>Ver em Materiais Instrutivos</a>`}</div>
+  </article>`;
+}
+
 function ListaResultados({ resultados, termo }) {
-  if (!resultados.length) return html`<div className="empty">
+  useRepoPdfs(); // atualiza quando a lista de PDFs do GitHub chega
+  const mats = termo ? buscarMateriais(termo) : [];
+  // Ordem: fichas dos veículos primeiro, depois materiais instrutivos, depois orientações gerais
+  const fichas = resultados.filter(r => !r.regra), regras = resultados.filter(r => r.regra);
+  const total = resultados.length + mats.length;
+  if (!total) return html`<div className="empty">
     <strong>Nenhum resultado para “${termo}”.</strong><br />
     Tente pesquisar só pelo modelo, como “Toro” ou “Creta”, ou por uma palavra do problema, como “Fuyao” ou “estepe”. Se não encontrar, acione o suporte técnico ADAS.
   </div>`;
   return html`<div>
-    <div className="count">${resultados.length} ${resultados.length === 1 ? "resultado" : "resultados"}</div>
-    <div className="results">${resultados.map((r, i) => html`<${Resultado} key=${(r.regra ? r.regra.id : r.v.id + (r.cat || "")) + i} r=${r} />`)}</div>
+    <div className="count">${total} ${total === 1 ? "resultado" : "resultados"}</div>
+    <div className="results">
+      ${fichas.map((r, i) => html`<${Resultado} key=${r.v.id + (r.cat || "") + i} r=${r} />`)}
+      ${mats.map(m => html`<${ResultadoMaterial} key=${"mat-" + m.id} m=${m} />`)}
+      ${regras.map((r, i) => html`<${Resultado} key=${r.regra.id + i} r=${r} />`)}
+    </div>
   </div>`;
 }
 
@@ -3297,7 +3336,7 @@ function Inicio() {
       <h2 className="home-h2">Montadoras</h2>
       <p className="lead">${VEICULOS.filter(v => !v.generico).length} modelos de ${MARCAS.length} montadoras cadastradas. <a href="#/modelos">Ver todos os modelos</a></p>
       <div className="pilares">${MARCAS.map(m => html`<a key=${m} className="pilar" href=${"#/consulta?marca=" + encodeURIComponent(m)}>
-        ${m}<small>${nModelos(m) ? `${nModelos(m)} ${nModelos(m) === 1 ? "modelo" : "modelos"}` : "todos os modelos"}</small>
+        ${rotMarca(m)}<small>${nModelos(m) ? `${nModelos(m)} ${nModelos(m) === 1 ? "modelo" : "modelos"}` : "todos os modelos"}</small>
       </a>`)}</div>
     </div></section>
 
@@ -3354,7 +3393,7 @@ function Consulta({ params }) {
       <div className="field">
         <label htmlFor="f-marca">Marca</label>
         <select id="f-marca" value=${marca} onChange=${e => { setMarca(e.target.value); setModelo(""); }}>
-          <option value="">Todas</option>${MARCAS.map(m => html`<option key=${m} value=${m}>${m}</option>`)}
+          <option value="">Todas</option>${MARCAS.map(m => html`<option key=${m} value=${m}>${rotMarca(m)}</option>`)}
         </select>
       </div>
       <div className="field">
@@ -3678,7 +3717,7 @@ function MedidasPagina({ params }) {
       <div className="field">
         <label htmlFor="m-marca">Marca</label>
         <select id="m-marca" value=${marca} onChange=${e => setMarca(e.target.value)}>
-          <option value="">Todas</option>${MARCAS.map(m => html`<option key=${m} value=${m}>${m}</option>`)}
+          <option value="">Todas</option>${MARCAS.map(m => html`<option key=${m} value=${m}>${rotMarca(m)}</option>`)}
         </select>
       </div>
       <${CamposExtras} f=${f} setF=${setF} idp="m-" />
@@ -4077,7 +4116,7 @@ function MarcasPagina() {
       const modelos = vs.filter(v => !v.generico).length;
       const alerta = DADOS.alertasMarca.find(a => a.marca === m);
       return html`<a key=${m} className="tile" href=${"#/consulta?marca=" + encodeURIComponent(m)}>
-        <div className="model">${m}</div>
+        <div className="model">${rotMarca(m)}</div>
         <div className="hint">${modelos ? `${modelos} ${modelos === 1 ? "modelo" : "modelos"}` : "Registro para todos os modelos"}</div>
         ${alerta && html`<div style=${{ marginTop: "8px" }}><span className=${"badge " + (alerta.nivel === "critico" ? "critico" : "comp-parcial")}>${alerta.nivel === "critico" ? html`${ic("⛔")} Não calibra` : html`${ic("⚠️")} Atenção`}</span></div>`}
       </a>`; })}</div>
@@ -4110,7 +4149,7 @@ function CoberturaTabela() {
     <div className="field" style=${{ maxWidth: "280px", marginBottom: "12px" }}>
       <label htmlFor="cob-marca">Marca</label>
       <select id="cob-marca" value=${marca} onChange=${e => setMarca(e.target.value)}>
-        <option value="">Todas</option>${MARCAS.map(m => html`<option key=${m} value=${m}>${m}</option>`)}
+        <option value="">Todas</option>${MARCAS.map(m => html`<option key=${m} value=${m}>${rotMarca(m)}</option>`)}
       </select>
     </div>
     <div className="tablewrap"><table className="cobertura">
@@ -4592,13 +4631,10 @@ function MateriaisPagina({ params }) {
   const lista = todos.filter(it => (!marca || it.marcas.includes(marca)) && (!tipo || (tipo === "pdf" ? it.tipo === "pdf" : it.tipo !== "pdf")) && (!semFicha || (String(it.id).startsWith("repo-") && !it.veiculo))
     && casaBusca([it.titulo, it.resumo, it.aplicacao, (it.marcas || []).join(" "), (it.passos || []).join(" "), (it.dicas || []).join(" "), (it.etapas || []).map(e => [e.texto, e.seguranca].join(" ")).join(" ")].join(" ")))
     .sort((a, b) => a.titulo.localeCompare(b.titulo, "pt-BR"));
-  const nTut = todos.filter(it => it.tipo !== "pdf").length, nPdf = todos.length - nTut;
   return html`<section className="section"><div className="wrap">
     <${TituloPagina} t="Materiais Instrutivos" sub="Central de conhecimento técnico com PDFs, tutoriais com imagens, orientações e dicas para instalação, substituição de peças e calibração." />
-    <div className="stats mi-stats">
-      <div className="stat"><b>${todos.length}</b><span>Materiais</span></div>
-      <div className="stat"><b>${nPdf}</b><span>PDFs</span></div>
-      <div className="stat"><b>${nTut}</b><span>Tutoriais com imagens</span></div>
+    <div className="stats mi-stats mi-stats-1">
+      <div className="stat"><b>${todos.length}</b><span>${todos.length === 1 ? "Material cadastrado" : "Materiais cadastrados"}</span></div>
     </div>
     <div className="filters vid-filtros">
       <div className="field"><label htmlFor="mi-q">Pesquisar nos materiais</label>
@@ -4738,7 +4774,7 @@ function VideosPagina({ params }) {
     </nav>
     <div className="filters vid-filtros">
       <div className="field"><label htmlFor="vq">Pesquisar vídeos</label><input id="vq" type="search" inputMode="search" autoComplete="off" spellCheck=${false} placeholder="Título, modelo ou assunto" value=${q} onInput=${e => setQ(e.target.value)} /></div>
-      <div className="field"><label htmlFor="vm">Montadora</label><select id="vm" value=${marca} onChange=${e => setMarca(e.target.value)}><option value="">Todas</option>${MARCAS.map(m => html`<option key=${m} value=${m}>${m}</option>`)}</select></div>
+      <div className="field"><label htmlFor="vm">Montadora</label><select id="vm" value=${marca} onChange=${e => setMarca(e.target.value)}><option value="">Todas</option>${MARCAS.map(m => html`<option key=${m} value=${m}>${rotMarca(m)}</option>`)}</select></div>
       <div className="field"><label htmlFor="vt">Tipo de calibração</label><select id="vt" value=${tipo} onChange=${e => setTipo(e.target.value)}><option value="">Todos</option><option value="estatica">Estática</option><option value="dinamica">Dinâmica</option></select></div>
     </div>
     ${!pronto && !todos.length ? html`<p className="hint">Carregando vídeos…</p>`
