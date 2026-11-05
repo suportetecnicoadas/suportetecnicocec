@@ -2205,7 +2205,12 @@ img.perfil-avatar{object-fit:cover;border:3px solid #FFFFFF;box-shadow:0 0 0 2px
     { id: "adas", nome: "ADAS: dicas e diagnóstico", icone: "🛠️" },
     { id: "camera", nome: "Câmera: ajuste e suporte", icone: "📷" },
     { id: "pecas", nome: "Peças e instalação", icone: "🔧" },
-    { id: "avaliacao", nome: "Teste seu conhecimento", icone: "📝" }
+    { id: "avaliacao", nome: "Teste seu conhecimento", icone: "📝" },
+    // Categorias dos cursos da Área do Credenciado
+    { id: "intro-adas", nome: "Introdução ao ADAS", icone: "🚗" },
+    { id: "diag-calib", nome: "Diagnóstico e calibragem", icone: "📋" },
+    { id: "base-eco", nome: "Base ECO", icone: "🎯" },
+    { id: "gabaritos", nome: "Gabaritos", icone: "📐" }
   ];
   // Links do Portal CEC informados pela equipe Autoglass
   // Público de cada vídeo (campo publico): "propria" (lojas Autoglass, padrão), "credenciada" ou "todos".
@@ -2235,7 +2240,34 @@ img.perfil-avatar{object-fit:cover;border:3px solid #FFFFFF;box-shadow:0 0 0 2px
     { id: "cec-nivelador-volvo", titulo: "Nivelador da câmera da Volvo", url: CEC + "view.php?id=1236", categoria: "camera", marca: "Volvo", descricao: "Curso no Portal CEC." },
     { id: "cec-gabarito-suporte", titulo: "Como posicionar o gabarito do suporte da câmera de forma correta", url: CEC + "view.php?id=1201", categoria: "camera", descricao: "Curso no Portal CEC." },
     // Avaliação
-    { id: "cec-teste-adas", titulo: "Teste seu conhecimento sobre ADAS", url: CEC + "view.php?id=779", categoria: "avaliacao", descricao: "Avaliação no Portal CEC." }
+    { id: "cec-teste-adas", titulo: "Teste seu conhecimento sobre ADAS", url: CEC + "view.php?id=779", categoria: "avaliacao", descricao: "Avaliação no Portal CEC." },
+    // ---------- Área do Credenciado (exclusivos das lojas credenciadas) ----------
+    {"id": "cred-curso-1", "titulo": "Introdução credenciados", "url": "https://areadocredenciado.autoglass.com.br/#/app/cursos-detalhe/1", "categoria": "intro-adas", "descricao": "Curso na Área do Credenciado.", "publico": "credenciada", "fonte": "Área do Credenciado", "ordem": 1},
+    {"id": "cred-curso-2", "titulo": "O que é ADAS?", "url": "https://areadocredenciado.autoglass.com.br/#/app/cursos-detalhe/2", "categoria": "intro-adas", "descricao": "Curso na Área do Credenciado.", "publico": "credenciada", "fonte": "Área do Credenciado", "ordem": 2},
+    {"id": "cred-curso-3", "titulo": "Calibração ADAS", "url": "https://areadocredenciado.autoglass.com.br/#/app/cursos-detalhe/3", "categoria": "intro-adas", "descricao": "Curso na Área do Credenciado.", "publico": "credenciada", "fonte": "Área do Credenciado", "ordem": 3},
+    {"id": "cred-curso-4", "titulo": "Quando calibrar", "url": "https://areadocredenciado.autoglass.com.br/#/app/cursos-detalhe/4", "categoria": "intro-adas", "descricao": "Curso na Área do Credenciado.", "publico": "credenciada", "fonte": "Área do Credenciado", "ordem": 4},
+    {"id": "cred-curso-5", "titulo": "Tipos de calibração", "url": "https://areadocredenciado.autoglass.com.br/#/app/cursos-detalhe/5", "categoria": "intro-adas", "descricao": "Curso na Área do Credenciado.", "publico": "credenciada", "fonte": "Área do Credenciado", "ordem": 5},
+    {"id": "cred-curso-6", "titulo": "Autoglass e ADAS", "url": "https://areadocredenciado.autoglass.com.br/#/app/cursos-detalhe/6", "categoria": "intro-adas", "descricao": "Curso na Área do Credenciado.", "publico": "credenciada", "fonte": "Área do Credenciado", "ordem": 6},
+    {"id": "cred-curso-7", "titulo": "Encerramento", "url": "https://areadocredenciado.autoglass.com.br/#/app/cursos-detalhe/7", "categoria": "intro-adas", "descricao": "Curso na Área do Credenciado.", "publico": "credenciada", "fonte": "Área do Credenciado", "ordem": 7},
+    {"id": "cred-curso-8", "titulo": "Introdução - Diagnóstico e calibragem", "url": "https://areadocredenciado.autoglass.com.br/#/app/cursos-detalhe/8", "categoria": "diag-calib", "descricao": "Curso na Área do Credenciado.", "publico": "credenciada", "fonte": "Área do Credenciado", "ordem": 8},
+    {"id": "cred-curso-9", "titulo": "Abrindo a caixa - Diagnóstico e calibragem", "url": "https://areadocredenciado.autoglass.com.br/#/app/cursos-detalhe/9", "categoria": "diag-calib", "descricao": "Curso na Área do Credenciado.", "publico": "credenciada", "fonte": "Área do Credenciado", "ordem": 9},
+    {"id": "cred-curso-10", "titulo": "Configuração do tablet - Diagnóstico e calibragem", "url": "https://areadocredenciado.autoglass.com.br/#/app/cursos-detalhe/10", "categoria": "diag-calib", "descricao": "Curso na Área do Credenciado.", "publico": "credenciada", "fonte": "Área do Credenciado", "ordem": 10},
+    {"id": "cred-curso-11", "titulo": "Conhecendo o aplicativo X431 PRO - Diagnóstico e calibragem", "url": "https://areadocredenciado.autoglass.com.br/#/app/cursos-detalhe/11", "categoria": "diag-calib", "descricao": "Curso na Área do Credenciado.", "publico": "credenciada", "fonte": "Área do Credenciado", "ordem": 11},
+    {"id": "cred-curso-12", "titulo": "Diagnóstico - Diagnóstico e calibragem", "url": "https://areadocredenciado.autoglass.com.br/#/app/cursos-detalhe/12", "categoria": "diag-calib", "descricao": "Curso na Área do Credenciado.", "publico": "credenciada", "fonte": "Área do Credenciado", "ordem": 12},
+    {"id": "cred-curso-13", "titulo": "Calibragem estática I - Diagnóstico e calibragem", "url": "https://areadocredenciado.autoglass.com.br/#/app/cursos-detalhe/13", "categoria": "diag-calib", "descricao": "Curso na Área do Credenciado.", "publico": "credenciada", "fonte": "Área do Credenciado", "ordem": 13, "tipo": "estatica"},
+    {"id": "cred-curso-14", "titulo": "Calibragem estática II - Diagnóstico e calibragem", "url": "https://areadocredenciado.autoglass.com.br/#/app/cursos-detalhe/14", "categoria": "diag-calib", "descricao": "Curso na Área do Credenciado.", "publico": "credenciada", "fonte": "Área do Credenciado", "ordem": 14, "tipo": "estatica"},
+    {"id": "cred-curso-15", "titulo": "Encerramento - Diagnóstico e calibragem", "url": "https://areadocredenciado.autoglass.com.br/#/app/cursos-detalhe/15", "categoria": "diag-calib", "descricao": "Curso na Área do Credenciado.", "publico": "credenciada", "fonte": "Área do Credenciado", "ordem": 15},
+    {"id": "cred-curso-16", "titulo": "Diagnóstico - Diagnóstico e calibragem", "url": "https://areadocredenciado.autoglass.com.br/#/app/cursos-detalhe/16", "categoria": "diag-calib", "descricao": "Curso na Área do Credenciado.", "publico": "credenciada", "fonte": "Área do Credenciado", "ordem": 16},
+    {"id": "cred-curso-17", "titulo": "Processo de calibragem - Diagnóstico e calibragem", "url": "https://areadocredenciado.autoglass.com.br/#/app/cursos-detalhe/17", "categoria": "diag-calib", "descricao": "Curso na Área do Credenciado.", "publico": "credenciada", "fonte": "Área do Credenciado", "ordem": 17},
+    {"id": "cred-curso-18", "titulo": "Teste de percurso - Diagnóstico e calibragem", "url": "https://areadocredenciado.autoglass.com.br/#/app/cursos-detalhe/18", "categoria": "diag-calib", "descricao": "Curso na Área do Credenciado.", "publico": "credenciada", "fonte": "Área do Credenciado", "ordem": 18, "tipo": "dinamica"},
+    {"id": "cred-curso-19", "titulo": "Introdução - Como montar a base ECO para calibração do ADAS", "url": "https://areadocredenciado.autoglass.com.br/#/app/cursos-detalhe/19", "categoria": "base-eco", "descricao": "Curso na Área do Credenciado.", "publico": "credenciada", "fonte": "Área do Credenciado", "ordem": 19},
+    {"id": "cred-curso-20", "titulo": "Orientações para montar a base ECO", "url": "https://areadocredenciado.autoglass.com.br/#/app/cursos-detalhe/20", "categoria": "base-eco", "descricao": "Curso na Área do Credenciado.", "publico": "credenciada", "fonte": "Área do Credenciado", "ordem": 20},
+    {"id": "cred-curso-21", "titulo": "Encerramento - Conte com o suporte técnico em caso de dúvidas", "url": "https://areadocredenciado.autoglass.com.br/#/app/cursos-detalhe/21", "categoria": "base-eco", "descricao": "Curso na Área do Credenciado.", "publico": "credenciada", "fonte": "Área do Credenciado", "ordem": 21},
+    {"id": "cred-curso-22", "titulo": "Gabaritos - Introdução", "url": "https://areadocredenciado.autoglass.com.br/#/app/cursos-detalhe/22", "categoria": "gabaritos", "descricao": "Curso na Área do Credenciado.", "publico": "credenciada", "fonte": "Área do Credenciado", "ordem": 22},
+    {"id": "cred-curso-23", "titulo": "Gabaritos - Como usar?", "url": "https://areadocredenciado.autoglass.com.br/#/app/cursos-detalhe/23", "categoria": "gabaritos", "descricao": "Curso na Área do Credenciado.", "publico": "credenciada", "fonte": "Área do Credenciado", "ordem": 23},
+    {"id": "cred-curso-24", "titulo": "Gabaritos - Encerramento", "url": "https://areadocredenciado.autoglass.com.br/#/app/cursos-detalhe/24", "categoria": "gabaritos", "descricao": "Curso na Área do Credenciado.", "publico": "credenciada", "fonte": "Área do Credenciado", "ordem": 24},
+    {"id": "cred-curso-25", "titulo": "Calibração de vidros laterais", "url": "https://areadocredenciado.autoglass.com.br/#/app/cursos-detalhe/25", "categoria": "pecas", "descricao": "Curso na Área do Credenciado.", "publico": "credenciada", "fonte": "Área do Credenciado", "ordem": 25},
+    {"id": "cred-curso-26", "titulo": "Calibração estática", "url": "https://areadocredenciado.autoglass.com.br/#/app/cursos-detalhe/26", "categoria": "estatica", "descricao": "Curso na Área do Credenciado.", "publico": "credenciada", "fonte": "Área do Credenciado", "ordem": 26, "tipo": "estatica"}
   ];
 
   // Imagens dos tutoriais (extraídas dos PDFs enviados pela equipe Autoglass e comprimidas)
@@ -2250,9 +2282,10 @@ img.perfil-avatar{object-fit:cover;border:3px solid #FFFFFF;box-shadow:0 0 0 2px
      O id precisa ser único: é ele que marca a novidade como lida no navegador.
      ========================================================== */
   const novidades = [
+    { id: "2026-11-04-videos-credenciados", data: "2026-11-04", tipo: "novo", titulo: "Cursos da Área do Credenciado", descricao: "A aba Vídeos dos credenciados ganhou 26 cursos: introdução ao ADAS, diagnóstico e calibragem com o X431 PRO, base ECO, gabaritos e calibração estática.", link: "#/videos", publicoNov: "credenciada" },
     { id: "2026-11-04-acessos", data: "2026-11-04", tipo: "novo", titulo: "Acesso para lojas Autoglass e credenciados", descricao: "Lojas Autoglass entram com o e-mail @autoglass.com.br; credenciados entram com o CNPJ da loja. Cada acesso mostra as páginas do seu perfil de operação." },
     { id: "2026-11-04-perfil", data: "2026-11-04", tipo: "novo", titulo: "Meu perfil", descricao: "Novo perfil com seus dados, foto, fichas favoritas, últimos acessos e pesquisas recentes. Use o botão Favoritar na ficha do veículo e acesse pelo ícone de pessoa no topo.", link: "#/perfil" },
-    { id: "2026-11-04-chat", data: "2026-11-04", tipo: "novo", titulo: "Chat CEC (em preparação)", descricao: "Chat geral entre lojas próprias e credenciadas, com fotos tiradas pelo celular, busca no histórico e avisos de novas mensagens. Por enquanto funciona em modo de demonstração, até a ligação com o servidor da Autoglass.", link: "#/chat" },
+    { id: "2026-11-04-chat", data: "2026-11-04", tipo: "novo", titulo: "Chat CEC (em preparação)", descricao: "Chat com o suporte técnico e entre lojas do mesmo perfil (lojas Autoglass ou credenciadas, em salas separadas), com fotos tiradas pelo celular, busca no histórico e avisos de novas mensagens. Por enquanto funciona em modo de demonstração, até a ligação com o servidor da Autoglass.", link: "#/chat" },
     { id: "2026-11-03-assistente", data: "2026-11-03", tipo: "novo", titulo: "Assistente Zayon", descricao: "Botão no canto da tela para perguntar sobre um veículo ou dúvida. O Assistente Zayon responde com as informações cadastradas no portal." },
     { id: "2026-11-03-sino", data: "2026-11-03", tipo: "novo", titulo: "Sino de novidades", descricao: "O cabeçalho ganhou o sino de notificações. Ele mostra o que foi adicionado, alterado ou melhorado em cada atualização do portal.", link: "#/novidades" },
     { id: "2026-11-03-laudos", data: "2026-11-03", tipo: "novo", titulo: "Laudo Scanners dentro do portal", descricao: "Os laudos técnicos dos scanners agora aparecem na própria aba, com pesquisa, filtros por status e ano e botão para baixar o PDF.", link: "#/laudos" },
@@ -3031,7 +3064,7 @@ function Feedback({ contexto }) {
     ${estado === "sim" && html`<p className="msg">Obrigado pelo retorno.</p>`}
     ${estado === "nao" && html`<div>
       <p><strong>Encontrou algum problema ou a informação não resolveu sua dúvida?</strong></p>
-      <p className="hint">O portal ainda não envia mensagens ao suporte. Acione o suporte técnico ADAS via WhatsApp: credenciados +55 0800 025 6301, loja Autoglass +55 27 3202-4646.</p>
+      <p className="hint">O portal ainda não envia mensagens ao suporte. Acione o suporte técnico ADAS via WhatsApp: ${contatosDoAcesso().map(c => c.numero).join(", ")}.</p>
       <div className="row"><a className="btn" href="#/contato">Ver contatos do suporte</a><button type="button" className="btn ghost" onClick=${() => setEstado("pergunta")}>Voltar</button></div>
     </div>`}
   </div>`;
@@ -3812,7 +3845,7 @@ function Sobre() {
     { i: "📏", t: "Medidas e alvos", d: "Altura, distância, código do alvo e desenho do ponto de calibração para a calibração estática.", h: "#/medidas" },
     { i: "✅", t: "Checklist", d: "Itens para conferir antes de iniciar a calibração estática ou dinâmica.", h: "#/checklist" },
     { i: "📄", t: "Materiais instrutivos", d: "PDFs e tutoriais com imagens de instalação, substituição de peças e calibração.", h: "#/materiais" },
-    { i: "🎬", t: "Vídeos", d: "Cursos e conteúdos do Portal CEC organizados por assunto.", h: "#/videos" },
+    { i: "🎬", t: "Vídeos", d: ehCredenciada() ? "Cursos da Área do Credenciado organizados por assunto." : "Cursos e conteúdos do Portal CEC organizados por assunto.", h: "#/videos" },
     { i: "📋", t: "Laudo Scanners", d: "Laudos técnicos dos scanners que precisaram do suporte do CEC.", h: "#/laudos" }
   ];
   const passos = [
@@ -4112,6 +4145,8 @@ const CONTATOS = [
   { publico: "Credenciados", titulo: "Suporte Técnico ADAS para credenciados", numero: "+55 0800 025 6301", whatsapp: "558000256301" },
   { publico: "Lojas Autoglass", titulo: "Suporte Técnico ADAS para loja Autoglass", numero: "+55 27 3202-4646", whatsapp: "552732024646" }
 ];
+// Cada acesso vê só o contato do seu suporte: credenciados o 0800; lojas Autoglass o (27) 3202-4646
+const contatosDoAcesso = () => CONTATOS.filter(c => c.publico === (ehCredenciada() ? "Credenciados" : "Lojas Autoglass"));
 // Mensagem automática enviada ao abrir a conversa no WhatsApp
 const MSG_WHATSAPP = "Olá! Preciso de ajuda na calibração do sistema ADAS.";
 const linkWhatsApp = n => `https://wa.me/${n}?text=${encodeURIComponent(MSG_WHATSAPP)}`;
@@ -4119,7 +4154,7 @@ const ICONE_WHATSAPP = html`<svg className="wa-ic" viewBox="0 0 32 32" aria-hidd
 
 // Cartões de contato do suporte (usados na página Contato e na página inicial)
 function ContatoCards() {
-  return html`<div className="contatos">${CONTATOS.map(c => html`<div className="panel contato" key=${c.numero}>
+  return html`<div className="contatos">${contatosDoAcesso().map(c => html`<div className="panel contato" key=${c.numero}>
       <span className="tag">${c.publico}</span>
       <h2>${c.titulo}</h2>
       <p className="fone ic-txt">${ic("💬")}${c.numero}</p>
@@ -4603,22 +4638,11 @@ const VIDEO_STATE = { lista: [], pronto: false, podeEditar: false, db: null, err
 const videoSubs = new Set();
 let videosIniciado = false;
 function emitVideos() { const s = { ...VIDEO_STATE }; videoSubs.forEach(f => f(s)); }
+// Os vídeos vêm só da base do portal: apenas o responsável pelo projeto inclui ou altera vídeos
 function iniciarVideos() {
   if (videosIniciado) return;
   videosIniciado = true;
-  (async () => {
-    const use = window.claude && window.claude.use;
-    const db = use ? await window.claude.use("db") : null;
-    if (!db) { VIDEO_STATE.pronto = true; emitVideos(); return; }
-    VIDEO_STATE.db = db;
-    const user = await window.claude.use("user");
-    VIDEO_STATE.podeEditar = user ? await user.canEdit() : false;
-    db.collection("videos").onSnapshot(snap => {
-      VIDEO_STATE.lista = snap.docs.map(d => ({ ...d.data(), id: d.id, origem: "db" }));
-      VIDEO_STATE.pronto = true; VIDEO_STATE.erro = null; emitVideos();
-    }, err => { VIDEO_STATE.erro = err.code; VIDEO_STATE.pronto = true; emitVideos(); });
-    emitVideos();
-  })().catch(() => { VIDEO_STATE.pronto = true; emitVideos(); });
+  VIDEO_STATE.pronto = true; emitVideos();
 }
 function useVideos() {
   const [st, setSt] = useState({ ...VIDEO_STATE });
@@ -4627,7 +4651,7 @@ function useVideos() {
   const publicoOk = x => { const pub = x.publico || "propria"; return pub === "todos" || pub === (ehCredenciada() ? "credenciada" : "propria"); };
   const todos = [...(DADOS.videos || []).map(x => ({ ...x, origem: "base" })), ...st.lista]
     .filter(publicoOk)
-    .sort((a, b) => (a.titulo || "").localeCompare(b.titulo || "", "pt-BR"));
+    .sort((a, b) => ((a.ordem || 9999) - (b.ordem || 9999)) || (a.titulo || "").localeCompare(b.titulo || "", "pt-BR"));
   return { ...st, todos };
 }
 const aplicacaoVideo = x => [x.veiculo && porId(x.veiculo) ? nomeVeiculo(porId(x.veiculo)) : x.marca, x.tipo && ROT_TIPO[x.tipo]].filter(Boolean).join(" · ");
@@ -4669,18 +4693,18 @@ function CapaVideo({ x, c }) {
       dangerouslySetInnerHTML=${{ __html: ICONES[ICON_DE[c.icone]] || ICONES.video }}></g>
     <text x="66" y="44" fill="#FFFFFF" opacity="0.78" fontSize="10.5" fontFamily=${f} fontWeight="600" letterSpacing="0.4">${c.nome.toUpperCase()}</text>
     ${ls.map((l, i) => html`<text key=${i} x="20" y=${y0 + i * 22} fill="#FFFFFF" fontSize="17" fontFamily=${f} fontWeight="600">${l}</text>`)}
-    <rect x="20" y="146" width="80" height="20" rx="10" fill="#FFFFFF" opacity="0.14" />
-    <text x="60" y="160" textAnchor="middle" fill="#FFFFFF" fontSize="10.5" fontFamily=${f} fontWeight="600">Portal CEC</text>
+    <rect x="20" y="146" width=${x.fonte ? 124 : 80} height="20" rx="10" fill="#FFFFFF" opacity="0.14" />
+    <text x=${x.fonte ? 82 : 60} y="160" textAnchor="middle" fill="#FFFFFF" fontSize="10.5" fontFamily=${f} fontWeight="600">${x.fonte || "Portal CEC"}</text>
     <g className="vc-play"><circle cx="274" cy="40" r="19" fill=${cor} stroke="#FFFFFF" strokeOpacity="0.35" strokeWidth="2" />
       <path d="M268 31 L283 40 L268 49 Z" fill="#FFFFFF" /></g>
   </svg>`;
 }
 
-function VideoCard({ x, podeEditar, onEditar, onExcluir }) {
+function VideoCard({ x }) {
   const c = catVideo(x.categoria);
   const ok = urlValida(x.url);
   return html`<article className="mi-card vid-card">
-    ${ok ? html`<a className="vid-thumb" href=${x.url} target="_blank" rel="noopener noreferrer" aria-label=${"Abrir no Portal CEC: " + x.titulo}>
+    ${ok ? html`<a className="vid-thumb" href=${x.url} target="_blank" rel="noopener noreferrer" aria-label=${"Abrir no " + (x.fonte === "Área do Credenciado" ? "site da Área do Credenciado" : "Portal CEC") + ": " + x.titulo}>
       <${CapaVideo} x=${x} c=${c} /></a>`
       : html`<div className="vid-thumb off"><${CapaVideo} x=${x} c=${c} /><span className="vid-cat">Link não informado</span></div>`}
     <div className="mi-body">
@@ -4688,77 +4712,28 @@ function VideoCard({ x, podeEditar, onEditar, onExcluir }) {
       <h3>${x.titulo}</h3>
       ${x.descricao && html`<p>${x.descricao}</p>`}
       <div className="row" style=${{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-        ${ok && html`<a className="btn primary" href=${x.url} target="_blank" rel="noopener noreferrer">▶ Abrir no Portal CEC</a>`}
+        ${ok && html`<a className="btn primary" href=${x.url} target="_blank" rel="noopener noreferrer">▶ Abrir ${x.fonte === "Área do Credenciado" ? "na Área do Credenciado" : "no Portal CEC"}</a>`}
         ${x.veiculo && porId(x.veiculo) && html`<a className="btn" href=${"#/veiculo/" + x.veiculo}>Ficha do veículo</a>`}
-        ${podeEditar && x.origem === "db" && html`<button type="button" className="btn ghost" onClick=${() => onEditar(x)}>Editar</button>
-          <button type="button" className="btn ghost" onClick=${() => onExcluir(x)}>Excluir</button>`}
       </div>
     </div>
   </article>`;
 }
 
-function VideoForm({ inicial, db, onFechar }) {
-  const vazio = { titulo: "", url: "", descricao: "", categoria: (CATS_VIDEO[0] || {}).id || "outros", marca: "", veiculo: "", tipo: "" };
-  const [f, setF] = useState({ ...vazio, ...(inicial || {}) });
-  const [estado, setEstado] = useState("");
-  const set = (k, val) => setF(o => ({ ...o, [k]: val, ...(k === "marca" ? { veiculo: "" } : {}) }));
-  const modelos = f.marca ? VEICULOS.filter(v => v.marca === f.marca) : [];
-  const salvar = async () => {
-    if (!f.titulo.trim()) return setEstado("Informe o título do vídeo.");
-    if (!urlValida(f.url.trim())) return setEstado("Informe o link completo do vídeo, começando com https://");
-    const doc = { titulo: f.titulo.trim(), url: f.url.trim(), descricao: f.descricao.trim(), categoria: f.categoria,
-      marca: f.marca || null, veiculo: f.veiculo || null, tipo: f.tipo || null, atualizadoEm: new Date().toISOString() };
-    setEstado("Salvando…");
-    try {
-      const ref = inicial && inicial.id ? db.collection("videos").doc(inicial.id) : db.collection("videos").doc();
-      await ref.set(doc);
-      onFechar();
-    } catch (e) {
-      setEstado(e && e.code === "invalid_argument" ? "Você não tem permissão para cadastrar vídeos." : e && e.code === "quota_exceeded" ? "Limite de armazenamento atingido." : "Não foi possível salvar. Tente novamente.");
-    }
-  };
-  return html`<div className="panel vid-form">
-    <div className="panel-head"><h2>${inicial && inicial.id ? "Editar vídeo" : "Adicionar vídeo"}</h2></div>
-    <div className="grid">
-      <div className="field"><label htmlFor="vf-t">Título</label><input id="vf-t" value=${f.titulo} onInput=${e => set("titulo", e.target.value)} /></div>
-      <div className="field"><label htmlFor="vf-u">Link do vídeo no Portal CEC</label><input id="vf-u" type="url" inputMode="url" placeholder="https://" value=${f.url} onInput=${e => set("url", e.target.value)} /></div>
-      <div className="field"><label htmlFor="vf-c">Categoria</label><select id="vf-c" value=${f.categoria} onChange=${e => set("categoria", e.target.value)}>${CATS_VIDEO.map(c => html`<option key=${c.id} value=${c.id}>${c.nome}</option>`)}</select></div>
-      <div className="field"><label htmlFor="vf-tp">Tipo de calibração (opcional)</label><select id="vf-tp" value=${f.tipo} onChange=${e => set("tipo", e.target.value)}>
-        <option value="">Não se aplica</option><option value="estatica">Estática</option><option value="dinamica">Dinâmica</option></select></div>
-      <div className="field"><label htmlFor="vf-m">Montadora (opcional)</label><select id="vf-m" value=${f.marca} onChange=${e => set("marca", e.target.value)}>
-        <option value="">Todas</option>${MARCAS.map(m => html`<option key=${m} value=${m}>${m}</option>`)}</select></div>
-      <div className="field"><label htmlFor="vf-v">Modelo (opcional)</label><select id="vf-v" value=${f.veiculo} disabled=${!f.marca} onChange=${e => set("veiculo", e.target.value)}>
-        <option value="">${f.marca ? "Todos da montadora" : "Escolha a montadora"}</option>${modelos.map(v => html`<option key=${v.id} value=${v.id}>${v.modelo}</option>`)}</select></div>
-    </div>
-    <div className="field"><label htmlFor="vf-d">Descrição</label><textarea id="vf-d" rows="3" value=${f.descricao} onInput=${e => set("descricao", e.target.value)}></textarea></div>
-    ${estado && html`<p className="hint" role="status">${estado}</p>`}
-    <div style=${{ display: "flex", gap: "8px", flexWrap: "wrap", marginTop: "8px" }}>
-      <button type="button" className="btn primary" onClick=${salvar}>Salvar</button>
-      <button type="button" className="btn ghost" onClick=${onFechar}>Cancelar</button>
-    </div>
-  </div>`;
-}
-
 function VideosPagina({ params }) {
-  const { todos, pronto, podeEditar, db } = useVideos();
+  const { todos, pronto } = useVideos();
   const cat = params.get("cat") || "";
   const [q, setQ] = useState(params.get("q") || "");
   const [marca, setMarca] = useState(params.get("marca") || "");
   const [tipo, setTipo] = useState("");
-  const [form, setForm] = useState(null);
   const ts = tokens(q);
   const lista = todos.filter(x => (!cat || x.categoria === cat) && (!marca || x.marca === marca) && (!tipo || x.tipo === tipo)
     && (!ts.length || ts.every(t => norm([x.titulo, x.descricao, aplicacaoVideo(x), catVideo(x.categoria).nome].join(" ")).includes(t))));
-  const excluir = async x => {
-    if (!window.confirm(`Excluir o vídeo “${x.titulo}”?`)) return;
-    try { await db.collection("videos").doc(x.id).delete(); } catch (e) { window.alert("Não foi possível excluir o vídeo."); }
-  };
   const nCat = id => todos.filter(x => x.categoria === id).length;
   return html`<section className="section"><div className="wrap">
-    <${TituloPagina} t="Vídeos" sub="Biblioteca de vídeos instrutivos do Portal CEC para apoiar as lojas na calibração automotiva." />
+    <${TituloPagina} t="Vídeos" sub=${ehCredenciada() ? "Cursos da Área do Credenciado para apoiar a calibração ADAS nas lojas credenciadas." : "Biblioteca de vídeos instrutivos do Portal CEC para apoiar as lojas na calibração automotiva."} />
     <nav className="mi-cats vid" aria-label="Categorias de vídeo">
       <a className=${"mi-cat" + (!cat ? " on" : "")} href="#/videos" aria-current=${!cat ? "page" : undefined}><span className="mi-ic" aria-hidden="true">${ic("🎬")}</span><span><strong>Todos</strong><small>${todos.length} ${todos.length === 1 ? "vídeo" : "vídeos"}</small></span></a>
-      ${CATS_VIDEO.map(c => html`<a key=${c.id} className=${"mi-cat" + (cat === c.id ? " on" : "")} href=${"#/videos?cat=" + c.id} aria-current=${cat === c.id ? "page" : undefined}>
+      ${CATS_VIDEO.filter(c => nCat(c.id) > 0).map((c, i) => ({ c, i, o: Math.min(...todos.filter(x => x.categoria === c.id).map(x => x.ordem || 9999)) })).sort((a, b) => a.o - b.o || a.i - b.i).map(({ c }) => c).map(c => html`<a key=${c.id} className=${"mi-cat" + (cat === c.id ? " on" : "")} href=${"#/videos?cat=" + c.id} aria-current=${cat === c.id ? "page" : undefined}>
         <span className="mi-ic" aria-hidden="true">${ic(c.icone)}</span><span><strong>${c.nome}</strong><small>${nCat(c.id)} ${nCat(c.id) === 1 ? "vídeo" : "vídeos"}</small></span></a>`)}
     </nav>
     <div className="filters vid-filtros">
@@ -4766,10 +4741,8 @@ function VideosPagina({ params }) {
       <div className="field"><label htmlFor="vm">Montadora</label><select id="vm" value=${marca} onChange=${e => setMarca(e.target.value)}><option value="">Todas</option>${MARCAS.map(m => html`<option key=${m} value=${m}>${m}</option>`)}</select></div>
       <div className="field"><label htmlFor="vt">Tipo de calibração</label><select id="vt" value=${tipo} onChange=${e => setTipo(e.target.value)}><option value="">Todos</option><option value="estatica">Estática</option><option value="dinamica">Dinâmica</option></select></div>
     </div>
-    ${podeEditar && db && !form && html`<p><button type="button" className="btn primary" onClick=${() => setForm({})}>＋ Adicionar vídeo</button></p>`}
-    ${form && html`<${VideoForm} key=${form.id || "novo"} inicial=${form} db=${db} onFechar=${() => setForm(null)} />`}
     ${!pronto && !todos.length ? html`<p className="hint">Carregando vídeos…</p>`
-      : lista.length ? html`<div className="mi-grid">${lista.map(x => html`<${VideoCard} key=${x.origem + x.id} x=${x} podeEditar=${podeEditar} onEditar=${setForm} onExcluir=${excluir} />`)}</div>`
+      : lista.length ? html`<div className="mi-grid">${lista.map(x => html`<${VideoCard} key=${x.origem + x.id} x=${x} />`)}</div>`
       : html`<div className="empty">${todos.length ? "Nenhum vídeo corresponde aos filtros." : ehCredenciada() ? "Os vídeos para lojas credenciadas serão publicados em breve." : "Ainda não há vídeos cadastrados. Os vídeos são incluídos pela equipe do Suporte Técnico - CEC com o link do Portal CEC."}</div>`}
   </div></section>`;
 }
@@ -4780,7 +4753,7 @@ function VideosVeiculo({ v }) {
   if (!rel.length) return null;
   return html`<section className="panel" id="sec-videos" aria-labelledby="h-videos">
     <div className="panel-head"><h2 id="h-videos"><span aria-hidden="true">${ic("🎬")}</span>Vídeos</h2><a className="btn ghost" href="#/videos">Todos os vídeos</a></div>
-    <div className="mi-grid">${rel.map(x => html`<${VideoCard} key=${x.origem + x.id} x=${x} podeEditar=${false} />`)}</div>
+    <div className="mi-grid">${rel.map(x => html`<${VideoCard} key=${x.origem + x.id} x=${x} />`)}</div>
   </section>`;
 }
 
@@ -4846,6 +4819,7 @@ function useNovidades() {
   const todas = [...(repo.novidades || []), ...(DADOS.novidades || [])]
     .filter(n => n && n.id && n.titulo && !vistos.has(n.id) && vistos.add(n.id))
     .filter(n => !ehCredenciada() || (linkPermitido(n.link) && !/material|laudo|pdf/i.test(n.titulo + " " + (n.descricao || ""))))
+    .filter(n => !n.publicoNov || n.publicoNov === (ehCredenciada() ? "credenciada" : "propria"))
     .map((n, i) => ({ ...n, _i: i }))
     .sort((a, b) => String(b.data || "").localeCompare(String(a.data || "")) || a._i - b._i);
   return { todas, lidas, naoLidas: todas.filter(n => !lidas.has(n.id)) };
@@ -4951,12 +4925,12 @@ function assistResponder(q) {
   return { tipo: "regras", itens: regras.slice(0, 2).map(x => x.regra) };
 }
 function BotoesSuporte() {
-  return html`<div className="as-acoes">${CONTATOS.map(c => html`<a key=${c.numero} className="btn btn-wa as-wa" href=${linkWhatsApp(c.whatsapp)} target="_blank" rel="noopener noreferrer">${ICONE_WHATSAPP}<span>WhatsApp ${c.publico}</span></a>`)}</div>`;
+  return html`<div className="as-acoes">${contatosDoAcesso().map(c => html`<a key=${c.numero} className="btn btn-wa as-wa" href=${linkWhatsApp(c.whatsapp)} target="_blank" rel="noopener noreferrer">${ICONE_WHATSAPP}<span>Falar no WhatsApp</span></a>`)}</div>`;
 }
 function RespostaAssist({ r, perguntar }) {
   if (r.tipo === "saudacao") return html`<p>Olá! Eu sou o Assistente Zayon, do Suporte Técnico - CEC. Pergunte sobre um veículo, como <em>medidas do Toro</em>, ou uma dúvida, como <em>veículo com estepe calibra?</em></p>`;
   if (r.tipo === "contato") return html`<div><p>Este é o contato do suporte técnico ADAS, pelo WhatsApp. Tenha em mãos a marca, o modelo, o ano do veículo e o que já foi verificado.</p>
-    <ul className="as-contatos">${CONTATOS.map(c => html`<li key=${c.numero}><strong>${c.publico}:</strong> ${c.numero}</li>`)}</ul><${BotoesSuporte} /></div>`;
+    <ul className="as-contatos">${contatosDoAcesso().map(c => html`<li key=${c.numero}><strong>${c.titulo}:</strong> ${c.numero}</li>`)}</ul><${BotoesSuporte} /></div>`;
   if (r.tipo === "agradece") return html`<p>Por nada! Se precisar, é só perguntar de novo.</p>`;
   if (r.tipo === "nada") return html`<div><p>Não encontrei essa informação no portal. Tente com a marca e o modelo do veículo, por exemplo <em>caminho da calibração do Corolla</em>. Você também pode perguntar assim:</p>
     <div className="as-chips">${ASSIST_SUGESTOES.map(s => html`<button type="button" key=${s} className="as-chip" onClick=${() => perguntar(s)}>${s}</button>`)}</div></div>`;
@@ -5114,7 +5088,7 @@ function criarChatHttp(base) {
 
 /* ---------- Modo demonstração (sem servidor): tudo fica neste navegador ---------- */
 function criarChatDemo() {
-  const CH = "cec_chat_demo_v2";
+  const CH = "cec_chat_demo_v3";
   const agora = () => new Date().toISOString();
   const pessoas = [
     { id: "u-voce", nome: "Você", email: "", loja: "Sua loja", tipoOperacao: "propria", papel: "usuario" },
@@ -5125,15 +5099,18 @@ function criarChatDemo() {
   const inicial = () => {
     const t0 = Date.now() - 3600e3;
     const m = (id, cid, autor, texto, min, oficial) => ({ id, conversaId: cid, autor: pessoas.find(p => p.id === autor), texto, imagem: null, oficial: !!oficial, criadaEm: new Date(t0 + min * 60e3).toISOString() });
+    const sem = tipo => pessoas.filter(p => p.id === "u-voce" || p.papel === "suporte" || p.tipoOperacao === tipo);
     return {
       conversas: [
-        { id: "c-geral", tipo: "grupo", nome: "Geral", participantes: pessoas, lidaAte: {} }
+        { id: "c-geral-autoglass", tipo: "grupo", nome: "Geral Autoglass", participantes: sem("propria"), lidaAte: {} },
+        { id: "c-geral-credenciados", tipo: "grupo", nome: "Geral Credenciados", participantes: sem("credenciada"), lidaAte: {} }
       ],
       mensagens: [
-        m("m1", "c-geral", "u-suporte", "Bem-vindos ao Chat CEC! Esta é uma conversa de demonstração: as mensagens ficam só neste navegador.", 0, true),
-        m("m2", "c-geral", "u-cred", "Exemplo de pergunta: alguém já calibrou um veículo com este procedimento?", 10),
-        m("m3", "c-geral", "u-suporte", "Exemplo de resposta do suporte, marcada como oficial.", 14, true),
-        m("m4", "c-geral", "u-loja", "Exemplo de boa prática compartilhada entre as lojas.", 30)
+        m("m1", "c-geral-autoglass", "u-suporte", "Bem-vindos ao chat das lojas Autoglass! Esta é uma conversa de demonstração: as mensagens ficam só neste navegador.", 0, true),
+        m("m2", "c-geral-autoglass", "u-loja", "Exemplo de boa prática compartilhada entre as lojas Autoglass.", 30),
+        m("m3", "c-geral-credenciados", "u-suporte", "Bem-vindos ao chat dos credenciados! Esta é uma conversa de demonstração: as mensagens ficam só neste navegador.", 0, true),
+        m("m4", "c-geral-credenciados", "u-cred", "Exemplo de pergunta: alguém já calibrou um veículo com este procedimento?", 10),
+        m("m5", "c-geral-credenciados", "u-suporte", "Exemplo de resposta do suporte, marcada como oficial.", 14, true)
       ]
     };
   };
@@ -5207,8 +5184,10 @@ function ChatLogin({ aoEntrar }) {
 }
 
 // Chat único: a conversa "Geral" (grupo com todos). Sem conversas individuais nem outros grupos.
+// Lojas Autoglass e credenciadas têm salas separadas; o suporte técnico participa das duas
 const ehGeral = c => c && c.tipo === "grupo" && norm(c.nome || "") === "geral";
-const conversaGeral = lista => (lista || []).find(ehGeral) || (lista || []).find(c => c.tipo === "grupo") || null;
+const salaDoAcesso = () => ehCredenciada() ? "geral credenciados" : "geral autoglass";
+const conversaGeral = lista => (lista || []).find(c => c.tipo === "grupo" && norm(c.nome || "") === salaDoAcesso()) || (lista || []).find(ehGeral) || null;
 
 function ChatPagina() {
   const [eu, setEu] = useState(null); const [carregando, setCarregando] = useState(true);
@@ -5252,14 +5231,14 @@ function ChatPagina() {
   const lista = achados || msgs;
 
   return html`<section className="section chat-sec"><div className="wrap">
-    <${TituloPagina} t="Chat CEC" sub="Chat geral para troca de experiências, dúvidas e boas práticas entre lojas próprias e credenciadas." />
+    <${TituloPagina} t="Chat CEC" sub=${ehCredenciada() ? "Chat para troca de experiências, dúvidas e boas práticas entre as lojas credenciadas, com o suporte técnico." : "Chat para troca de experiências, dúvidas e boas práticas entre as lojas Autoglass, com o suporte técnico."} />
     ${CHAT.demo && html`<div className="alert atencao" role="note"><p>${ic("⚠️")} <strong>Demonstração.</strong> O chat ainda não está ligado ao servidor da Autoglass. As mensagens desta tela ficam só neste navegador e ninguém mais as vê.</p></div>`}
     ${erro && html`<div className="alert critico" role="alert"><p>${erro}</p></div>`}
     ${carregando ? html`<p className="hint">Carregando…</p>` : !eu ? html`<${ChatLogin} aoEntrar=${setEu} />` : html`
     <div className="chat chat-unico">
       <div className="chat-main">
         <header className="chat-topo">
-          <span className="chat-topo-t"><strong>${ic("💬")} Chat geral</strong><small>Lojas próprias e credenciadas</small></span>
+          <span className="chat-topo-t"><strong>${ic("💬")} ${ehCredenciada() ? "Chat dos credenciados" : "Chat das lojas Autoglass"}</strong><small>${ehCredenciada() ? "Somente lojas credenciadas e o suporte técnico" : "Somente lojas Autoglass e o suporte técnico"}</small></span>
           <span className="chat-eu-mini"><span>${eu.nome}</span><${SeloOperacao} u=${eu} />${!CHAT.demo && html`<button type="button" className="nov-ler" onClick=${async () => { await CHAT.sair(); setEu(null); setGeral(null); setMsgs([]); }}>Sair</button>`}</span>
         </header>
         <div className="chat-ferr">
@@ -5407,7 +5386,7 @@ function App({ sessao, onSair }) {
     <footer><div className="wrap">
       <img className="footlogo" src=${LOGO_GRUPO} alt="Grupo Autoglass" width="609" height="68" />
       <p><strong>Importante:</strong> As informações deste portal são destinadas à consulta técnica e devem ser utilizadas conforme os procedimentos e orientações vigentes da Autoglass. Em caso de divergência ou situação não contemplada, acione o suporte técnico ADAS.</p>
-      ${secao !== "" && html`<p className="footcontato"><a href="#/contato"><strong>Suporte Técnico ADAS</strong></a>, acionamento via WhatsApp: credenciados <span>+55 0800 025 6301</span> | loja Autoglass <span>+55 27 3202-4646</span></p>`}
+      ${secao !== "" && html`<p className="footcontato"><a href="#/contato"><strong>Suporte Técnico ADAS</strong></a>, acionamento via WhatsApp: ${contatosDoAcesso().map(c => html`<span key=${c.numero}>${c.numero}</span>`)}</p>`}
       <p>Suporte Técnico - CEC, Grupo Autoglass. <a href="#/sobre">Sobre o projeto</a></p>
     </div></footer>
     <nav className="bottomnav" aria-label="Acesso rápido">
