@@ -3287,6 +3287,8 @@ function Resultado({ r }) {
 
 // Materiais instrutivos que combinam com a pesquisa (montadora, modelo ou palavra-chave como "SFD"); só para lojas Autoglass
 const PALAVRAS_SO_FICHA = new Set(["medidas", "medida", "caminho", "alvo", "alvos", "tipo", "checklist", "calibracao", "calibrar", "calibragem", "orientacoes", "orientacao", "alertas", "alerta", "ano"]);
+// PDF do GitHub sem veículo, sem família de modelos e sem montadora (material geral ou nome não reconhecido)
+const semFichaRepo = it => String(it.id).startsWith("repo-") && !it.veiculo && !(it.veiculos || []).length && !it.marca;
 function buscarMateriais(q) {
   if (ehCredenciada()) return [];
   const ts = tokens(q).filter(t => !PALAVRAS_SO_FICHA.has(t));
@@ -3644,7 +3646,7 @@ function Veiculo({ id, params }) {
   const cat = params.get("cat");
   const { todos: todosVideos } = useVideos();
   useEffect(() => { if (v) registrarAcesso(v.id); }, [id]);
-  const repoVeic = useRepoPdfs().lista.filter(x => v && (x.veiculo === v.id || (!x.veiculo && x.marca === v.marca)));
+  const repoVeic = useRepoPdfs().lista.filter(x => v && (x.veiculo === v.id || (x.veiculos || []).includes(v.id) || (!x.veiculo && !(x.veiculos || []).length && x.marca === v.marca)));
   // Todo o material instrutivo do veículo: PDFs cadastrados, tutoriais com imagens e PDFs do GitHub
   const matsVeic = !v || ehCredenciada() ? [] : (() => {
     const doVeic = it => it.veiculo ? it.veiculo === v.id : MARCAS.some(m => m === v.marca && norm(it.aplicacao || "").split(/\s+/).includes(norm(m)));
@@ -4567,7 +4569,7 @@ function MaterialItem({ it }) {
   return html`<article className=${"mi-card" + (aberto && etapas.length ? " aberto" : "")}>
     ${capa ? html`<${ImagemAlvo} a=${{ codigo: it.titulo, legenda: "", imagem: capa }} />` : it.tipo === "pdf" && it.link ? html`<${PdfThumb} link=${it.link} titulo=${it.titulo} categoria=${it.categoria} />` : null}
     <div className="mi-body">
-      <p className="mat-tags"><span className="tag">${ROT_TIPO_MAT[it.tipo] || "Material"}</span>${String(it.id).startsWith("repo-") && !it.veiculo && html`<span className="tag tag-semficha">Sem ficha de veículo</span>`}${(it.aplicacao || "") && html`<span className="tag">${it.aplicacao}</span>`}${etapas.length > 0 && html`<span className="tag">${etapas.length} imagens</span>`}</p>
+      <p className="mat-tags"><span className="tag">${ROT_TIPO_MAT[it.tipo] || "Material"}</span>${semFichaRepo(it) && html`<span className="tag tag-semficha">Sem ficha de veículo</span>`}${(it.aplicacao || "") && html`<span className="tag">${it.aplicacao}</span>`}${etapas.length > 0 && html`<span className="tag">${etapas.length} imagens</span>`}</p>
       <h3>${it.titulo}</h3>
       ${it.restricao && html`<p className="mat-restricao">${ic("⚠️")} ${it.restricao}</p>`}
       ${it.resumo && html`<p>${it.resumo}</p>`}
@@ -4647,7 +4649,15 @@ function classificarArquivo(nome) {
   const anos = (base.match(/\b(19|20)\d{2}\b/g) || []);
   const faixa = base.match(/\b(\d{2})\s+(\d{2})\b/);
   const ano = anos.length ? anos.join(" a ") : faixa && +faixa[1] < +faixa[2] ? `20${faixa[1]} a 20${faixa[2]}` : "";
-  return { categoria, marca, veiculo, ano };
+  // Nome que cita só a família do modelo (ex.: "Dodge RAM", "Ram"): liga a todos os modelos dessa família (RAM 1500 e RAM 3500)
+  let veiculos = [];
+  if (!veiculo) {
+    const familia = l => l.filter(v => { const mt = norm(v.modelo).split(/\s+/); return !v.generico && mt.length > 1 && tem(mt[0]) && mt[0].length >= 3; });
+    veiculos = familia(VEICULOS.filter(v => !marca || v.marca === marca));
+    if (!veiculos.length) veiculos = familia(VEICULOS);
+  }
+  if (veiculos.length === 1) { veiculo = veiculos[0]; veiculos = []; }
+  return { categoria, marca, veiculo, veiculos, ano };
 }
 // Nome do arquivo no GitHub → link (usado para o "Baixar PDF" dos tutoriais com imagens)
 let REPO_LINKS = {};
@@ -4681,10 +4691,12 @@ function montarRepo(arquivos, meta) {
     const veicJson = doJson && doJson.veiculo;
     // Se o materiais.json não identificar o veículo, vale o reconhecimento pelo nome do arquivo
     const veic = veicJson || auto.veiculo;
-    const marca = m.montadora || (veic ? veic.marca : auto.marca);
-    const aplicacao = m.montadora ? [m.montadora, (m.modelos || []).join(", ")].filter(Boolean).join(" ") : [veic ? nomeVeiculo(veic) : auto.marca, auto.ano].filter(Boolean).join(" ");
+    const varios = veic ? [] : ((doJson && doJson.veiculos && doJson.veiculos.length) ? doJson.veiculos : auto.veiculos || []);
+    const marca = veic ? veic.marca : varios.length ? varios[0].marca : (doJson && doJson.marca) || auto.marca || m.montadora;
+    const aplicacao = veic ? [nomeVeiculo(veic), auto.ano].filter(Boolean).join(" ")
+      : varios.length ? varios.map(nomeVeiculo).join(", ") : [marca, auto.ano].filter(Boolean).join(" ");
     return { id: "repo-" + a.sha, tipo: "pdf", categoria: cat, titulo: m.titulo || limparNome(a.name), resumo: m.descricao || "",
-      aplicacao, marca: marca || null, veiculo: veic ? veic.id : null, link: a.html_url };
+      aplicacao, marca: marca || null, veiculo: veic ? veic.id : null, veiculos: varios.map(v => v.id), link: a.html_url };
   });
 }
 // Lê um repositório: lista os PDFs (inclusive em pastas) e o materiais.json
@@ -4803,7 +4815,7 @@ function MateriaisPagina({ params }) {
     ...repoSt.lista.map(it => ({ ...it, marcas: [it.marca].filter(Boolean) }))
   ];
   const marcasDisp = [...new Set(todos.flatMap(it => it.marcas))].sort((a, b) => a.localeCompare(b, "pt-BR"));
-  const lista = todos.filter(it => (!marca || it.marcas.includes(marca)) && (!tipo || (tipo === "pdf" ? it.tipo === "pdf" : it.tipo !== "pdf")) && (!semFicha || (String(it.id).startsWith("repo-") && !it.veiculo))
+  const lista = todos.filter(it => (!marca || it.marcas.includes(marca)) && (!tipo || (tipo === "pdf" ? it.tipo === "pdf" : it.tipo !== "pdf")) && (!semFicha || semFichaRepo(it))
     && casaBusca([it.titulo, it.resumo, it.aplicacao, (it.marcas || []).join(" "), (it.passos || []).join(" "), (it.dicas || []).join(" "), (it.etapas || []).map(e => [e.texto, e.seguranca].join(" ")).join(" ")].join(" ")))
     .sort((a, b) => a.titulo.localeCompare(b.titulo, "pt-BR"));
   return html`<section className="section"><div className="wrap">
@@ -4822,11 +4834,11 @@ function MateriaisPagina({ params }) {
     <${StatusRepo} st=${repoSt} />
     ${(() => {
       // PDFs do GitHub cujo nome não corresponde a nenhum veículo cadastrado
-      const sem = repoSt.lista.filter(it => !it.veiculo);
+      const sem = repoSt.lista.filter(semFichaRepo);
       if (!sem.length) return null;
       const nomes = sem.map(it => it.titulo + (it.marca ? ` (montadora reconhecida: ${it.marca})` : "")).join("\n");
       return html`<div className="alert atencao mi-semficha" role="note">
-        <p>${ic("⚠️")} <strong>${sem.length} ${sem.length === 1 ? "PDF do GitHub não está ligado" : "PDFs do GitHub não estão ligados"} a nenhuma ficha de veículo.</strong> O nome do arquivo não corresponde a um modelo cadastrado.</p>
+        <p>${ic("⚠️")} <strong>${sem.length} ${sem.length === 1 ? "PDF do GitHub não está ligado" : "PDFs do GitHub não estão ligados"} a nenhuma ficha de veículo nem montadora.</strong> Se forem materiais gerais, podem ficar assim; se forem de um veículo, inclua a montadora e o modelo no nome do arquivo.</p>
         <div className="mi-semficha-acoes">
           <button type="button" className="btn" aria-pressed=${semFicha} onClick=${() => setSemFicha(!semFicha)}>${semFicha ? "Mostrar todos os materiais" : "Ver esses PDFs"}</button>
           <${CopyButton} texto=${nomes} rotulo="Copiar lista" sucesso="Lista copiada" />
