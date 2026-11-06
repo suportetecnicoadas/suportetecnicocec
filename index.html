@@ -2426,6 +2426,16 @@ img.perfil-avatar{object-fit:cover;border:3px solid #FFFFFF;box-shadow:0 0 0 2px
     { id: "2026-11-03-whatsapp", data: "2026-11-03", tipo: "novo", titulo: "Suporte pelo WhatsApp com um clique", descricao: "Botões “Falar com o Suporte pelo WhatsApp” na página Contato e na página inicial, já com a mensagem para o atendimento.", link: "#/contato" }
   ];
 
+  // Hilux SW4: mesmas informações da Hilux (tipo, caminho, alvo, medidas, alertas e materiais), pedido da equipe Autoglass
+  (() => {
+    const hilux = veiculos.find(v => v.id === "toyota-hilux");
+    if (!hilux || veiculos.some(v => v.id === "toyota-hilux-sw4")) return;
+    const sw4 = JSON.parse(JSON.stringify(hilux));
+    sw4.id = "toyota-hilux-sw4"; sw4.modelo = "Hilux SW4"; sw4.apelidos = ["SW4", "SW 4"];
+    veiculos.splice(veiculos.indexOf(hilux) + 1, 0, sw4);
+    materiais.forEach(m => { if ((m.veiculos || []).includes("toyota-hilux")) m.veiculos.push("toyota-hilux-sw4"); });
+  })();
+
   return { checklists, tiposCalibracao, veiculos, alertasMarca, regras, faq, fontesExternas, materiais, referenciaDinamica, centralMateriais, categoriasVideo, videos, imagensMateriais, novidades };
 })();
 </script>
