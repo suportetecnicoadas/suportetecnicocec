@@ -1493,6 +1493,10 @@ img.perfil-avatar{object-fit:cover;border:3px solid #FFFFFF;box-shadow:0 0 0 2px
 .mm-area-cred .mm-top{color:#3510B5;font-weight:700}
 @media (hover:hover) and (pointer:fine){.area-cred:hover{background:#2A0C92}.sb-area-cred:hover{background:#F0EDFC}}
 
+/* Cobertura ADAS da Launch na página de ferramentas externas */
+.launch-cob{margin-top:16px}
+.launch-cob .qcta{margin-top:10px}
+
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
@@ -3917,6 +3921,7 @@ function MedidasPagina({ params }) {
 }
 
 function QcarPagina() {
+  const URL_LAUNCH_ADAS = "https://cnlaunchlatin.com/cobertura/adas/";
   const url = QCAR.url;
   const passos = [
     "Identifique o veículo",
@@ -3935,8 +3940,8 @@ function QcarPagina() {
     <div className="qhead">
       <span className="qicon" aria-hidden="true">${ic("🔎")}</span>
       <div>
-        <h1 style=${{ fontSize: "clamp(28px, 6vw, 40px)" }}>Consulta QCar</h1>
-        <p className="lead" style=${{ margin: "4px 0 0" }}>Acesso rápido ao QCar / LAUNCH ADAS Vehicle Inquiry, ferramenta externa de consulta.</p>
+        <h1 style=${{ fontSize: "clamp(28px, 6vw, 40px)" }}>Ferramentas externas</h1>
+        <p className="lead" style=${{ margin: "4px 0 0" }}>Acesso rápido ao QCar / LAUNCH ADAS Vehicle Inquiry e à Cobertura ADAS da Launch Latin America, ferramentas externas de consulta.</p>
       </div>
     </div>
 
@@ -3957,6 +3962,15 @@ function QcarPagina() {
     <div className="qcta">
       <a className="btn-qcar" href=${url} target="_blank" rel="noopener noreferrer">${ic("🔗")} ACESSAR QCAR</a>
       <p className="hint">Abre o site oficial do QCar / LAUNCH em uma nova aba do navegador.<br /><span className="qurl">${url}</span></p>
+    </div>
+
+    <div className="panel launch-cob" id="sec-launch">
+      <div className="panel-head"><h2>${ic("🔎")} Cobertura ADAS – Launch Latin America</h2></div>
+      <p>Consulte no site oficial da LAUNCH quais veículos e sistemas ADAS têm cobertura de calibração nos equipamentos LAUNCH, como o X-431. Use quando quiser confirmar se o equipamento atende o veículo antes de iniciar o atendimento.</p>
+      <div className="qcta">
+        <a className="btn-qcar" href=${URL_LAUNCH_ADAS} target="_blank" rel="noopener noreferrer">${ic("🔗")} ACESSAR COBERTURA ADAS LAUNCH</a>
+        <p className="hint">Abre o site oficial da Launch Latin America em uma nova aba. O site é em espanhol.<br /><span className="qurl">${URL_LAUNCH_ADAS}</span></p>
+      </div>
     </div>
 
     <div className="stack">
