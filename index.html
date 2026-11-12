@@ -1498,6 +1498,14 @@ img.perfil-avatar{object-fit:cover;border:3px solid #FFFFFF;box-shadow:0 0 0 2px
 .launch-cob .qcta{margin-top:10px}
 
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+/* ---------- Shorts da página inicial ---------- */
+.shorts-trilho{list-style:none;margin:0;padding:2px 2px 10px;display:grid;grid-auto-flow:column;grid-auto-columns:min(62%,240px);gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
+.short{scroll-snap-align:start;min-width:0}
+.short-quadro{aspect-ratio:9/16;border-radius:var(--radius,12px);overflow:hidden;background:var(--c-roxo-escuro)}
+.short-video{display:block;width:100%;height:100%;object-fit:contain;background:var(--c-roxo-escuro)}
+.short h3{font-size:16px;font-weight:600;line-height:1.3;margin:10px 0 4px}
+.short p{font-size:14px;line-height:1.45;color:var(--muted);margin:0}
+@media (min-width:1001px){.shorts-trilho{grid-auto-flow:row;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));overflow:visible}}
 </style>
 </head>
 <body>
@@ -2413,6 +2421,7 @@ img.perfil-avatar{object-fit:cover;border:3px solid #FFFFFF;box-shadow:0 0 0 2px
      O id precisa ser único: é ele que marca a novidade como lida no navegador.
      ========================================================== */
   const novidades = [
+    { id: "2026-11-12-shorts", data: "2026-11-12", tipo: "novo", titulo: "Vídeos sobre as funções do ADAS", descricao: "A página inicial ganhou a seção Entenda cada função do ADAS, com vídeos curtos sobre cada sistema de assistência ao motorista.", link: "#/" },
     { id: "2026-11-05-fichas-pdfs-2", data: "2026-11-05", tipo: "novo", titulo: "100 novas fichas para os PDFs", descricao: "Veículos de 22 montadoras ganharam ficha para reunir os PDFs de instalação (como Fiat Palio, Uno e Doblò, GM Onix, Celta e Corsa, Honda Civic e Fit, VW Fox, Gol e Up), mais as montadoras Iveco, JAC, Mini e Troller.", link: "#/materiais", publicoNov: "propria" },
     { id: "2026-11-04-videos-credenciados", data: "2026-11-04", tipo: "novo", titulo: "Cursos da Área do Credenciado", descricao: "A aba Vídeos dos credenciados ganhou 26 cursos: introdução ao ADAS, diagnóstico e calibragem com o X431 PRO, base ECO, gabaritos e calibração estática.", link: "#/videos", publicoNov: "credenciada" },
     { id: "2026-11-04-acessos", data: "2026-11-04", tipo: "novo", titulo: "Acesso para lojas Autoglass e credenciados", descricao: "Lojas Autoglass entram com o e-mail @autoglass.com.br; credenciados entram com o CNPJ da loja. Cada acesso mostra as páginas do seu perfil de operação." },
@@ -3422,6 +3431,37 @@ const MAIS_ACESSADOS = [
   { t: "Renegade", sub: "Jeep", h: "#/veiculo/jeep-renegade" }
 ];
 
+// Um short: tenta o arquivo publicado junto com o site (GitHub Pages) e, se não houver, o arquivo do repositório
+function ShortCard({ x, onFalha }) {
+  const ult = useRef(null);
+  useEffect(() => { const el = ult.current; if (!el) return; el.addEventListener("error", onFalha); return () => el.removeEventListener("error", onFalha); }, []);
+  const soUm = e => { document.querySelectorAll("video.short-video").forEach(v => { if (v !== e.target && !v.paused) v.pause(); }); };
+  return html`<li className="short">
+    <div className="short-quadro">
+      <video className="short-video" controls playsInline preload="metadata" onPlay=${soUm} aria-label=${x.titulo}>
+        <source src=${x.local + "#t=0.5"} type="video/mp4" />
+        <source ref=${ult} src=${x.raw + "#t=0.5"} type="video/mp4" />
+      </video>
+    </div>
+    <h3>${x.titulo}</h3>
+    ${x.descricao && html`<p>${x.descricao}</p>`}
+  </li>`;
+}
+function ShortsInicio() {
+  const st = useRepoPdfs();
+  const [falhas, setFalhas] = useState({});
+  const publicoOk = x => x.publico === "todos" || x.publico === (ehCredenciada() ? "credenciada" : "propria");
+  const lista = (st.shorts || []).filter(publicoOk).filter(x => !falhas[x.id])
+    .sort((a, b) => a.ordem - b.ordem || a.titulo.localeCompare(b.titulo, "pt-BR"));
+  return html`<section className="section shorts-sec" aria-labelledby="h-shorts"><div className="wrap">
+    <h2 className="home-h2" id="h-shorts">Entenda cada função do ADAS</h2>
+    <p className="lead">Vídeos curtos que mostram como funciona cada sistema de assistência ao motorista.</p>
+    ${!st.pronto ? html`<div className="empty">Carregando vídeos...</div>`
+      : lista.length ? html`<ul className="shorts-trilho" aria-label="Vídeos sobre as funções do ADAS">${lista.map(x => html`<${ShortCard} key=${x.id} x=${x} onFalha=${() => setFalhas(f => ({ ...f, [x.id]: true }))} />`)}</ul>`
+      : html`<div className="empty">Os vídeos sobre as funções do ADAS serão publicados aqui em breve.</div>`}
+  </div></section>`;
+}
+
 function Inicio() {
   const [q, setQ] = useState("");
   const res = useMemo(() => buscar(q), [q]);
@@ -3501,6 +3541,8 @@ function Inicio() {
         <div className="dl-btns">${atalhos.filter(a => linkPermitido(a.h)).map(a => html`<a className="pill-btn" key=${a.t} href=${a.h}><span className="pb-ic" aria-hidden="true">${ic(a.em)}</span>${a.t}</a>`)}</div>
       </div>
     </div></section>
+
+    <${ShortsInicio} />
 
     <section className="section sec-alt"><div className="wrap">
       <h2 className="home-h2">Montadoras</h2>
@@ -4616,9 +4658,9 @@ function MaterialItem({ it }) {
    publicada no Claude), o portal usa apenas os PDFs já cadastrados. */
 const REPO_PDFS = {
   repos: [{ dono: "suportetecnicoadas", nome: "PDF-s-F12" }, { dono: "suportetecnicoadas", nome: "suportetecnicocec" }],
-  cache: "cec_repo_pdfs_v6", horas: 3
+  cache: "cec_repo_pdfs_v7", horas: 3
 };
-const REPO_STATE = { lista: [], laudos: [], novidades: [], pronto: false, status: null };
+const REPO_STATE = { lista: [], laudos: [], novidades: [], shorts: [], pronto: false, status: null };
 const repoSubs = new Set();
 let repoIniciado = false;
 const limparNome = n => decodeURIComponent(String(n).split("/").pop()).replace(/\.pdf$/i, "").replace(/[_]+/g, " ").replace(/\s+/g, " ").trim();
@@ -4711,6 +4753,21 @@ function montarRepo(arquivos, meta) {
       aplicacao, marca: marca || null, veiculo: veic ? veic.id : null, veiculos: varios.map(v => v.id), link: a.html_url };
   });
 }
+// SHORTS DA PÁGINA INICIAL
+// Vídeos .mp4 dentro de uma pasta "shorts" do repositório. O arquivo shorts.json (na mesma pasta) é opcional e define
+// título, descrição, ordem e público de cada vídeo:
+// [{ "arquivo": "frenagem-autonoma.mp4", "titulo": "", "descricao": "", "ordem": 1, "publico": "todos" | "propria" | "credenciada", "ocultar": false }]
+// Sem o shorts.json, o título sai do nome do arquivo (frenagem-autonoma.mp4 → "Frenagem autonoma").
+const nomeShort = n => { const t = decodeURIComponent(String(n).split("/").pop()).replace(/\.(mp4|m4v|webm)$/i, "").replace(/[-_]+/g, " ").replace(/\s+/g, " ").trim(); return t.charAt(0).toUpperCase() + t.slice(1); };
+function montarShorts(videos, meta, dono, nome) {
+  const porArq = new Map((meta || []).filter(m => m && m.arquivo).map(m => [chaveArq(m.arquivo), m]));
+  return videos.map(v => {
+    const m = porArq.get(v.arq.toLowerCase()) || {};
+    const ordem = m.ordem == null || m.ordem === "" || !isFinite(+m.ordem) ? 999 : +m.ordem;
+    return { id: "short-" + v.sha, arquivo: v.arq, titulo: String(m.titulo || nomeShort(v.arq)), descricao: String(m.descricao || ""), ordem, publico: m.publico || "todos", ocultar: m.ocultar === true,
+      local: caminhoUrl(v.path), raw: `https://raw.githubusercontent.com/${dono}/${nome}/HEAD/${caminhoUrl(v.path)}` };
+  }).filter(x => !x.ocultar);
+}
 // Lê um repositório: lista os PDFs (inclusive em pastas) e o materiais.json
 async function lerRepo(dono, nome) {
   let r = null;
@@ -4721,7 +4778,7 @@ async function lerRepo(dono, nome) {
   }
   if (!r || !r.ok) throw new Error(r && r.status === 404 ? "repositório não encontrado ou privado" : "erro " + (r ? r.status : "de conexão"));
   const j = await r.json();
-  const arquivos = [], meta = [], metaLaudos = [], novidades = [];
+  const arquivos = [], meta = [], metaLaudos = [], novidades = [], videos = [], metaShorts = [];
   for (const it of j.tree || []) {
     if (it.type !== "blob") continue;
     const arq = String(it.path).split("/").pop();
@@ -4729,6 +4786,11 @@ async function lerRepo(dono, nome) {
       try { const rn = await fetch(`https://raw.githubusercontent.com/${dono}/${nome}/HEAD/${caminhoUrl(it.path)}`); if (rn.ok) { const m = await rn.json(); if (Array.isArray(m)) novidades.push(...m); } } catch (e) {}
       continue;
     }
+    if (arq.toLowerCase() === "shorts.json") {
+      try { const rs = await fetch(`https://raw.githubusercontent.com/${dono}/${nome}/HEAD/${caminhoUrl(it.path)}`); if (rs.ok) { const m = await rs.json(); if (Array.isArray(m)) metaShorts.push(...m); } } catch (e) {}
+      continue;
+    }
+    if (/\.(mp4|m4v|webm)$/i.test(arq) && /(^|\/)shorts\//i.test(it.path)) { videos.push({ arq, path: it.path, sha: it.sha }); continue; }
     if (arq.toLowerCase() === "laudos.json") {
       try { const rm = await fetch(`https://raw.githubusercontent.com/${dono}/${nome}/HEAD/${caminhoUrl(it.path)}`); if (rm.ok) { const m = await rm.json(); if (Array.isArray(m)) metaLaudos.push(...m); } } catch (e) {}
       continue;
@@ -4739,7 +4801,7 @@ async function lerRepo(dono, nome) {
     }
     if (/\.pdf$/i.test(arq)) arquivos.push({ name: arq, path: it.path, sha: it.sha, html_url: `https://github.com/${dono}/${nome}/blob/HEAD/${caminhoUrl(it.path)}` });
   }
-  return { arquivos, meta, metaLaudos, novidades };
+  return { arquivos, meta, metaLaudos, novidades, shorts: montarShorts(videos, metaShorts, dono, nome) };
 }
 function iniciarRepo() {
   if (repoIniciado) return;
@@ -4754,9 +4816,9 @@ function iniciarRepo() {
     REPO_LINKS = { ...REPO_LINKS }; lds.forEach(a => { REPO_LINKS[a.name.toLowerCase()] = a.html_url; });
     fim(l, { ...status, n: mats.length, novos: l.length }, montarLaudos(lds, metaLaudos));
   };
-  try { const c = JSON.parse(localStorage.getItem(REPO_PDFS.cache) || "null"); if (c && c.t > Date.now() - REPO_PDFS.horas * 3600e3) return (REPO_STATE.novidades = c.novidades || [], montar)(c.arquivos, c.meta, c.metaLaudos || [], { ok: true, quando: c.quando || c.t, avisos: c.avisos || [] }); } catch (e) {}
+  try { const c = JSON.parse(localStorage.getItem(REPO_PDFS.cache) || "null"); if (c && c.t > Date.now() - REPO_PDFS.horas * 3600e3) return (REPO_STATE.novidades = c.novidades || [], REPO_STATE.shorts = c.shorts || [], montar)(c.arquivos, c.meta, c.metaLaudos || [], { ok: true, quando: c.quando || c.t, avisos: c.avisos || [] }); } catch (e) {}
   (async () => {
-    const arquivos = [], meta = [], metaLaudos = [], novidades = [], vistos = new Set(), avisos = [];
+    const arquivos = [], meta = [], metaLaudos = [], novidades = [], shorts = [], vistos = new Set(), avisos = [];
     let algum = false, falhou = false;
     for (const { dono, nome } of REPO_PDFS.repos) {
       let res = null;
@@ -4774,12 +4836,14 @@ function iniciarRepo() {
       meta.push(...(res.meta || []));
       metaLaudos.push(...(res.metaLaudos || []));
       novidades.push(...(res.novidades || []));
+      shorts.push(...(res.shorts || []));
     }
     if (!algum) throw new Error(avisos.join(" · ") || "sem acesso ao GitHub");
     // Com falha, tenta de novo em 10 minutos; sem falha, guarda por 3 horas
     const t = falhou ? Date.now() - REPO_PDFS.horas * 3600e3 + 10 * 60e3 : Date.now();
-    try { localStorage.setItem(REPO_PDFS.cache, JSON.stringify({ t, quando: Date.now(), arquivos, meta, metaLaudos, novidades, avisos })); } catch (e) {}
+    try { localStorage.setItem(REPO_PDFS.cache, JSON.stringify({ t, quando: Date.now(), arquivos, meta, metaLaudos, novidades, shorts, avisos })); } catch (e) {}
     REPO_STATE.novidades = novidades;
+    REPO_STATE.shorts = shorts;
     montar(arquivos, meta, metaLaudos, { ok: true, quando: Date.now(), avisos });
   })().catch(e => fim([], { ok: false, erro: String(e && e.message || e) }));
 }
