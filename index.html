@@ -2477,7 +2477,6 @@ const ANOS_EM_TEXTO = t => String(t)
 (function ajustarAnos(o, chave, semUnidades) {
   // Imagens (data:) ficam intactas; caminhos de calibração seguem o texto do equipamento (ex.: "TAMANHO ALVO: 120M") e não têm as unidades convertidas
   const conv = t => { if (typeof t !== "string" || t.startsWith("data:")) return t; let r = t;
-    if (/(>=|<=|=>|=<|≥|≤|[<>]\s*\d{4})/.test(r)) r = ANOS_EM_TEXTO(r);
     if (/\d\s?(mm|cm|m)\b/i.test(r)) r = UNIDADES_EM_TEXTO(r, semUnidades);
     return r; };
   if (Array.isArray(o)) { o.forEach((x, i) => { if (typeof x === "string") { if (chave !== "anos" && chave !== "palavras") o[i] = conv(x); } else ajustarAnos(x, chave, semUnidades); }); return; }
@@ -2693,13 +2692,11 @@ const MARCAS = [...new Set(VEICULOS.map(v => v.marca))].sort((a, b) => a.localeC
 function formatarAnos(a) {
   if (!a || a === "TODOS") return null;
   let m;
-  if ((m = a.match(/^MAIOR OU IGUAL A (\d{4})$/i))) return `Maior ou igual a ${m[1]}`;
-  if ((m = a.match(/^\?\s*>=\s*(\d{4})$/))) return `Maior ou igual a ${m[1]} (a confirmar)`;
-  if ((m = a.match(/^>=\s*(\d{4})$/))) return `Maior ou igual a ${m[1]}`;
-  if ((m = a.match(/^<=\s*(\d{4})$/))) return `Menor ou igual a ${m[1]}`;
-  if ((m = a.match(/^>\s*(\d{4})$/))) return `Maior que ${m[1]}`;
-  if ((m = a.match(/^<\s*(\d{4})$/))) return `Menor que ${m[1]}`;
-  return ANOS_EM_TEXTO(a);
+  // Anos com os símbolos da planilha (ex.: ">=2016", "<=2023"), a pedido da equipe Autoglass
+  if ((m = a.match(/^MAIOR OU IGUAL A (\d{4})$/i))) return `>=${m[1]}`;
+  if ((m = a.match(/^\?\s*>=\s*(\d{4})$/))) return `>=${m[1]} (a confirmar)`;
+  if ((m = a.match(/^(>=|<=|>|<)\s*(\d{4})$/))) return `${m[1]}${m[2]}`;
+  return a;
 }
 const ORDEM_NIVEL = { critico: 0, atencao: 1, info: 2 };
 function alertasDe(v) {
