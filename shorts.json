@@ -1,0 +1,5 @@
+[
+  { "arquivo": "frenagem-autonoma.mp4", "titulo": "Frenagem autônoma de emergência", "descricao": "Como o veículo freia sozinho quando detecta risco de colisão à frente.", "ordem": 1 },
+  { "arquivo": "permanencia-em-faixa.mp4", "titulo": "Assistente de permanência em faixa", "descricao": "Como a câmera lê as faixas e corrige a direção.", "ordem": 2 },
+  { "arquivo": "piloto-automatico-adaptativo.mp4", "titulo": "Piloto automático adaptativo", "descricao": "Como o veículo mantém a distância do carro da frente.", "ordem": 3 }
+]
