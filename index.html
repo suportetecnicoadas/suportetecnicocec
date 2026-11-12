@@ -1503,6 +1503,7 @@ img.perfil-avatar{object-fit:cover;border:3px solid #FFFFFF;box-shadow:0 0 0 2px
 .short{scroll-snap-align:start;min-width:0}
 .short-quadro{aspect-ratio:9/16;border-radius:var(--radius,12px);overflow:hidden;background:var(--c-roxo-escuro)}
 .short-video{display:block;width:100%;height:100%;object-fit:contain;background:var(--c-roxo-escuro)}
+.short-erro{display:grid;place-items:center;height:100%;padding:16px;text-align:center;color:#FFFFFF;font-size:14px;line-height:1.4}
 .short h3{font-size:16px;font-weight:600;line-height:1.3;margin:10px 0 4px}
 .short p{font-size:14px;line-height:1.45;color:var(--muted);margin:0}
 @media (min-width:1001px){.shorts-trilho{grid-auto-flow:row;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));overflow:visible}}
@@ -3432,16 +3433,18 @@ const MAIS_ACESSADOS = [
 ];
 
 // Um short: tenta o arquivo publicado junto com o site (GitHub Pages) e, se não houver, o arquivo do repositório
-function ShortCard({ x, onFalha }) {
+function ShortCard({ x }) {
   const ult = useRef(null);
-  useEffect(() => { const el = ult.current; if (!el) return; el.addEventListener("error", onFalha); return () => el.removeEventListener("error", onFalha); }, []);
+  const [erro, setErro] = useState(false);
+  useEffect(() => { const el = ult.current; if (!el) return; const f = () => setErro(true); el.addEventListener("error", f); return () => el.removeEventListener("error", f); }, []);
   const soUm = e => { document.querySelectorAll("video.short-video").forEach(v => { if (v !== e.target && !v.paused) v.pause(); }); };
   return html`<li className="short">
     <div className="short-quadro">
-      <video className="short-video" controls playsInline preload="metadata" onPlay=${soUm} aria-label=${x.titulo}>
+      ${erro ? html`<div className="short-erro">Vídeo indisponível no momento.</div>`
+        : html`<video className="short-video" controls playsInline preload="metadata" onPlay=${soUm} onError=${() => setErro(true)} aria-label=${x.titulo}>
         <source src=${x.local + "#t=0.5"} type="video/mp4" />
         <source ref=${ult} src=${x.raw + "#t=0.5"} type="video/mp4" />
-      </video>
+      </video>`}
     </div>
     <h3>${x.titulo}</h3>
     ${x.descricao && html`<p>${x.descricao}</p>`}
@@ -3449,15 +3452,19 @@ function ShortCard({ x, onFalha }) {
 }
 function ShortsInicio() {
   const st = useRepoPdfs();
-  const [falhas, setFalhas] = useState({});
+  const [doJson, setDoJson] = useState(null);
+  useEffect(() => { let vivo = true; lerShortsJson().then(r => vivo && setDoJson(r)); return () => { vivo = false; }; }, []);
   const publicoOk = x => x.publico === "todos" || x.publico === (ehCredenciada() ? "credenciada" : "propria");
-  const lista = (st.shorts || []).filter(publicoOk).filter(x => !falhas[x.id])
-    .sort((a, b) => a.ordem - b.ordem || a.titulo.localeCompare(b.titulo, "pt-BR"));
+  const ocultos = doJson ? doJson.ocultos : new Set();
+  const mapa = new Map();
+  [...(doJson ? doJson.lista : []), ...(st.shorts || [])].forEach(x => { const k = x.arquivo.toLowerCase(); if (!mapa.has(k) && !ocultos.has(k)) mapa.set(k, x); });
+  const lista = [...mapa.values()].filter(publicoOk).sort((a, b) => a.ordem - b.ordem || a.titulo.localeCompare(b.titulo, "pt-BR"));
+  const carregando = !lista.length && (doJson === null || !st.pronto);
   return html`<section className="section shorts-sec" aria-labelledby="h-shorts"><div className="wrap">
     <h2 className="home-h2" id="h-shorts">Entenda cada função do ADAS</h2>
     <p className="lead">Vídeos curtos que mostram como funciona cada sistema de assistência ao motorista.</p>
-    ${!st.pronto ? html`<div className="empty">Carregando vídeos...</div>`
-      : lista.length ? html`<ul className="shorts-trilho" aria-label="Vídeos sobre as funções do ADAS">${lista.map(x => html`<${ShortCard} key=${x.id} x=${x} onFalha=${() => setFalhas(f => ({ ...f, [x.id]: true }))} />`)}</ul>`
+    ${carregando ? html`<div className="empty">Carregando vídeos...</div>`
+      : lista.length ? html`<ul className="shorts-trilho" aria-label="Vídeos sobre as funções do ADAS">${lista.map(x => html`<${ShortCard} key=${x.id} x=${x} />`)}</ul>`
       : html`<div className="empty">Os vídeos sobre as funções do ADAS serão publicados aqui em breve.</div>`}
   </div></section>`;
 }
@@ -4767,6 +4774,22 @@ function montarShorts(videos, meta, dono, nome) {
     return { id: "short-" + v.sha, arquivo: v.arq, titulo: String(m.titulo || nomeShort(v.arq)), descricao: String(m.descricao || ""), ordem, publico: m.publico || "todos", ocultar: m.ocultar === true,
       local: caminhoUrl(v.path), raw: `https://raw.githubusercontent.com/${dono}/${nome}/HEAD/${caminhoUrl(v.path)}` };
   }).filter(x => !x.ocultar);
+}
+// O shorts.json da pasta "shorts" é lido a cada acesso, direto do repositório, para os vídeos novos aparecerem na hora
+let SHORTS_JSON = null;
+function lerShortsJson() {
+  if (!SHORTS_JSON) SHORTS_JSON = Promise.all(REPO_PDFS.repos.map(({ dono, nome }) =>
+    fetch(`https://raw.githubusercontent.com/${dono}/${nome}/HEAD/shorts/shorts.json?v=${Date.now()}`, { cache: "no-store" })
+      .then(r => r.ok ? r.json() : [])
+      .then(m => {
+        const itens = (Array.isArray(m) ? m : []).filter(x => x && x.arquivo);
+        const ocultos = itens.filter(x => x.ocultar === true).map(x => chaveArq(x.arquivo));
+        const videos = itens.map(x => { const arq = decodeURIComponent(String(x.arquivo).split("/").pop()); return { arq, path: "shorts/" + arq, sha: nome + "-" + arq.toLowerCase() }; });
+        return { lista: montarShorts(videos, itens, dono, nome), ocultos };
+      })
+      .catch(() => ({ lista: [], ocultos: [] }))))
+    .then(rs => ({ lista: rs.flatMap(r => r.lista), ocultos: new Set(rs.flatMap(r => r.ocultos)) }));
+  return SHORTS_JSON;
 }
 // Lê um repositório: lista os PDFs (inclusive em pastas) e o materiais.json
 async function lerRepo(dono, nome) {
