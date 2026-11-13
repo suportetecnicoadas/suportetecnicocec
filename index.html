@@ -2144,7 +2144,7 @@ img.perfil-avatar{object-fit:cover;border:3px solid #FFFFFF;box-shadow:0 0 0 2px
       arquivo: "LIBERACAO_SFD.pdf", formato: "PDF", tamanho: "1,9 MB", paginas: 10, origem: "Grupo Autoglass", link: "https://github.com/suportetecnicoadas/PDF-s-F12/blob/main/LIBERACAO%20SFD.pdf",
       descricao: "Veículos da Volkswagen, Audi e Porsche necessitam de liberação da licença SFD para prosseguir com a calibração de câmera ou radar." },
     { id: "calibracao-chevrolet", titulo: "Manual de instrução para calibração de veículos Chevrolet/GM", veiculos: [], marcas: ["Chevrolet"],
-      arquivo: "CALIBRAÇÃO_CHEVROLET.pdf", formato: "PDF", tamanho: "2,5 MB", paginas: 13, origem: "Grupo Autoglass", link: "https://github.com/suportetecnicoadas/PDF-s-F12/blob/main/CALIBRA%C3%87%C3%83O%20CHEVROLET.pdf",
+      arquivo: "Calibração_Chevrolet.pdf", formato: "PDF", tamanho: "2,5 MB", paginas: 13, origem: "Grupo Autoglass", link: "https://github.com/suportetecnicoadas/PDF-s-F12/blob/main/Calibra%C3%A7%C3%A3o%20Chevrolet.pdf",
       descricao: "Este manual foi elaborado para instruir exclusivamente sobre a forma de calibração dos veículos Chevrolet/GM. Siga os passos orientados abaixo para realizar a calibração com sucesso." }
   ];
 
@@ -4687,7 +4687,11 @@ const limparNome = n => decodeURIComponent(String(n).split("/").pop()).replace(/
 const chaveArq = u => { try { return decodeURIComponent(String(u || "").split("/").pop()).toLowerCase(); } catch (e) { return String(u || "").split("/").pop().toLowerCase(); } };
 const caminhoUrl = p => String(p).split("/").map(encodeURIComponent).join("/");
 /* Organização automática pelo nome do arquivo: categoria (vidros, faróis…) e veículo (marca/modelo) */
-const RAW_DE = u => String(u || "").replace(/^https:\/\/github\.com\/([^/]+)\/([^/]+)\/blob\//, "https://raw.githubusercontent.com/$1/$2/");
+// Acha o arquivo real no GitHub mesmo com diferença de maiúsculas, acentos, espaço ou sublinhado no nome
+const chaveNome = u => { let n = String(u || "").split("/").pop(); try { n = decodeURIComponent(n); } catch (e) {} return n.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\.pdf$/, "").replace(/[^a-z0-9]+/g, ""); };
+let REPO_CHAVES = {};
+const linkReal = u => (/^https:\/\/github\.com\/[^/]+\/[^/]+\/blob\//.test(String(u || "")) && REPO_CHAVES[chaveNome(u)]) || u;
+const RAW_DE = u => String(linkReal(u) || "").replace(/^https:\/\/github\.com\/([^/]+)\/([^/]+)\/blob\//, "https://raw.githubusercontent.com/$1/$2/");
 const CAT_PALAVRAS = [
   ["retrovisores", /retrovisor|retrov|espelho/],
   ["farois", /farol|farois|milha/],
@@ -4753,9 +4757,11 @@ function montarLaudos(arquivos, meta) {
 }
 function montarRepo(arquivos, meta) {
   REPO_LINKS = {}; arquivos.forEach(a => { REPO_LINKS[String(a.name).toLowerCase()] = a.html_url; });
+  REPO_CHAVES = {}; arquivos.forEach(a => { REPO_CHAVES[chaveNome(a.name)] = a.html_url; });
+  const conhecidosChave = new Set(MATERIAIS.map(m => chaveNome(m.link)).filter(Boolean));
   const conhecidos = new Set([...MATERIAIS.map(m => chaveArq(m.link)), ...CENTRAL.flatMap(c => (c.itens || []).map(it => chaveArq(it.link))), ...CENTRAL.flatMap(c => (c.itens || []).map(it => String(it.pdfNome || "").toLowerCase()))].filter(Boolean));
   const porArq = {}; (meta || []).forEach(m => { if (m && m.arquivo) porArq[String(m.arquivo).split("/").pop().toLowerCase()] = m; });
-  return arquivos.filter(a => /\.pdf$/i.test(a.name) && !conhecidos.has(a.name.toLowerCase())).map(a => {
+  return arquivos.filter(a => /\.pdf$/i.test(a.name) && !conhecidos.has(a.name.toLowerCase()) && !conhecidosChave.has(chaveNome(a.name))).map(a => {
     const m = porArq[a.name.toLowerCase()] || {};
     const auto = classificarArquivo(a.name);
     // O materiais.json tem prioridade; sem ele, a organização vem do nome do arquivo
