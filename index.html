@@ -5759,11 +5759,13 @@ function Tour({ onFim }) {
 
 /* =====================================================================
    SUGESTÕES PARA O SITE (#/sugestoes)
-   A loja escreve a sugestão e o envio abre o aplicativo de e-mail com a mensagem
-   pronta para o endereço abaixo. O site não tem servidor para guardar mensagens,
-   por isso o e-mail é o canal de envio.
+   A loja escreve a sugestão e o site envia direto para o e-mail do suporte,
+   pelo serviço gratuito FormSubmit (formsubmit.co), sem abrir aplicativo de e-mail.
+   No primeiro envio, o FormSubmit manda uma mensagem de ativação para o e-mail
+   abaixo: é preciso abrir essa mensagem e clicar em "Activate Form" uma única vez.
    ===================================================================== */
 const EMAIL_SUGESTOES = "suportetecnicoadas@autoglass.com.br";
+const ENVIO_SUGESTOES = "https://formsubmit.co/ajax/" + EMAIL_SUGESTOES;
 const TIPOS_SUGESTAO = ["Sugestão de melhoria", "Erro ou problema no site", "Informação incorreta ou desatualizada", "Elogio"];
 function SugestoesPagina({ sessao, params }) {
   const cred = ehCredenciada();
@@ -5773,34 +5775,58 @@ function SugestoesPagina({ sessao, params }) {
   const vazio = { tipo: TIPOS_SUGESTAO[0], area: "", msg: "", nome: dados.nome || "", loja: dados.loja || "" };
   const [f, setF] = useState({ ...vazio, area: areas.includes(params.get("area") || "") ? params.get("area") : "" });
   const [erro, setErro] = useState("");
-  const [enviado, setEnviado] = useState(false);
+  const [etapa, setEtapa] = useState("form"); // form | enviando | ok | falha
+  const quem = (cred ? "CNPJ: " : "E-mail: ") + sessao.email;
   const texto = () => ["Sugestão para o site Suporte Técnico - CEC", "Tipo: " + f.tipo, f.area && "Assunto: " + f.area,
-    f.nome.trim() && "Nome: " + f.nome.trim(), f.loja.trim() && "Loja: " + f.loja.trim(), (cred ? "CNPJ: " : "E-mail: ") + sessao.email]
+    f.nome.trim() && "Nome: " + f.nome.trim(), f.loja.trim() && "Loja: " + f.loja.trim(), quem]
     .filter(Boolean).join("\n") + "\n\n" + f.msg.trim();
   const assunto = () => "Sugestão para o site: " + f.tipo + (f.area ? " (" + f.area + ")" : "");
   const linkEmail = () => `mailto:${EMAIL_SUGESTOES}?subject=${encodeURIComponent(assunto())}&body=${encodeURIComponent(texto())}`;
   const muda = k => e => setF({ ...f, [k]: e.target.value });
-  const enviar = e => {
+  const enviar = async e => {
     e.preventDefault();
+    if (etapa === "enviando") return;
     if (f.msg.trim().length < 10) { setErro("Escreva a sua mensagem com pelo menos 10 caracteres."); const t = document.getElementById("sug-msg"); t && t.focus(); return; }
-    setErro("");
-    location.href = linkEmail();
-    setEnviado(true);
+    setErro(""); setEtapa("enviando");
+    const ctl = new AbortController(); const tempo = setTimeout(() => ctl.abort(), 20000);
+    try {
+      const r = await fetch(ENVIO_SUGESTOES, {
+        method: "POST", signal: ctl.signal,
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({
+          _subject: assunto(), _template: "table", _captcha: "false",
+          "Tipo": f.tipo, "Parte do site": f.area || "Não informada", "Nome": f.nome.trim() || "Não informado",
+          "Loja": f.loja.trim() || "Não informada", "Acesso": cred ? "Loja credenciada" : "Loja própria",
+          [cred ? "CNPJ" : "E-mail"]: sessao.email, "Mensagem": f.msg.trim()
+        })
+      });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok || !(j.success === true || j.success === "true")) throw new Error(j.message || "HTTP " + r.status);
+      setEtapa("ok");
+    } catch (x) {
+      console.warn("Sugestão não enviada:", x && x.message);
+      setEtapa("falha");
+    } finally { clearTimeout(tempo); }
   };
+  const novo = () => { setF({ ...vazio, nome: f.nome, loja: f.loja }); setEtapa("form"); };
   return html`<section className="section"><div className="wrap narrow">
     <${TituloPagina} t="Sugestões para o site" sub="Conte o que pode melhorar no portal: uma ideia, um erro que você encontrou ou uma informação que precisa ser corrigida." />
-    ${enviado ? html`<div className="panel sug-ok" role="status">
-        <h2>Falta só um toque</h2>
-        <p>O seu aplicativo de e-mail foi aberto com a mensagem pronta para <strong>${EMAIL_SUGESTOES}</strong>. Confira o texto e envie para concluir. Obrigado por ajudar a melhorar o portal!</p>
-        <p className="hint">Se nenhum aplicativo de e-mail abriu, copie a mensagem e o endereço e envie pelo seu e-mail de costume, como o Outlook ou o Gmail.</p>
+    ${etapa === "ok" ? html`<div className="panel sug-ok" role="status">
+        <h2>${ic("✅")} Sugestão enviada</h2>
+        <p>A sua mensagem chegou ao suporte técnico. Obrigado por ajudar a melhorar o portal!</p>
+        <div className="sug-acoes"><button type="button" className="btn primary" onClick=${novo}>Escrever outra sugestão</button></div>
+      </div>`
+    : etapa === "falha" ? html`<div className="panel sug-ok" role="alert">
+        <h2>Não foi possível enviar agora</h2>
+        <p>Verifique a sua conexão e tente de novo. Se continuar sem enviar, copie a mensagem e mande pelo seu e-mail para <strong>${EMAIL_SUGESTOES}</strong>.</p>
         <div className="sug-acoes">
-          <a className="btn primary" href=${linkEmail()}>Abrir o e-mail de novo</a>
+          <button type="button" className="btn primary" onClick=${() => setEtapa("form")}>Tentar de novo</button>
           <${CopyButton} texto=${texto()} rotulo="Copiar mensagem" sucesso="Mensagem copiada" />
           <${CopyButton} texto=${EMAIL_SUGESTOES} rotulo="Copiar endereço de e-mail" sucesso="Endereço copiado" />
-          <button type="button" className="btn ghost" onClick=${() => { setF({ ...vazio, nome: f.nome, loja: f.loja }); setEnviado(false); }}>Escrever outra sugestão</button>
+          <a className="btn ghost" href=${linkEmail()}>Abrir no aplicativo de e-mail</a>
         </div>
       </div>`
-    : html`<form className="panel sug-form" onSubmit=${enviar} noValidate>
+    : html`<form className="panel sug-form" onSubmit=${enviar} noValidate aria-busy=${etapa === "enviando"}>
         <fieldset className="sug-tipos">
           <legend>O que você quer enviar?</legend>
           ${TIPOS_SUGESTAO.map(t => html`<label key=${t} className="sug-chip"><input type="radio" name="sug-tipo" value=${t} checked=${f.tipo === t} onChange=${muda("tipo")} />${t}</label>`)}
@@ -5814,8 +5840,8 @@ function SugestoesPagina({ sessao, params }) {
           <div className="field"><label htmlFor="sug-nome">Seu nome (opcional)</label><input id="sug-nome" value=${f.nome} onInput=${muda("nome")} autoComplete="name" /></div>
           <div className="field"><label htmlFor="sug-loja">Loja (opcional)</label><input id="sug-loja" value=${f.loja} onInput=${muda("loja")} placeholder="Nome ou cidade da loja" /></div>
         </div>
-        <p className="hint">Ao enviar, o seu aplicativo de e-mail abre com a mensagem pronta para ${EMAIL_SUGESTOES}. É só conferir e enviar.</p>
-        <button type="submit" className="btn primary sug-enviar">Enviar por e-mail</button>
+        <p className="hint">A sua mensagem vai direto para o e-mail do suporte técnico, junto com o ${cred ? "CNPJ" : "e-mail"} do seu acesso.</p>
+        <button type="submit" className="btn primary sug-enviar" disabled=${etapa === "enviando"}>${etapa === "enviando" ? "Enviando..." : "Enviar sugestão"}</button>
       </form>`}
   </div></section>`;
 }
